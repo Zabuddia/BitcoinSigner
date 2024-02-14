@@ -1,6 +1,6 @@
 #include <signal.h>
 
-#include "cube.c"
+#include "lib/all_libs.h"
 
 /* DEFAULT COLORS */
 #define BACKGROUND_COLOR WHITE
