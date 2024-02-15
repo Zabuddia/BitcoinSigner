@@ -52,3 +52,32 @@ FieldElement* FieldElement_sub(FieldElement* self, FieldElement* other) {
     int prime = self->prime;
     return FieldElement_init(num, prime);
 }
+
+FieldElement* FieldElement_mul(FieldElement* self, FieldElement* other) {
+    assert(self->prime == other->prime);
+    int num = (self->num * other->num) % self->prime;
+    int prime = self->prime;
+    return FieldElement_init(num, prime);
+}
+
+FieldElement* FieldElement_pow(FieldElement* self, int exponent) {
+    int n = exponent % (self->prime - 1);
+    int num = 1;
+    for (int i = 0; i < n; i++) {
+        num = (num * self->num) % self->prime;
+    }
+    int prime = self->prime;
+    return FieldElement_init(num, prime);
+}
+
+FieldElement* FieldElement_div(FieldElement* self, FieldElement* other) {
+    assert(self->prime == other->prime);
+    int inv = 1;
+    int p_minus_2 = self->prime - 2;
+    for (int i = 0; i < p_minus_2; i++) {
+        inv = (inv * other->num) % self->prime;
+    }
+    int num = (self->num * inv) % self->prime;
+    int prime = self->prime;
+    return FieldElement_init(num, prime);
+}

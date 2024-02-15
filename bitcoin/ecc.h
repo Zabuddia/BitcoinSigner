@@ -20,3 +20,7 @@ int FieldElement_ne(FieldElement* self, FieldElement* other);
 FieldElement* FieldElement_add(FieldElement* self, FieldElement* other);
 
 FieldElement* FieldElement_sub(FieldElement* self, FieldElement* other);
+
+FieldElement* FieldElement_mul(FieldElement* self, FieldElement* other);
+
+FieldElement* FieldElement_pow(FieldElement* self, int exponent);
