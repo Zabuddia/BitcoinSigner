@@ -8,7 +8,8 @@ FieldElement* FieldElement_init(int num, int prime) {
     assert(num >= 0 && num < prime); //Check that num is between 0 and prime - 1
     FieldElement* element = (FieldElement*)malloc(sizeof(FieldElement));
     if (element == NULL) {
-        exit(1); //Exit if memory allocation fails
+        printf("Memory allocation failed\n");
+        exit(1);
     }
     element->num = num;
     element->prime = prime;
@@ -23,62 +24,68 @@ void FieldElement_toString(FieldElement* element) {
     printf("FieldElement_%d(%d)\n", element->prime, element->num);
 }
 
-int FieldElement_eq(FieldElement* self, FieldElement* other) {
-    if (other == NULL) {
+int FieldElement_eq(FieldElement* e1, FieldElement* e2) {
+    if (e2 == NULL) {
         return 0;
     }
 
-    return self->num == other->num && self->prime == other->prime;
+    return e1->num == e2->num && e1->prime == e2->prime;
 }
 
-int FieldElement_ne(FieldElement* self, FieldElement* other) {
-    if (other == NULL) {
+int FieldElement_ne(FieldElement* e1, FieldElement* e2) {
+    if (e2 == NULL) {
         return 0;
     }
 
-    return self->num != other->num || self->prime != other->prime;
+    return e1->num != e2->num || e1->prime != e2->prime;
 }
 
-FieldElement* FieldElement_add(FieldElement* self, FieldElement* other) {
-    assert(self->prime == other->prime); //Make sure they are in the same field
-    int num = (self->num + other->num) % self->prime;
-    int prime = self->prime;
+FieldElement* FieldElement_add(FieldElement* e1, FieldElement* e2) {
+    assert(e1->prime == e2->prime); //Make sure they are in the same field
+    int num = (e1->num + e2->num) % e1->prime;
+    int prime = e1->prime;
     return FieldElement_init(num, prime);
 }
 
-FieldElement* FieldElement_sub(FieldElement* self, FieldElement* other) {
-    assert(self->prime == other->prime); //Make sure they are in the same field
-    int num = (self->num - other->num + self->prime) % self->prime; //Ensure a positive result
-    int prime = self->prime;
+FieldElement* FieldElement_sub(FieldElement* e1, FieldElement* e2) {
+    assert(e1->prime == e2->prime); //Make sure they are in the same field
+    int num = (e1->num - e2->num + e1->prime) % e1->prime; //Ensure a positive result
+    int prime = e1->prime;
     return FieldElement_init(num, prime);
 }
 
-FieldElement* FieldElement_mul(FieldElement* self, FieldElement* other) {
-    assert(self->prime == other->prime);
-    int num = (self->num * other->num) % self->prime;
-    int prime = self->prime;
+FieldElement* FieldElement_mul(FieldElement* e1, FieldElement* e2) {
+    assert(e1->prime == e2->prime);
+    int num = (e1->num * e2->num) % e1->prime;
+    int prime = e1->prime;
+    return FieldElement_init(num, prime);
+}
+
+FieldElement* FieldElement_mul_scalar(FieldElement* e, int s) {
+    int num = (e->num * s) % e->prime;
+    int prime = e->prime;
     return FieldElement_init(num, prime);
 }
 
 // Add a function to calculate the modular inverse
-FieldElement* FieldElement_mod_inv(FieldElement* self) {
-    int exponent = self->prime - 2; // Fermat's Little Theorem
+FieldElement* FieldElement_mod_inv(FieldElement* e1) {
+    int exponent = e1->prime - 2; // Fermat's Little Theorem
     int result = 1;
-    int base = self->num;
+    int base = e1->num;
     while (exponent > 0) {
         if (exponent % 2 == 1) {
-            result = (result * base) % self->prime;
+            result = (result * base) % e1->prime;
         }
-        base = (base * base) % self->prime;
+        base = (base * base) % e1->prime;
         exponent /= 2;
     }
-    return FieldElement_init(result, self->prime);
+    return FieldElement_init(result, e1->prime);
 }
 
-FieldElement* FieldElement_pow(FieldElement* self, int exponent) {
+FieldElement* FieldElement_pow(FieldElement* e, int exponent) {
     if (exponent < 0) {
         // Calculate the modular inverse for negative exponents
-        FieldElement* inv = FieldElement_mod_inv(self);
+        FieldElement* inv = FieldElement_mod_inv(e);
         // Use the positive equivalent of the exponent
         int positiveExponent = -exponent;
         FieldElement* result = FieldElement_pow(inv, positiveExponent);
@@ -86,27 +93,27 @@ FieldElement* FieldElement_pow(FieldElement* self, int exponent) {
         return result;
     } else {
         int result = 1;
-        int base = self->num;
-        int exp = exponent % (self->prime - 1); // Ensure exponent is within field size
+        int base = e->num;
+        int exp = exponent % (e->prime - 1); // Ensure exponent is within field size
         while (exp > 0) {
             if (exp % 2 == 1) {
-                result = (result * base) % self->prime;
+                result = (result * base) % e->prime;
             }
-            base = (base * base) % self->prime;
+            base = (base * base) % e->prime;
             exp /= 2;
         }
-        return FieldElement_init(result, self->prime);
+        return FieldElement_init(result, e->prime);
     }
 }
 
-FieldElement* FieldElement_div(FieldElement* self, FieldElement* other) {
-    assert(self->prime == other->prime);
+FieldElement* FieldElement_div(FieldElement* e1, FieldElement* e2) {
+    assert(e1->prime == e2->prime);
     int inv = 1;
-    int p_minus_2 = self->prime - 2;
+    int p_minus_2 = e1->prime - 2;
     for (int i = 0; i < p_minus_2; i++) {
-        inv = (inv * other->num) % self->prime;
+        inv = (inv * e2->num) % e1->prime;
     }
-    int num = (self->num * inv) % self->prime;
-    int prime = self->prime;
+    int num = (e1->num * inv) % e1->prime;
+    int prime = e1->prime;
     return FieldElement_init(num, prime);
 }
