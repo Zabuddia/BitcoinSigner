@@ -17,7 +17,7 @@ int main() {
     Point* p1 = Point_init(x1, y1, a, b);
     Point* p2 = Point_init(x2, y2, a, b);
 
-    Point* addedPoints = Point_mul(p1, 7);
+    Point* addedPoints = Point_mul(p1, 2);
     Point_toString(addedPoints);
 
     FieldElement_free(a);
