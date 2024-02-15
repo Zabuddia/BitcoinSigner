@@ -136,6 +136,20 @@ Point* Point_add(Point* p1, Point* p2) {
     }
 }
 
+Point* Point_copy(Point* original) {
+    if (original == NULL) return NULL;
+
+    // Assuming FieldElement_init creates a new FieldElement with the given num and prime
+    FieldElement* x = original->x != NULL ? FieldElement_init(original->x->num, original->x->prime) : NULL;
+    FieldElement* y = original->y != NULL ? FieldElement_init(original->y->num, original->y->prime) : NULL;
+    FieldElement* a = original->a != NULL ? FieldElement_init(original->a->num, original->a->prime) : NULL;
+    FieldElement* b = original->b != NULL ? FieldElement_init(original->b->num, original->b->prime) : NULL;
+
+    // Assuming Point_init creates a new Point with the given FieldElement references
+    Point* copy = Point_init(x, y, a, b);
+    return copy;
+}
+
 Point* Point_mul(Point* p, int coefficient) {
     // Initialize the result as the point at infinity (identity element for addition)
     Point* result = Point_init(NULL, NULL, p->a, p->b); // Assuming this does not dynamically allocate 'a' and 'b'
