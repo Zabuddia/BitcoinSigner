@@ -8,13 +8,17 @@
 #include "fieldelement.h"
 
 typedef struct {
-    FieldElement* x, y;
-    FieldElement* a, b;
+    FieldElement* x;
+    FieldElement* y;
+    FieldElement* a;
+    FieldElement* b;
 } Point;
 
 Point* Point_init(FieldElement* x, FieldElement* y, FieldElement* a, FieldElement* b);
 
 void Point_free(Point* p);
+
+void Point_toString(Point* p);
 
 int Point_eq(Point* p1, Point* p2);
 
