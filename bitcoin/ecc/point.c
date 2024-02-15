@@ -137,28 +137,31 @@ Point* Point_add(Point* p1, Point* p2) {
 }
 
 Point* Point_mul(Point* p, int coefficient) {
-    int coef = coefficient;
-    Point* current = p; // Current point to add
-    Point* result = Point_init(NULL, NULL, p->a, p->b); // Point at infinity as the initial result
+    // Initialize the result as the point at infinity (identity element for addition)
+    Point* result = Point_init(NULL, NULL, p->a, p->b); // Assuming this does not dynamically allocate 'a' and 'b'
+    Point* current = Point_copy(p); // Create a copy of 'p' for the doubling process
 
-    while (coef > 0) {
-        if (coef & 1) {
-            // If the current bit of coef is 1, add 'current' to 'result'
-            Point* temp = Point_add(result, current);
-            // Free the previous 'result' if necessary to prevent memory leaks
-            Point_free(result); 
-            result = temp;
+    while (coefficient > 0) {
+        if (coefficient & 1) {
+            Point* temp_result = Point_add(result, current);
+            if (result != NULL) {
+                Point_free(result); // Only free if 'result' is not the initial point at infinity
+            }
+            result = temp_result;
         }
-        // Double 'current'
-        Point* temp = Point_add(current, current);
-        // Free the previous 'current' if necessary
-        Point_free(current); 
-        current = temp;
+        Point* temp_current = Point_add(current, current);
+        if (current != p) { // Ensure not to free the original point 'p'
+            Point_free(current);
+        }
+        current = temp_current;
 
-        coef >>= 1; // Right shift coef by 1
+        coefficient >>= 1; // Right shift the coefficient by 1
     }
-    // Note: Depending on the implementation, you might not want to free 'current' here if it's used outside
-    // Point_free(current); // Uncomment if 'current' is dynamically allocated and not used after this function
+
+    if (current != p) { // Ensure not to free the original point 'p'
+        Point_free(current);
+    }
 
     return result;
 }
+
