@@ -90,8 +90,8 @@ Point* Point_add(Point* p1, Point* p2) {
         FieldElement* x2_minus_x1 = FieldElement_sub(x2, x1);
         FieldElement* s = FieldElement_div(y2_minus_y1, x2_minus_x1);
         FieldElement* s_squared = FieldElement_pow(s, 2);
-        FieldElement* x1_minus_x2 = FieldElement_sub(x1, x2);
-        FieldElement* x3 = FieldElement_sub(s_squared, x1_minus_x2);
+        FieldElement* s_squared_minus_x1 = FieldElement_sub(s_squared, x1);
+        FieldElement* x3 = FieldElement_sub(s_squared_minus_x1, x2);
         FieldElement* x1_minux_x3 = FieldElement_sub(x1, x3);
         FieldElement* s_times_x1_minus_x3 = FieldElement_mul(s, x1_minux_x3);
         FieldElement* y3 = FieldElement_sub(s_times_x1_minus_x3, y1);
@@ -100,7 +100,7 @@ Point* Point_add(Point* p1, Point* p2) {
         FieldElement_free(x2_minus_x1);
         FieldElement_free(s);
         FieldElement_free(s_squared);
-        FieldElement_free(x1_minus_x2);
+        FieldElement_free(s_squared_minus_x1);
         FieldElement_free(x1_minux_x3);
         FieldElement_free(s_times_x1_minus_x3);
         return newPoint;

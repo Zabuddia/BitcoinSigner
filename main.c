@@ -10,8 +10,8 @@ int main() {
     FieldElement* a = FieldElement_init(0, prime);
     FieldElement* b = FieldElement_init(7, prime);
     FieldElement* x1 = FieldElement_init(192, prime);
-    FieldElement* x2 = FieldElement_init(105, prime);
-    FieldElement* y1 = FieldElement_init(17, prime);
+    FieldElement* y1 = FieldElement_init(105, prime);
+    FieldElement* x2 = FieldElement_init(17, prime);
     FieldElement* y2 = FieldElement_init(56, prime);
 
     Point* p1 = Point_init(x1, y1, a, b);
@@ -19,6 +19,16 @@ int main() {
 
     Point* addedPoints = Point_add(p1, p2);
     Point_toString(addedPoints);
+
+    FieldElement_free(a);
+    FieldElement_free(b);
+    FieldElement_free(x1);
+    FieldElement_free(x2);
+    FieldElement_free(y1);
+    FieldElement_free(y2);
+    Point_free(p1);
+    Point_free(p2);
+    Point_free(addedPoints);
 
     return 0;
 }
