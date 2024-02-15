@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "ecc.h"
+#include "fieldelement.h"
 
 FieldElement* FieldElement_init(int num, int prime) {
     assert(num >= 0 && num < prime); //Check that num is between 0 and prime - 1

@@ -2,7 +2,7 @@
 #include <assert.h>
 
 #include "lib/all_libs.h"
-#include "bitcoin/ecc.c"
+#include "bitcoin/ecc/fieldelement.h"
 
 int main() {
     FieldElement* a = FieldElement_init(7, 13);
