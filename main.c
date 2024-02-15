@@ -2,15 +2,23 @@
 #include <assert.h>
 
 #include "lib/all_libs.h"
+#include "bitcoin/ecc/point.h"
 #include "bitcoin/ecc/fieldelement.h"
 
 int main() {
-    FieldElement* a = FieldElement_init(7, 13);
-    FieldElement* b = FieldElement_init(8, 13);
+    int prime = 223;
+    FieldElement* a = FieldElement_init(0, prime);
+    FieldElement* b = FieldElement_init(7, prime);
+    FieldElement* x1 = FieldElement_init(192, prime);
+    FieldElement* x2 = FieldElement_init(105, prime);
+    FieldElement* y1 = FieldElement_init(17, prime);
+    FieldElement* y2 = FieldElement_init(56, prime);
 
-    FieldElement* addedElements = FieldElement_pow(a, -3);
-    int num = addedElements->num;
-    printf("%d\n", num);
+    Point* p1 = Point_init(x1, y1, a, b);
+    Point* p2 = Point_init(x2, y2, a, b);
+
+    Point* addedPoints = Point_add(p1, p2);
+    Point_toString(addedPoints);
 
     return 0;
 }

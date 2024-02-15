@@ -1,3 +1,6 @@
+#ifndef FIELDELEMENT_H
+#define FIELDELEMENT_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -28,3 +31,5 @@ FieldElement* FieldElement_mod_inv(FieldElement* self);
 FieldElement* FieldElement_pow(FieldElement* self, int exponent);
 
 FieldElement* FieldElement_div(FieldElement* self, FieldElement* other);
+
+#endif //FIELDELEMENT_H
