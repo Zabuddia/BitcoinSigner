@@ -108,12 +108,9 @@ FieldElement* FieldElement_pow(FieldElement* e, int exponent) {
 
 FieldElement* FieldElement_div(FieldElement* e1, FieldElement* e2) {
     assert(e1->prime == e2->prime);
-    int inv = 1;
-    int p_minus_2 = e1->prime - 2;
-    for (int i = 0; i < p_minus_2; i++) {
-        inv = (inv * e2->num) % e1->prime;
-    }
-    int num = (e1->num * inv) % e1->prime;
+    FieldElement* inv_e2 = FieldElement_mod_inv(e2); // Correctly calculate the modular inverse of e2
+    int num = (e1->num * inv_e2->num) % e1->prime; // Then multiply e1->num by this inverse, modulo prime
     int prime = e1->prime;
+    FieldElement_free(inv_e2); // Clean up the temporary FieldElement created for the inverse
     return FieldElement_init(num, prime);
 }
