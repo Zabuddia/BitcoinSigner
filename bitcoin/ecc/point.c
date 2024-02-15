@@ -136,7 +136,7 @@ Point* Point_add(Point* p1, Point* p2) {
     }
 }
 
-Point* Point_rmul(Point* p, int coefficient) {
+Point* Point_mul(Point* p, int coefficient) {
     int coef = coefficient;
     Point* current = p; // Current point to add
     Point* result = Point_init(NULL, NULL, p->a, p->b); // Point at infinity as the initial result
