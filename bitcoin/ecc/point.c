@@ -42,8 +42,15 @@ Point* Point_init(FieldElement* x, FieldElement* y, FieldElement* a, FieldElemen
 }
 
 void Point_free(Point* p) {
-    free(p);
+    if (p != NULL) {
+        FieldElement_free(p->x);
+        FieldElement_free(p->y);
+        FieldElement_free(p->a);
+        FieldElement_free(p->b);
+        free(p);
+    }
 }
+
 
 void Point_toString(Point* p) {
     if (p->x == NULL) {
