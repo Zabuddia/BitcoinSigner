@@ -10,24 +10,24 @@ Point* Point_init(FieldElement* x, FieldElement* y, FieldElement* a, FieldElemen
     }
 
     //y^2 != x^3 + a * x + b
-    FieldElement* y_squared = FieldElement_pow(y, 2);
-    FieldElement* x_cubed = FieldElement_pow(x, 3);
-    FieldElement* a_times_x = FieldElement_mul(a, x);
-    FieldElement* x_cubed_plus_a_times_x = FieldElement_add(x_cubed, a_times_x);
-    FieldElement* x_cubed_plus_a_times_x_plus_b = FieldElement_add(x_cubed_plus_a_times_x, b);
+    // FieldElement* y_squared = FieldElement_pow(y, 2);
+    // FieldElement* x_cubed = FieldElement_pow(x, 3);
+    // FieldElement* a_times_x = FieldElement_mul(a, x);
+    // FieldElement* x_cubed_plus_a_times_x = FieldElement_add(x_cubed, a_times_x);
+    // FieldElement* x_cubed_plus_a_times_x_plus_b = FieldElement_add(x_cubed_plus_a_times_x, b);
 
-    if (FieldElement_ne(y_squared, x_cubed_plus_a_times_x_plus_b)) {
-        printf("Error: points are not on the curve:\n");
-        FieldElement_toString(x);
-        FieldElement_toString(y);
-        exit(1);
-    }
+    // if (FieldElement_ne(y_squared, x_cubed_plus_a_times_x_plus_b)) {
+    //     printf("Error: points are not on the curve:\n");
+    //     FieldElement_toString(x);
+    //     FieldElement_toString(y);
+    //     exit(1);
+    // }
 
-    FieldElement_free(y_squared);
-    FieldElement_free(x_cubed);
-    FieldElement_free(a_times_x);
-    FieldElement_free(x_cubed_plus_a_times_x);
-    FieldElement_free(x_cubed_plus_a_times_x_plus_b);
+    // FieldElement_free(y_squared);
+    // FieldElement_free(x_cubed);
+    // FieldElement_free(a_times_x);
+    // FieldElement_free(x_cubed_plus_a_times_x);
+    // FieldElement_free(x_cubed_plus_a_times_x_plus_b);
 
     Point* p = malloc(sizeof(Point));
     if (p == NULL) {
