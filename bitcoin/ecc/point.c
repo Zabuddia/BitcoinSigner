@@ -135,3 +135,23 @@ Point* Point_add(Point* p1, Point* p2) {
         return newPoint;
     }
 }
+
+Point* Point_mul(Point* p, int coefficient) {
+    Point* result = Point_init(NULL, NULL, p->a, p->b);
+
+    while (coefficient > 0) {
+        if (coefficient & 1) {
+            //If the current bit of the coefficient is 1, add p to result
+            Point* temp = Point_add(result, p);
+            //Free the previous result
+            result = temp;
+        }
+        //Double p
+        Point* temp = Point_add(p, p);
+        //Free the previous p
+        p = temp;
+
+        coefficient >>= 1; //Right shift coefficient by 1
+    }
+    return result;
+}

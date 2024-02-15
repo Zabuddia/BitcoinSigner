@@ -9,15 +9,15 @@ int main() {
     int prime = 223;
     FieldElement* a = FieldElement_init(0, prime);
     FieldElement* b = FieldElement_init(7, prime);
-    FieldElement* x1 = FieldElement_init(192, prime);
-    FieldElement* y1 = FieldElement_init(105, prime);
+    FieldElement* x1 = FieldElement_init(15, prime);
+    FieldElement* y1 = FieldElement_init(86, prime);
     FieldElement* x2 = FieldElement_init(17, prime);
     FieldElement* y2 = FieldElement_init(56, prime);
 
     Point* p1 = Point_init(x1, y1, a, b);
     Point* p2 = Point_init(x2, y2, a, b);
 
-    Point* addedPoints = Point_add(p1, p2);
+    Point* addedPoints = Point_mul(p1, 2);
     Point_toString(addedPoints);
 
     FieldElement_free(a);
