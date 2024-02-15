@@ -8,7 +8,7 @@ int main() {
     FieldElement* a = FieldElement_init(7, 13);
     FieldElement* b = FieldElement_init(12, 13);
 
-    FieldElement* addedElements = FieldElement_add(a, b);
+    FieldElement* addedElements = FieldElement_sub(a, b);
     int num = addedElements->num;
     printf("%d\n", num);
 

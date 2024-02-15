@@ -48,7 +48,7 @@ FieldElement* FieldElement_add(FieldElement* self, FieldElement* other) {
 
 FieldElement* FieldElement_sub(FieldElement* self, FieldElement* other) {
     assert(self->prime == other->prime); //Make sure they are in the same field
-    int num = (self->num - other->num) % self->prime;
+    int num = (self->num - other->num + self->prime) % self->prime; //Ensure a positive result
     int prime = self->prime;
     return FieldElement_init(num, prime);
 }
