@@ -136,22 +136,29 @@ Point* Point_add(Point* p1, Point* p2) {
     }
 }
 
-Point* Point_mul(Point* p, int coefficient) {
-    Point* result = Point_init(NULL, NULL, p->a, p->b);
+Point* Point_rmul(Point* p, int coefficient) {
+    int coef = coefficient;
+    Point* current = p; // Current point to add
+    Point* result = Point_init(NULL, NULL, p->a, p->b); // Point at infinity as the initial result
 
-    while (coefficient > 0) {
-        if (coefficient & 1) {
-            //If the current bit of the coefficient is 1, add p to result
-            Point* temp = Point_add(result, p);
-            //Free the previous result
+    while (coef > 0) {
+        if (coef & 1) {
+            // If the current bit of coef is 1, add 'current' to 'result'
+            Point* temp = Point_add(result, current);
+            // Free the previous 'result' if necessary to prevent memory leaks
+            Point_free(result); 
             result = temp;
         }
-        //Double p
-        Point* temp = Point_add(p, p);
-        //Free the previous p
-        p = temp;
+        // Double 'current'
+        Point* temp = Point_add(current, current);
+        // Free the previous 'current' if necessary
+        Point_free(current); 
+        current = temp;
 
-        coefficient >>= 1; //Right shift coefficient by 1
+        coef >>= 1; // Right shift coef by 1
     }
+    // Note: Depending on the implementation, you might not want to free 'current' here if it's used outside
+    // Point_free(current); // Uncomment if 'current' is dynamically allocated and not used after this function
+
     return result;
 }
