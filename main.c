@@ -20,12 +20,6 @@ int main() {
     Point* addedPoints = Point_mul(p1, 2);
     Point_toString(addedPoints);
 
-    FieldElement_free(a);
-    FieldElement_free(b);
-    FieldElement_free(x1);
-    FieldElement_free(x2);
-    FieldElement_free(y1);
-    FieldElement_free(y2);
     Point_free(p1);
     Point_free(p2);
     Point_free(addedPoints);
