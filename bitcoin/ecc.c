@@ -39,14 +39,14 @@ int FieldElement_ne(FieldElement* self, FieldElement* other) {
     return self->num != other->num || self->prime != other->prime;
 }
 
-int FieldElement_add(FieldElement* self, FieldElement* other) {
+FieldElement* FieldElement_add(FieldElement* self, FieldElement* other) {
     assert(self->prime == other->prime); //Make sure they are in the same field
     int num = (self->num + other->num) % self->prime;
     int prime = self->prime;
     return FieldElement_init(num, prime);
 }
 
-int FieldElement_sub(FieldElement* self, FieldElement* other) {
+FieldElement* FieldElement_sub(FieldElement* self, FieldElement* other) {
     assert(self->prime == other->prime); //Make sure they are in the same field
     int num = (self->num - other->num) % self->prime;
     int prime = self->prime;

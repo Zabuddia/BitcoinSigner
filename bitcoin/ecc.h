@@ -17,6 +17,6 @@ int FieldElement_eq(FieldElement* self, FieldElement* other);
 
 int FieldElement_ne(FieldElement* self, FieldElement* other);
 
-int FieldElement_add(FieldElement* self, FieldElement* other);
+FieldElement* FieldElement_add(FieldElement* self, FieldElement* other);
 
-int FieldElement_sub(FieldElement* self, FieldElement* other);
+FieldElement* FieldElement_sub(FieldElement* self, FieldElement* other);
