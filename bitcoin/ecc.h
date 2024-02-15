@@ -23,4 +23,8 @@ FieldElement* FieldElement_sub(FieldElement* self, FieldElement* other);
 
 FieldElement* FieldElement_mul(FieldElement* self, FieldElement* other);
 
+FieldElement* FieldElement_mod_inv(FieldElement* self);
+
 FieldElement* FieldElement_pow(FieldElement* self, int exponent);
+
+FieldElement* FieldElement_div(FieldElement* self, FieldElement* other);

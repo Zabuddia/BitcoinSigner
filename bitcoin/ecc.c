@@ -60,14 +60,43 @@ FieldElement* FieldElement_mul(FieldElement* self, FieldElement* other) {
     return FieldElement_init(num, prime);
 }
 
-FieldElement* FieldElement_pow(FieldElement* self, int exponent) {
-    int n = exponent % (self->prime - 1);
-    int num = 1;
-    for (int i = 0; i < n; i++) {
-        num = (num * self->num) % self->prime;
+// Add a function to calculate the modular inverse
+FieldElement* FieldElement_mod_inv(FieldElement* self) {
+    int exponent = self->prime - 2; // Fermat's Little Theorem
+    int result = 1;
+    int base = self->num;
+    while (exponent > 0) {
+        if (exponent % 2 == 1) {
+            result = (result * base) % self->prime;
+        }
+        base = (base * base) % self->prime;
+        exponent /= 2;
     }
-    int prime = self->prime;
-    return FieldElement_init(num, prime);
+    return FieldElement_init(result, self->prime);
+}
+
+FieldElement* FieldElement_pow(FieldElement* self, int exponent) {
+    if (exponent < 0) {
+        // Calculate the modular inverse for negative exponents
+        FieldElement* inv = FieldElement_mod_inv(self);
+        // Use the positive equivalent of the exponent
+        int positiveExponent = -exponent;
+        FieldElement* result = FieldElement_pow(inv, positiveExponent);
+        FieldElement_free(inv);
+        return result;
+    } else {
+        int result = 1;
+        int base = self->num;
+        int exp = exponent % (self->prime - 1); // Ensure exponent is within field size
+        while (exp > 0) {
+            if (exp % 2 == 1) {
+                result = (result * base) % self->prime;
+            }
+            base = (base * base) % self->prime;
+            exp /= 2;
+        }
+        return FieldElement_init(result, self->prime);
+    }
 }
 
 FieldElement* FieldElement_div(FieldElement* self, FieldElement* other) {

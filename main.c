@@ -5,10 +5,10 @@
 #include "bitcoin/ecc.c"
 
 int main() {
-    FieldElement* a = FieldElement_init(6, 13);
-    FieldElement* b = FieldElement_init(12, 13);
+    FieldElement* a = FieldElement_init(7, 13);
+    FieldElement* b = FieldElement_init(8, 13);
 
-    FieldElement* addedElements = FieldElement_mul(a, b);
+    FieldElement* addedElements = FieldElement_pow(a, -3);
     int num = addedElements->num;
     printf("%d\n", num);
 
