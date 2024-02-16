@@ -8,8 +8,8 @@
 
 #define A 0
 #define B 7
-#define P "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"
-#define N "0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
+#define P "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"
+#define N "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
 
 typedef struct {
     mpz_t num;
