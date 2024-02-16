@@ -17,7 +17,7 @@ typedef struct {
     S256Field* b;
 } S256Point;
 
-S256Point* S256Point_init(S256Field* x, S256Field* y, S256Field* a, S256Field* b);
+S256Point* S256Point_init(S256Field* x, S256Field* y);
 
 void S256Point_free(S256Point* p);
 

@@ -4,21 +4,30 @@
 
 #include "s256point.h"
 
-S256Point* S256Point_init(S256Field* x, S256Field* y, S256Field* a, S256Field* b) {
+S256Point* S256Point_init(S256Field* x, S256Field* y) {
     if (x == NULL && y == NULL) {
         return NULL; //The point at infinity
     }
+
+    mpz_t a;
+    mpz_t b;
+    mpz_init_set_ui(a, A);
+    mpz_init_set_ui(b, B);
 
     mpz_t two;
     mpz_t three;
     mpz_init_set_ui(two, 2);
     mpz_init_set_ui(three, 3);
+
+    S256Field* temp_a = S256Field_init(a);
+    S256Field* temp_b = S256Field_init(b);
+
     //y^2 != x^3 + a * x + b
     S256Field* y_squared = S256Field_pow(y, two);
     S256Field* x_cubed = S256Field_pow(x, three);
-    S256Field* a_times_x = S256Field_mul(a, x);
+    S256Field* a_times_x = S256Field_mul(temp_a, x);
     S256Field* x_cubed_plus_a_times_x = S256Field_add(x_cubed, a_times_x);
-    S256Field* x_cubed_plus_a_times_x_plus_b = S256Field_add(x_cubed_plus_a_times_x, b);
+    S256Field* x_cubed_plus_a_times_x_plus_b = S256Field_add(x_cubed_plus_a_times_x, temp_b);
 
     mpz_clear(two);
     mpz_clear(three);
@@ -43,8 +52,8 @@ S256Point* S256Point_init(S256Field* x, S256Field* y, S256Field* a, S256Field* b
     }
     p->x = x;
     p->y = y;
-    p->a = a;
-    p->b = b;
+    p->a = temp_a;
+    p->b = temp_b;
     return p;
 }
 
@@ -63,7 +72,7 @@ void S256Point_toString(S256Point* p) {
     if (p == NULL) {
         printf("S256Point(infinity)\n");
     } else {
-        gmp_printf("S256Point(%Zd, %Zd)_%Zd_%Zd S256Field(%Zd)\n", p->x->num, p->y->num, p->a->num, p->b->num, p->x->prime);
+        gmp_printf("S256Point(%Zd, %Zd)_%Zd_%Zd\n", p->x->num, p->y->num, p->a->num, p->b->num);
     }
 }
 
@@ -85,11 +94,11 @@ S256Point* S256Point_add(S256Point* p1, S256Point* p2) {
     }
 
     if (S256Point_eq(p1, p2) && p1->y->num == 0) {
-        return S256Point_init(NULL, NULL, p1->a, p1->b);
+        return S256Point_init(NULL, NULL);
     }
 
     if (S256Field_eq(p1->x, p2->x) && S256Field_ne(p1->y, p2->y)) {
-        return S256Point_init(NULL, NULL, p1->a, p1->b);
+        return S256Point_init(NULL, NULL);
     }
 
     if (S256Field_ne(p1->x, p2->x)) {
@@ -112,7 +121,7 @@ S256Point* S256Point_add(S256Point* p1, S256Point* p2) {
         S256Field* x1_minux_x3 = S256Field_sub(x1, x3);
         S256Field* s_times_x1_minus_x3 = S256Field_mul(s, x1_minux_x3);
         S256Field* y3 = S256Field_sub(s_times_x1_minus_x3, y1);
-        S256Point* newS256Point = S256Point_init(x3, y3, p1->a, p1->b);
+        S256Point* newS256Point = S256Point_init(x3, y3);
         S256Field_free(y2_minus_y1);
         S256Field_free(x2_minus_x1);
         S256Field_free(s);
@@ -145,7 +154,7 @@ S256Point* S256Point_add(S256Point* p1, S256Point* p2) {
         S256Field* x1_minux_x3 = S256Field_sub(x1, x3);
         S256Field* s_times_x1_minus_x3 = S256Field_mul(s, x1_minux_x3);
         S256Field* y3 = S256Field_sub(s_times_x1_minus_x3, y1);
-        S256Point* newS256Point = S256Point_init(x3, y3, p1->a, p1->b);
+        S256Point* newS256Point = S256Point_init(x3, y3);
         S256Field_free(x1_squared);
         S256Field_free(three_times_x1_squared);
         S256Field_free(three_times_x1_squared_plus_a);
@@ -162,10 +171,13 @@ S256Point* S256Point_add(S256Point* p1, S256Point* p2) {
 }
 
 S256Point* S256Point_mul(S256Point* p, mpz_t coefficient) {
-    S256Point* result = S256Point_init(NULL, NULL, p->a, p->b);
+    S256Point* result = S256Point_init(NULL, NULL);
     S256Point* current = p;
     mpz_t coef;
+    mpz_t n;
+    mpz_init_set_str(n, N, 16);
     mpz_init_set(coef, coefficient);
+    mpz_mod(coef, coef, n);
 while (mpz_cmp_ui(coef, 0) > 0) { // While coef is greater than 0
     if (mpz_tstbit(coef, 0) == 1) { // If the least significant bit of coef is 1
         result = S256Point_add(result, current);

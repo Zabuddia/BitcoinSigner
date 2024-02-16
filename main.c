@@ -29,18 +29,14 @@ int main() {
     mpz_init_set_str(n, N, 16);
     mpz_init_set_str(p, P, 16);
 
-    FieldElement* a = FieldElement_init(zero, p);
-    FieldElement* b = FieldElement_init(seven, p);
-    FieldElement* c = FieldElement_init(two_hundred, two_hundred_and_twenty_three);
-    FieldElement* d = FieldElement_init(one_hundred_and_fifty, two_hundred_and_twenty_three);
-    FieldElement* x = FieldElement_init(gx, p);
-    FieldElement* y = FieldElement_init(gy, p);
+    S256Field* x = S256Field_init(gx);
+    S256Field* y = S256Field_init(gy);
 
-    Point* G = Point_init(x, y, a, b);
+    S256Point* G = S256Point_init(x, y);
 
-    Point* mul = Point_mul(G, n);
+    S256Point* mul = S256Point_mul(G, n);
 
-    Point_toString(mul);
+    S256Point_toString(mul);
 
     return 0;
 }
