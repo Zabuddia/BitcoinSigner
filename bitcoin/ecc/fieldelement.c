@@ -84,11 +84,15 @@ FieldElement* FieldElement_mul(FieldElement* e1, FieldElement* e2) {
     return FieldElement_init(num, prime);
 }
 
-// FieldElement* FieldElement_mul_scalar(FieldElement* e, mpz_t s) {
-//     mpz_t num = (e->num * s) % e->prime;
-//     mpz_t prime = e->prime;
-//     return FieldElement_init(num, prime);
-// }
+FieldElement* FieldElement_mul_scalar(FieldElement* e, mpz_t s) {
+    mpz_t num;
+    mpz_t prime;
+    mpz_init(num);
+    mpz_init_set(prime, e->prime);
+    mpz_mul(num, e->num, s);
+    mpz_mod(num, num, prime);
+    return FieldElement_init(num, prime);
+}
 
 // // Add a function to calculate the modular inverse
 // FieldElement* FieldElement_mod_inv(FieldElement* e1) {

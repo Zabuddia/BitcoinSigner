@@ -32,7 +32,7 @@ int main() {
     FieldElement* x = FieldElement_init(gx, p);
     FieldElement* y = FieldElement_init(gy, p);
 
-    FieldElement* add = FieldElement_mul(x, y);
+    FieldElement* add = FieldElement_mul_scalar(x, one_hundred_and_fifty);
     
     FieldElement_toString(add);
     return 0;
