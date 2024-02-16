@@ -6,9 +6,7 @@
 #include "fieldelement.h"
 
 FieldElement* FieldElement_init(mpz_t num, mpz_t prime) {
-    mpz_t z;
-    mpz_init_set_ui(z, 0);
-    assert(mpz_cmp(num, z) >= 0 && mpz_cmp(num, prime) < 0); //Check that num is between 0 and prime - 1
+    assert(mpz_cmp_ui(num, 0) >= 0 && mpz_cmp(num, prime) < 0); //Check that num is between 0 and prime - 1
     FieldElement* element = (FieldElement*)malloc(sizeof(FieldElement));
     if (element == NULL) {
         printf("Memory allocation failed\n");
@@ -16,7 +14,6 @@ FieldElement* FieldElement_init(mpz_t num, mpz_t prime) {
     }
     mpz_init_set(element->num, num);
     mpz_init_set(element->prime, prime);
-    mpz_clear(z);
     return element;
 }
 
@@ -94,45 +91,75 @@ FieldElement* FieldElement_mul_scalar(FieldElement* e, mpz_t s) {
     return FieldElement_init(num, prime);
 }
 
-// // Add a function to calculate the modular inverse
-// FieldElement* FieldElement_mod_inv(FieldElement* e1) {
-//     mpz_t exponent = e1->prime - 2; // Fermat's Little Theorem
-//     mpz_t result = 1;
-//     mpz_t base = e1->num;
-//     while (exponent > 0) {
-//         if (exponent % 2 == 1) {
-//             result = (result * base) % e1->prime;
-//         }
-//         base = (base * base) % e1->prime;
-//         exponent /= 2;
-//     }
-//     return FieldElement_init(result, e1->prime);
-// }
+// Add a function to calculate the modular inverse
+FieldElement* FieldElement_mod_inv(FieldElement* e) {
+    mpz_t base;
+    mpz_t prime;
+    mpz_t exponent;
+    mpz_t result;
+    mpz_init_set(base, e->num);
+    mpz_init_set(prime, e->prime);
+    mpz_init(exponent);
+    mpz_sub_ui(exponent, prime, 2); //Fermat's Little Theorem
+    mpz_init_set_ui(result, 1);
 
-// FieldElement* FieldElement_pow(FieldElement* e, mpz_t exponent) {
-//     if (exponent < 0) {
-//         // Calculate the modular inverse for negative exponents
-//         FieldElement* inv = FieldElement_mod_inv(e);
-//         // Use the positive equivalent of the exponent
-//         mpz_t positiveExponent = -exponent;
-//         FieldElement* result = FieldElement_pow(inv, positiveExponent);
-//         FieldElement_free(inv);
-//         return result;
-//     } else {
-//         mpz_t result = 1;
-//         mpz_t base = e->num;
-//         mpz_t exp = exponent % (e->prime - 1); // Ensure exponent is within field size
-//         while (exp > 0) {
-//             if (exp % 2 == 1) {
-//                 result = (result * base) % e->prime;
-//             }
-//             base = (base * base) % e->prime;
-//             exp /= 2;
-//         }
-//         mpz_t prime = e->prime;
-//         return FieldElement_init(result, prime);
-//     }
-// }
+    while (mpz_cmp_ui(exponent, 0) > 0) {
+        mpz_t temp;
+        mpz_init(temp);
+        mpz_mod_ui(temp, exponent, 2);
+        if (mpz_cmp_ui(temp, 1) == 0) {
+            mpz_mul(result, result, base);
+            mpz_mod(result, result, prime);
+        }
+        mpz_pow_ui(base, base, 2);
+        mpz_mod(base, base, prime);
+        mpz_div_ui(exponent, exponent, 2);
+        mpz_clear(temp);
+    }
+    mpz_clear(exponent);
+    return FieldElement_init(result, prime);
+}
+
+FieldElement* FieldElement_pow(FieldElement* e, mpz_t exponent) {
+    if (mpz_cmp_ui(exponent, 0) < 0) {
+        // Calculate the modular inverse for negative exponents
+        FieldElement* inv = FieldElement_mod_inv(e);
+        // Use the positive equivalent of the exponent
+        mpz_t positiveExponent;
+        mpz_init(positiveExponent);
+        mpz_mul_si(positiveExponent, exponent, -1);
+        FieldElement* result = FieldElement_pow(inv, positiveExponent);
+        FieldElement_free(inv);
+        return result;
+    } else {
+        mpz_t base;
+        mpz_t prime;
+        mpz_t result;
+        mpz_t exp;
+        mpz_t temp;
+        mpz_init_set(base, e->num);
+        mpz_init_set(prime, e->prime);
+        mpz_init_set_ui(result, 1);
+        mpz_init(exp);
+        mpz_init(temp);
+        mpz_sub_ui(temp, prime, 1); //Ensure exponent is within field size
+        mpz_mod(exp, exponent, temp); //Ensure exponent is within field size
+
+        while (mpz_cmp_ui(exp, 0) > 0) {
+            mpz_mod_ui(temp, exp, 2);
+            if (mpz_cmp_ui(temp, 1) == 0) {
+                mpz_mul(result, result, base);
+                mpz_mod(result, result, prime);
+            }
+            mpz_pow_ui(base, base, 2);
+            mpz_mod(base, base, prime);
+            mpz_div_ui(exp, exp, 2);
+        }
+        mpz_clear(temp);
+        mpz_clear(exp);
+        return FieldElement_init(result, prime);
+    }
+}
 
 // FieldElement* FieldElement_div(FieldElement* e1, FieldElement* e2) {
 //     assert(e1->prime == e2->prime);

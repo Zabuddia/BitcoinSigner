@@ -10,6 +10,7 @@
 int main() {
     mpz_t zero;
     mpz_t seven;
+    mpz_t negative_seven;
     mpz_t two_hundred_and_twenty_three;
     mpz_t two_hundred;
     mpz_t one_hundred_and_fifty;
@@ -18,6 +19,7 @@ int main() {
     mpz_t p;
     mpz_init_set_si(zero, 0);
     mpz_init_set_si(seven, 7);
+    mpz_init_set_si(negative_seven, -7);
     mpz_init_set_si(two_hundred_and_twenty_three, 223);
     mpz_init_set_si(two_hundred, 200);
     mpz_init_set_si(one_hundred_and_fifty, 150);
@@ -32,7 +34,7 @@ int main() {
     FieldElement* x = FieldElement_init(gx, p);
     FieldElement* y = FieldElement_init(gy, p);
 
-    FieldElement* add = FieldElement_mul_scalar(x, one_hundred_and_fifty);
+    FieldElement* add = FieldElement_pow(x, negative_seven);
     
     FieldElement_toString(add);
     return 0;
