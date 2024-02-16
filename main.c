@@ -34,7 +34,7 @@ int main() {
     FieldElement* x = FieldElement_init(gx, p);
     FieldElement* y = FieldElement_init(gy, p);
 
-    FieldElement* add = FieldElement_pow(x, negative_seven);
+    FieldElement* add = FieldElement_div(x, y);
     
     FieldElement_toString(add);
     return 0;

@@ -161,11 +161,15 @@ FieldElement* FieldElement_pow(FieldElement* e, mpz_t exponent) {
     }
 }
 
-// FieldElement* FieldElement_div(FieldElement* e1, FieldElement* e2) {
-//     assert(e1->prime == e2->prime);
-//     FieldElement* inv_e2 = FieldElement_mod_inv(e2); // Correctly calculate the modular inverse of e2
-//     mpz_t num = (e1->num * inv_e2->num) % e1->prime; // Then multiply e1->num by this inverse, modulo prime
-//     mpz_t prime = e1->prime;
-//     FieldElement_free(inv_e2); // Clean up the temporary FieldElement created for the inverse
-//     return FieldElement_init(num, prime);
-// }
+FieldElement* FieldElement_div(FieldElement* e1, FieldElement* e2) {
+    assert(mpz_cmp(e1->prime, e2->prime) == 0); //Make sure they are in the same field
+    FieldElement* inv_e2 = FieldElement_mod_inv(e2); //Correctly calculate the modular inverse of e2
+    mpz_t num;
+    mpz_t prime;
+    mpz_init(num);
+    mpz_init_set(prime, e1->prime);
+    mpz_mul(num, e1->num, inv_e2->num);
+    mpz_mod(num, num, prime);  //Then multiply e1->num by this inverse, modulo prime
+    FieldElement_free(inv_e2); // Clean up the temporary FieldElement created for the inverse
+    return FieldElement_init(num, prime);
+}
