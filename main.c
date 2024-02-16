@@ -4,26 +4,29 @@
 #include "lib/all_libs.h"
 #include "bitcoin/ecc/point.h"
 #include "bitcoin/ecc/fieldelement.h"
+#include "bitcoin/ecc/s256field.h"
+#include "bitcoin/ecc/s256point.h"
 
 int main() {
-    int prime = 223;
-    FieldElement* a = FieldElement_init(0, prime);
-    FieldElement* b = FieldElement_init(7, prime);
-    FieldElement* x1 = FieldElement_init(15, prime);
-    FieldElement* y1 = FieldElement_init(86, prime);
-    FieldElement* x2 = FieldElement_init(17, prime);
-    FieldElement* y2 = FieldElement_init(56, prime);
-    FieldElement* x3 = FieldElement_init(15, prime);
-    FieldElement* y3 = FieldElement_init(137, prime);
+    mpz_t zero;
+    mpz_t seven;
+    mpz_t two_hundred_and_twenty_three;
+    mpz_t two_hundred;
+    mpz_t one_hundred_and_fifty;
+    mpz_init_set_ui(zero, 0);
+    mpz_init_set_ui(seven, 7);
+    mpz_init_set_ui(two_hundred_and_twenty_three, 223);
+    mpz_init_set_ui(two_hundred, 200);
+    mpz_init_set_ui(one_hundred_and_fifty, 150);
 
-    Point* p1 = Point_init(x1, y1, a, b);
-    Point* p2 = Point_init(x2, y2, a, b);
-    Point* p3 = Point_init(x3, y3, a, b);
+    FieldElement* a = FieldElement_init(zero, two_hundred_and_twenty_three);
+    FieldElement* b = FieldElement_init(seven, two_hundred_and_twenty_three);
+    FieldElement* c = FieldElement_init(two_hundred, two_hundred_and_twenty_three);
+    FieldElement* d = FieldElement_init(one_hundred_and_fifty, two_hundred_and_twenty_three);
 
-    Point* add = Point_add(p1, p3);
-
-    Point_toString(add);
-
+    FieldElement* add = FieldElement_add(c, d);
+    
+    FieldElement_toString(add);
     return 0;
 }
 
