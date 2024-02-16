@@ -32,7 +32,7 @@ int main() {
     FieldElement* x = FieldElement_init(gx, p);
     FieldElement* y = FieldElement_init(gy, p);
 
-    FieldElement* add = FieldElement_sub(x, y);
+    FieldElement* add = FieldElement_mul(x, y);
     
     FieldElement_toString(add);
     return 0;
