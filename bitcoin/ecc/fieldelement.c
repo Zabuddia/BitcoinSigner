@@ -16,6 +16,7 @@ FieldElement* FieldElement_init(mpz_t num, mpz_t prime) {
     }
     mpz_init_set(element->num, num);
     mpz_init_set(element->prime, prime);
+    mpz_clear(z);
     return element;
 }
 
@@ -54,18 +55,23 @@ FieldElement* FieldElement_add(FieldElement* e1, FieldElement* e2) {
     mpz_t num;
     mpz_t prime;
     mpz_init(num);
-    mpz_add(num, e1->num, e2->num);
-    mpz_mod(num, num, e1->prime);
     mpz_init_set(prime, e1->prime);
+    mpz_add(num, e1->num, e2->num);
+    mpz_mod(num, num, prime);
     return FieldElement_init(num, prime);
 }
 
-// FieldElement* FieldElement_sub(FieldElement* e1, FieldElement* e2) {
-//     mpz_t prime = e1->prime;
-//     assert(e1->prime == e2->prime); //Make sure they are in the same field
-//     mpz_t num = ((e1->num - e2->num) + prime) % prime; //Ensure a positive result
-//     return FieldElement_init(num, prime);
-// }
+FieldElement* FieldElement_sub(FieldElement* e1, FieldElement* e2) {
+    assert(mpz_cmp(e1->prime, e2->prime) == 0); //Make sure they are in the same field
+    mpz_t num;
+    mpz_t prime;
+    mpz_init(num);
+    mpz_init_set(prime, e1->prime);
+    mpz_sub(num, e1->num, e2->num);
+    mpz_add(num, num, prime); //Ensure a positive result
+    mpz_mod(num, num, prime);
+    return FieldElement_init(num, prime);
+}
 
 // FieldElement* FieldElement_mul(FieldElement* e1, FieldElement* e2) {
 //     assert(e1->prime == e2->prime);
