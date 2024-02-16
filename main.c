@@ -13,13 +13,16 @@ int main() {
     FieldElement* y1 = FieldElement_init(86, prime);
     FieldElement* x2 = FieldElement_init(17, prime);
     FieldElement* y2 = FieldElement_init(56, prime);
+    FieldElement* x3 = FieldElement_init(15, prime);
+    FieldElement* y3 = FieldElement_init(137, prime);
 
     Point* p1 = Point_init(x1, y1, a, b);
     Point* p2 = Point_init(x2, y2, a, b);
+    Point* p3 = Point_init(x3, y3, a, b);
 
-    Point* mul = Point_mul(p1, 8);
+    Point* add = Point_add(p1, p3);
 
-    Point_toString(mul);
+    Point_toString(add);
 
     return 0;
 }

@@ -53,7 +53,7 @@ void Point_free(Point* p) {
 
 
 void Point_toString(Point* p) {
-    if (p->x == NULL) {
+    if (p == NULL) {
         printf("Point(infinity)\n");
     } else {
         printf("Point(%d, %d)_%d_%d FieldElement(%d)\n", p->x->num, p->y->num, p->a->num, p->b->num, p->x->prime);
