@@ -17,12 +17,9 @@ int main() {
     Point* p1 = Point_init(x1, y1, a, b);
     Point* p2 = Point_init(x2, y2, a, b);
 
-    Point* addedPoints = Point_mul(p1, 2);
-    Point_toString(addedPoints);
+    Point* mul = Point_mul(p1, 2);
 
-    Point_free(p1);
-    Point_free(p2);
-    Point_free(addedPoints);
+    Point_toString(mul);
 
     return 0;
 }

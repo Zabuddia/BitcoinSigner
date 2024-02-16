@@ -102,7 +102,8 @@ FieldElement* FieldElement_pow(FieldElement* e, int exponent) {
             base = (base * base) % e->prime;
             exp /= 2;
         }
-        return FieldElement_init(result, e->prime);
+        int prime = e->prime;
+        return FieldElement_init(result, prime);
     }
 }
 
