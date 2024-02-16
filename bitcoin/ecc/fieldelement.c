@@ -34,15 +34,19 @@ int FieldElement_eq(FieldElement* e1, FieldElement* e2) {
         return 0;
     }
 
-    return e1->num == e2->num && e1->prime == e2->prime;
+    if (mpz_cmp(e1->num, e2->num) == 0 && mpz_cmp(e1->num, e2->num) == 0) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 int FieldElement_ne(FieldElement* e1, FieldElement* e2) {
-    if (e2 == NULL) {
+    if (mpz_cmp(e1->num, e2->num) != 0 || mpz_cmp(e1->num, e2->num) != 0) {
+        return 1;
+    } else {
         return 0;
     }
-
-    return e1->num != e2->num || e1->prime != e2->prime;
 }
 
 FieldElement* FieldElement_add(FieldElement* e1, FieldElement* e2) {
