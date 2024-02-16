@@ -17,22 +17,22 @@ void FieldElement_free(FieldElement* element);
 
 void FieldElement_toString(FieldElement* element);
 
-int FieldElement_eq(FieldElement* self, FieldElement* other);
+int FieldElement_eq(FieldElement* e1, FieldElement* e2);
 
-int FieldElement_ne(FieldElement* self, FieldElement* other);
+int FieldElement_ne(FieldElement* e1, FieldElement* e2);
 
-FieldElement* FieldElement_add(FieldElement* self, FieldElement* other);
+FieldElement* FieldElement_add(FieldElement* e1, FieldElement* e2);
 
-FieldElement* FieldElement_sub(FieldElement* self, FieldElement* other);
+FieldElement* FieldElement_sub(FieldElement* e1, FieldElement* e2);
 
-FieldElement* FieldElement_mul(FieldElement* self, FieldElement* other);
+FieldElement* FieldElement_mul(FieldElement* e1, FieldElement* e2);
 
 FieldElement* FieldElement_mul_scalar(FieldElement* e, mpz_t s);
 
-FieldElement* FieldElement_mod_inv(FieldElement* self);
+FieldElement* FieldElement_mod_inv(FieldElement* e1);
 
-FieldElement* FieldElement_pow(FieldElement* self, mpz_t exponent);
+FieldElement* FieldElement_pow(FieldElement* e1, mpz_t exponent);
 
-FieldElement* FieldElement_div(FieldElement* self, FieldElement* other);
+FieldElement* FieldElement_div(FieldElement* e1, FieldElement* e2);
 
 #endif //FIELDELEMENT_H

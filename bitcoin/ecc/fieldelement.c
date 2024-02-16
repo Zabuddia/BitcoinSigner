@@ -32,7 +32,7 @@ int FieldElement_eq(FieldElement* e1, FieldElement* e2) {
         return 0;
     }
 
-    if (mpz_cmp(e1->num, e2->num) == 0 && mpz_cmp(e1->num, e2->num) == 0) {
+    if (mpz_cmp(e1->num, e2->num) == 0 && mpz_cmp(e1->prime, e2->prime) == 0) {
         return 1;
     } else {
         return 0;
@@ -40,7 +40,7 @@ int FieldElement_eq(FieldElement* e1, FieldElement* e2) {
 }
 
 int FieldElement_ne(FieldElement* e1, FieldElement* e2) {
-    if (mpz_cmp(e1->num, e2->num) != 0 || mpz_cmp(e1->num, e2->num) != 0) {
+    if (mpz_cmp(e1->num, e2->num) != 0 || mpz_cmp(e1->prime, e2->prime) != 0) {
         return 1;
     } else {
         return 0;
