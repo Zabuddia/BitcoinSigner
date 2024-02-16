@@ -143,46 +143,17 @@ Point* Point_add(Point* p1, Point* p2) {
     }
 }
 
-Point* Point_copy(Point* original) {
-    if (original == NULL) return NULL;
-
-    // Assuming FieldElement_init creates a new FieldElement with the given num and prime
-    FieldElement* x = original->x != NULL ? FieldElement_init(original->x->num, original->x->prime) : NULL;
-    FieldElement* y = original->y != NULL ? FieldElement_init(original->y->num, original->y->prime) : NULL;
-    FieldElement* a = original->a != NULL ? FieldElement_init(original->a->num, original->a->prime) : NULL;
-    FieldElement* b = original->b != NULL ? FieldElement_init(original->b->num, original->b->prime) : NULL;
-
-    // Assuming Point_init creates a new Point with the given FieldElement references
-    Point* copy = Point_init(x, y, a, b);
-    return copy;
-}
-
 Point* Point_mul(Point* p, int coefficient) {
-    // Initialize the result as the point at infinity (identity element for addition)
-    Point* result = Point_init(NULL, NULL, p->a, p->b); // Assuming this does not dynamically allocate 'a' and 'b'
-    Point* current = Point_copy(p); // Create a copy of 'p' for the doubling process
+    Point* result = Point_init(NULL, NULL, p->a, p->b);
+    Point* current = p;
+    int coef = coefficient;
 
-    while (coefficient > 0) {
-        if (coefficient & 1) {
-            Point* temp_result = Point_add(result, current);
-            if (result != NULL) {
-                Point_free(result); // Only free if 'result' is not the initial point at infinity
-            }
-            result = temp_result;
+    while (coef) {
+        if (coef & 1) {
+            result = Point_add(result, current);
         }
-        Point* temp_current = Point_add(current, current);
-        if (current != p) { // Ensure not to free the original point 'p'
-            Point_free(current);
-        }
-        current = temp_current;
-
-        coefficient >>= 1; // Right shift the coefficient by 1
+        current = Point_add(current, current);
+        coef >>=1;
     }
-
-    if (current != p) { // Ensure not to free the original point 'p'
-        Point_free(current);
-    }
-
     return result;
 }
-

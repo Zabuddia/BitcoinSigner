@@ -17,7 +17,7 @@ int main() {
     Point* p1 = Point_init(x1, y1, a, b);
     Point* p2 = Point_init(x2, y2, a, b);
 
-    Point* mul = Point_mul(p1, 2);
+    Point* mul = Point_mul(p1, 8);
 
     Point_toString(mul);
 
