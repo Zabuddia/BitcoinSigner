@@ -17,6 +17,7 @@ int main() {
     mpz_t gx;
     mpz_t gy;
     mpz_t p;
+    mpz_t n;
     mpz_init_set_si(zero, 0);
     mpz_init_set_si(seven, 7);
     mpz_init_set_si(negative_seven, -7);
@@ -25,18 +26,22 @@ int main() {
     mpz_init_set_si(one_hundred_and_fifty, 150);
     mpz_init_set_str(gx, "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798", 16);
     mpz_init_set_str(gy, "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8", 16);
+    mpz_init_set_str(n, N, 16);
     mpz_init_set_str(p, P, 16);
 
-    FieldElement* a = FieldElement_init(zero, two_hundred_and_twenty_three);
-    FieldElement* b = FieldElement_init(seven, two_hundred_and_twenty_three);
+    FieldElement* a = FieldElement_init(zero, p);
+    FieldElement* b = FieldElement_init(seven, p);
     FieldElement* c = FieldElement_init(two_hundred, two_hundred_and_twenty_three);
     FieldElement* d = FieldElement_init(one_hundred_and_fifty, two_hundred_and_twenty_three);
     FieldElement* x = FieldElement_init(gx, p);
     FieldElement* y = FieldElement_init(gy, p);
 
-    FieldElement* add = FieldElement_div(x, y);
-    
-    FieldElement_toString(add);
+    Point* G = Point_init(x, y, a, b);
+
+    Point* mul = Point_mul(G, n);
+
+    Point_toString(mul);
+
     return 0;
 }
 

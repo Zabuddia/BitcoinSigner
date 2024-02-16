@@ -26,6 +26,6 @@ int Point_ne(Point* p1, Point* p2);
 
 Point* Point_add(Point* p1, Point* p2);
 
-Point* Point_mul(Point* p1, int coefficient);
+Point* Point_mul(Point* p1, mpz_t coefficient);
 
 #endif //POINT_H
