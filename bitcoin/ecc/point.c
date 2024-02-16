@@ -166,7 +166,6 @@ Point* Point_mul(Point* p, mpz_t coefficient) {
     Point* current = p;
     mpz_t coef;
     mpz_init_set(coef, coefficient);
-    printf("Made it here\n");
 while (mpz_cmp_ui(coef, 0) > 0) { // While coef is greater than 0
     if (mpz_tstbit(coef, 0) == 1) { // If the least significant bit of coef is 1
         result = Point_add(result, current);
