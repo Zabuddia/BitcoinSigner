@@ -8,22 +8,10 @@
 #include "bitcoin/ecc/s256point.h"
 
 int main() {
-    mpz_t zero;
-    mpz_t seven;
-    mpz_t negative_seven;
-    mpz_t two_hundred_and_twenty_three;
-    mpz_t two_hundred;
-    mpz_t one_hundred_and_fifty;
     mpz_t gx;
     mpz_t gy;
     mpz_t p;
     mpz_t n;
-    mpz_init_set_si(zero, 0);
-    mpz_init_set_si(seven, 7);
-    mpz_init_set_si(negative_seven, -7);
-    mpz_init_set_si(two_hundred_and_twenty_three, 223);
-    mpz_init_set_si(two_hundred, 200);
-    mpz_init_set_si(one_hundred_and_fifty, 150);
     mpz_init_set_str(gx, "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798", 16);
     mpz_init_set_str(gy, "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8", 16);
     mpz_init_set_str(n, N, 16);
