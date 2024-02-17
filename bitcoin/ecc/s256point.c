@@ -200,16 +200,16 @@ S256Point* S256Point_mul(S256Point* p, mpz_t coefficient) {
     mpz_init_set_str(n, N, 16);
     mpz_init_set(coef, coefficient);
     mpz_mod(coef, coef, n);
-while (mpz_cmp_ui(coef, 0) > 0) { // While coef is greater than 0
-    if (mpz_tstbit(coef, 0) == 1) { // If the least significant bit of coef is 1
-        result = S256Point_add(result, current);
+    while (mpz_cmp_ui(coef, 0) > 0) { // While coef is greater than 0
+        if (mpz_tstbit(coef, 0) == 1) { // If the least significant bit of coef is 1
+            result = S256Point_add(result, current);
+        }
+        current = S256Point_add(current, current);
+        mpz_fdiv_q_2exp(coef, coef, 1); // Right shift coef by 1
     }
-    current = S256Point_add(current, current);
-    mpz_fdiv_q_2exp(coef, coef, 1); // Right shift coef by 1
-}
-mpz_clear(coef);
+    mpz_clear(coef);
 
-return result;
+    return result;
 }
 
 int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
