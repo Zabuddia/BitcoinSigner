@@ -11,6 +11,10 @@ void Initialize_prime() {
     mpz_init_set_str(PRIME, P, 16);
 }
 
+void Free_prime() {
+    mpz_clear(PRIME);
+}
+
 S256Field* S256Field_init(mpz_t num) {
     assert(mpz_cmp_ui(num, 0) >= 0 && mpz_cmp(num, PRIME) < 0); //Check that num is between 0 and prime - 1
     S256Field* element = (S256Field*)malloc(sizeof(S256Field));

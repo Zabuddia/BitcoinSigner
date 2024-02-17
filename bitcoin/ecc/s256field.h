@@ -18,6 +18,8 @@ typedef struct {
 
 void Initialize_prime();
 
+void Free_prime();
+
 S256Field* S256Field_init(mpz_t num);
 
 void S256Field_free(S256Field* element);

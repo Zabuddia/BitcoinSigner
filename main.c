@@ -58,6 +58,8 @@ int main() {
     S256Point_free(point);
     S256Field_free(Z);
     Signature_free(sig);
+    Free_prime();
+    Free_a_and_b();
 
     return 0;
 }

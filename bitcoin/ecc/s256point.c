@@ -12,6 +12,11 @@ void Initialize_a_and_b() {
     mpz_init_set_ui(B, 7);
 }
 
+void Free_a_and_b() {
+    mpz_clear(A);
+    mpz_clear(B);
+}
+
 S256Point* S256Point_init(S256Field* x, S256Field* y) {
     if (x == NULL && y == NULL) {
         return NULL; //The point at infinity
@@ -213,15 +218,15 @@ int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
 
     int isVerified = S256Field_eq(total->x, sig->r);
     
-    S256Field_free(x);
-    S256Field_free(y);
-    S256Field_free(s_inv);
-    S256Field_free(u);
-    S256Field_free(v);
-    S256Point_free(G);
-    S256Point_free(u_times_G);
-    S256Point_free(v_times_p);
-    S256Point_free(total);
+    // S256Field_free(x);
+    // S256Field_free(y);
+    // S256Field_free(s_inv);
+    // S256Field_free(u);
+    // S256Field_free(v);
+    // S256Point_free(G);
+    // S256Point_free(u_times_G);
+    // S256Point_free(v_times_p);
+    // S256Point_free(total);
 
     return isVerified;
 }
