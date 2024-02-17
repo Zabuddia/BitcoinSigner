@@ -34,9 +34,9 @@ int main() {
     PrivateKey* key = PrivateKey_init("my secret");
     Signature* sig = PrivateKey_sign(key, z);
 
-    S256Point_toString(key->point);
-    S256Field_toString(sig->r);
-    S256Field_toString(sig->s);
+    S256Field* K = Deterministic_k(key, z);
+
+    S256Field_toString(K);
 
     S256Field_free(e);
     S256Field_free(z);
