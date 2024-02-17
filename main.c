@@ -10,47 +10,40 @@
 #include "bitcoin/ecc/s256point.h"
 #include "bitcoin/ecc/signature.h"
 #include "bitcoin/helper.h"
+#include "bitcoin/ecc/privatekey.h"
+
+extern S256Point* G;
 
 int main() {
     Initialize_prime();
     Initialize_a_and_b();
-    mpz_t gx;
-    mpz_t gy;
-    mpz_init_set_str(gx, GX, 16);
-    mpz_init_set_str(gy, GY, 16);
-    S256Field* x = S256Field_init(gx);
-    S256Field* y = S256Field_init(gy);
-    S256Point* G = S256Point_init(x, y);
+    Initialize_G();
+    // mpz_t gx;
+    // mpz_t gy;
+    // mpz_init_set_str(gx, GX, 16);
+    // mpz_init_set_str(gy, GY, 16);
+    // S256Field* x = S256Field_init(gx);
+    // S256Field* y = S256Field_init(gy);
+    // S256Point* G = S256Point_init(x, y);
 
     const char* secret = "my secret";
     const char* message = "my message";
     S256Field* e = hash_to_s256field((const unsigned char*)secret, strlen(secret));
     S256Field* z = hash_to_s256field((const unsigned char*)message, strlen(message));
 
-    mpz_t kay;
-    mpz_init_set_ui(kay, 1234567890);
-    S256Field* k = S256Field_init(kay);
+    PrivateKey* key = PrivateKey_init("my secret");
+    Signature* sig = PrivateKey_sign(key, z);
 
-    S256Field* r = S256Point_mul(G, k->num)->x;
-
-    S256Field* k_inv = S256Field_s_inv(k);
-
-    S256Field* r_times_e = S256Field_s_mul(r, e);
-    S256Field* z_plus_r_times_e = S256Field_add(z, r_times_e);
-    S256Field* s = S256Field_s_mul(z_plus_r_times_e, k_inv);
-
-    S256Point* point = S256Point_mul(G, e->num);
-
-    S256Point_toString(point);
-    S256Field_toString(z);
-    S256Field_toString(r);
-    S256Field_toString(s);
+    S256Point_toString(key->point);
+    S256Field_toString(sig->r);
+    S256Field_toString(sig->s);
 
     S256Field_free(e);
     S256Field_free(z);
     S256Point_free(G);
     Free_prime();
     Free_a_and_b();
+    //Free_G();
 
     return 0;
 }

@@ -6,6 +6,21 @@
 
 mpz_t A;
 mpz_t B;
+mpz_t gx;
+mpz_t gy;
+S256Point* G;
+
+void Initialize_G() {
+    mpz_init_set_str(gx, GX, 16);
+    mpz_init_set_str(gy, GY, 16);
+    S256Field* x = S256Field_init(gx);
+    S256Field* y = S256Field_init(gy);
+    G = S256Point_init(x, y);
+}
+
+void Free_G() {
+    S256Point_free(G);
+}
 
 void Initialize_a_and_b() {
     mpz_init_set_ui(A, 0);
@@ -75,12 +90,11 @@ void S256Point_free(S256Point* p) {
     }
 }
 
-
 void S256Point_toString(S256Point* p) {
     if (p == NULL) {
         printf("S256Point(infinity)\n");
     } else {
-        gmp_printf("S256Point(%Zd, %Zd)_%Zd_%Zd\n", p->x->num, p->y->num, p->a->num, p->b->num);
+        gmp_printf("S256Point(%Zd, %Zd)\n", p->x->num, p->y->num);
     }
 }
 
@@ -199,16 +213,6 @@ return result;
 }
 
 int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
-    mpz_t gx;
-    mpz_t gy;
-    mpz_init_set_str(gx, GX, 16);
-    mpz_init_set_str(gy, GY, 16);
-
-    S256Field* x = S256Field_init(gx);
-    S256Field* y = S256Field_init(gy);
-
-    S256Point* G = S256Point_init(x, y);
-
     S256Field* s_inv = S256Field_s_inv(sig->s);
     S256Field* u = S256Field_s_mul(z, s_inv);
     S256Field* v = S256Field_s_mul(sig->r, s_inv);

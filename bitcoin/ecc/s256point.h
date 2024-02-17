@@ -12,6 +12,8 @@
 
 extern mpz_t A;
 extern mpz_t B;
+extern mpz_t gx;
+extern mpz_t gy;
 
 typedef struct {
     S256Field* x;
@@ -19,6 +21,10 @@ typedef struct {
     S256Field* a;
     S256Field* b;
 } S256Point;
+
+void Initialize_G();
+
+void Free_G();
 
 void Initialize_a_and_b();
 
