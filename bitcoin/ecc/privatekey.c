@@ -24,25 +24,6 @@ PrivateKey* PrivateKey_init(const char* secret) {
     return key;
 }
 
-void mpz_to_bytes(const mpz_t op, unsigned char *out, size_t out_len) {
-    size_t op_size = (mpz_sizeinbase(op, 2) + 7) / 8;
-    mpz_export(out + (out_len - op_size), NULL, 1, 1, 0, 0, op);
-}
-
-void compute_hmac_sha256(unsigned char *key, int key_len,
-                         unsigned char *data, int data_len,
-                         unsigned char *output, size_t *output_len) {
-    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
-    EVP_PKEY *pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL, key, key_len);
-
-    EVP_DigestSignInit(ctx, NULL, EVP_sha256(), NULL, pkey);
-    EVP_DigestSignUpdate(ctx, data, data_len);
-    EVP_DigestSignFinal(ctx, output, output_len);
-
-    EVP_MD_CTX_free(ctx);
-    EVP_PKEY_free(pkey);
-}
-
 S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
     unsigned char k[32] = {0};
     size_t k_len = 32;
@@ -94,7 +75,7 @@ S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
     // v = hmac.new(k, v, s256).digest()
     // candidate = int.from_bytes(v, 'big')
     // if candidate >= 1 and candidate < N:
-    //     return candidate  # <2>
+    //     return candidate
     // k = hmac.new(k, v + b'\x00', s256).digest()
     // v = hmac.new(k, v, s256).digest()
 

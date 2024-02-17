@@ -65,3 +65,22 @@ S256Field* hash_to_s256field(const unsigned char* data, size_t data_len) {
 
     return result;
 }
+
+void mpz_to_bytes(const mpz_t op, unsigned char *out, size_t out_len) {
+    size_t op_size = (mpz_sizeinbase(op, 2) + 7) / 8;
+    mpz_export(out + (out_len - op_size), NULL, 1, 1, 0, 0, op);
+}
+
+void compute_hmac_sha256(unsigned char *key, int key_len,
+                         unsigned char *data, int data_len,
+                         unsigned char *output, size_t *output_len) {
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+    EVP_PKEY *pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL, key, key_len);
+
+    EVP_DigestSignInit(ctx, NULL, EVP_sha256(), NULL, pkey);
+    EVP_DigestSignUpdate(ctx, data, data_len);
+    EVP_DigestSignFinal(ctx, output, output_len);
+
+    EVP_MD_CTX_free(ctx);
+    EVP_PKEY_free(pkey);
+}

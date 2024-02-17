@@ -21,5 +21,5 @@ void Signature_free(Signature* sig) {
 }
 
 void Signature_toString(Signature* sig) {
-    gmp_printf("Signature(%Zd, %Zd)\n", sig->r->num, sig->s->num);
+    gmp_printf("Signature(%Zx, %Zx)\n", sig->r->num, sig->s->num);
 }

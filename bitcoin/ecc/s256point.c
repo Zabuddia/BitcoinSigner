@@ -94,7 +94,7 @@ void S256Point_toString(S256Point* p) {
     if (p == NULL) {
         printf("S256Point(infinity)\n");
     } else {
-        gmp_printf("S256Point(%Zd, %Zd)\n", p->x->num, p->y->num);
+        gmp_printf("S256Point(%Zx, %Zx)\n", p->x->num, p->y->num);
     }
 }
 
