@@ -17,6 +17,8 @@ int main() {
     // S256Field* y = S256Field_init(gy);
     // S256Point* G = S256Point_init(x, y);
 
+    Initialize_prime();
+    Initialize_a_and_b();
     mpz_t ex;
     mpz_t why;
     mpz_init_set_str(ex, "887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c", 16);

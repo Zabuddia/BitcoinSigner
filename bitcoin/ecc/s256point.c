@@ -4,23 +4,23 @@
 
 #include "s256point.h"
 
+void Initialize_a_and_b() {
+    mpz_init_set_ui(A, 0);
+    mpz_init_set_ui(B, 7);
+}
+
 S256Point* S256Point_init(S256Field* x, S256Field* y) {
     if (x == NULL && y == NULL) {
         return NULL; //The point at infinity
     }
-
-    mpz_t a;
-    mpz_t b;
-    mpz_init_set_ui(a, A);
-    mpz_init_set_ui(b, B);
 
     mpz_t two;
     mpz_t three;
     mpz_init_set_ui(two, 2);
     mpz_init_set_ui(three, 3);
 
-    S256Field* temp_a = S256Field_init(a);
-    S256Field* temp_b = S256Field_init(b);
+    S256Field* temp_a = S256Field_init(A);
+    S256Field* temp_b = S256Field_init(B);
 
     //y^2 != x^3 + a * x + b
     S256Field* y_squared = S256Field_pow(y, two);
@@ -207,7 +207,7 @@ int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
     S256Point* u_times_G = S256Point_mul(G, u->num);
     S256Point* v_times_p = S256Point_mul(p, v->num);
     S256Point* total = S256Point_add(u_times_G, v_times_p);
-    
+
     int isVerified = S256Field_eq(total->x, sig->r);
     
     S256Field_free(x);

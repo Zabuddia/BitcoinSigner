@@ -9,10 +9,14 @@
 #define P "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"
 #define N "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
 
+extern mpz_t PRIME;
+
 typedef struct {
     mpz_t num;
     mpz_t prime;
 } S256Field;
+
+void Initialize_prime();
 
 S256Field* S256Field_init(mpz_t num);
 

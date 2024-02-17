@@ -5,24 +5,25 @@
 
 #include "s256field.h"
 
+void Initialize_prime() {
+    mpz_init_set_str(PRIME, P, 16);
+}
+
 S256Field* S256Field_init(mpz_t num) {
-    mpz_t prime;
-    mpz_init_set_str(prime, P, 16);
-    assert(mpz_cmp_ui(num, 0) >= 0 && mpz_cmp(num, prime) < 0); //Check that num is between 0 and prime - 1
+    assert(mpz_cmp_ui(num, 0) >= 0 && mpz_cmp(num, PRIME) < 0); //Check that num is between 0 and prime - 1
     S256Field* element = (S256Field*)malloc(sizeof(S256Field));
     if (element == NULL) {
         printf("Memory allocation failed\n");
         exit(1);
     }
     mpz_init_set(element->num, num);
-    mpz_init_set(element->prime, prime);
+    mpz_init_set(element->prime, PRIME);
     return element;
 }
 
 void S256Field_free(S256Field* element) {
     if (element != NULL) {
         mpz_clear(element->num);
-        mpz_clear(element->prime);
         free(element);
     }
 }

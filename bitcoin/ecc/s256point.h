@@ -7,10 +7,11 @@
 
 #include "signature.h"
 
-#define A 0
-#define B 7
 #define GX "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
 #define GY "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
+
+extern mpz_t A;
+extern mpz_t B;
 
 typedef struct {
     S256Field* x;
@@ -18,6 +19,8 @@ typedef struct {
     S256Field* a;
     S256Field* b;
 } S256Point;
+
+void Initialize_a_and_b();
 
 S256Point* S256Point_init(S256Field* x, S256Field* y);
 
