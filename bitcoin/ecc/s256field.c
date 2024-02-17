@@ -35,7 +35,7 @@ void S256Field_free(S256Field* element) {
 }
 
 void S256Field_toString(S256Field* element) {
-    gmp_printf("S256Field_%Zd(%Zd)\n", element->prime, element->num);
+    gmp_printf("S256Field_(%Zd)\n", element->num);
 }
 
 int S256Field_eq(S256Field* e1, S256Field* e2) {

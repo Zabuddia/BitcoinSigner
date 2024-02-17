@@ -1,7 +1,7 @@
 #include <signal.h>
+#include <string.h>
 #include <assert.h>
-#include <openssl/sha.h>
-#include <openssl/bn.h>
+#include <openssl/evp.h>
 
 #include "lib/all_libs.h"
 #include "bitcoin/ecc/point.h"
@@ -9,57 +9,29 @@
 #include "bitcoin/ecc/s256field.h"
 #include "bitcoin/ecc/s256point.h"
 #include "bitcoin/ecc/signature.h"
+#include "bitcoin/helper.h"
 
 int main() {
     Initialize_prime();
     Initialize_a_and_b();
-    // mpz_t gx;
-    // mpz_t gy;
-    // mpz_init_set_str(gx, GX, 16);
-    // mpz_init_set_str(gy, GY, 16);
-    // S256Field* x = S256Field_init(gx);
-    // S256Field* y = S256Field_init(gy);
-    // S256Point* G = S256Point_init(x, y);
+    mpz_t gx;
+    mpz_t gy;
+    mpz_init_set_str(gx, GX, 16);
+    mpz_init_set_str(gy, GY, 16);
+    S256Field* x = S256Field_init(gx);
+    S256Field* y = S256Field_init(gy);
+    S256Point* G = S256Point_init(x, y);
 
-    mpz_t ex;
-    mpz_t why;
-    mpz_init_set_str(ex, "887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c", 16);
-    mpz_init_set_str(why, "61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34", 16);
-    S256Field* X = S256Field_init(ex);
-    S256Field* Y = S256Field_init(why);
-    S256Point* point = S256Point_init(X, Y);
+    const char* secret = "my secret";
+    const char* message = "my message";
+    S256Field* e = hash_to_s256field((const unsigned char*)secret, strlen(secret));
+    S256Field* z = hash_to_s256field((const unsigned char*)message, strlen(message));
+    S256Field_toString(e);
+    S256Field_toString(z);
 
-    //signature 1
-    mpz_t zee;
-    mpz_t are;
-    mpz_t ess;
-    mpz_init_set_str(zee, "ec208baa0fc1c19f708a9ca96fdeff3ac3f230bb4a7ba4aede4942ad003c0f60", 16);
-    mpz_init_set_str(are, "ac8d1c87e51d0d441be8b3dd5b05c8795b48875dffe00b7ffcfac23010d3a395", 16);
-    mpz_init_set_str(ess, "68342ceff8935ededd102dd876ffd6ba72d6a427a3edb13d26eb0781cb423c4", 16);
-    S256Field* Z = S256Field_init(zee);
-    S256Field* R = S256Field_init(are);
-    S256Field* S = S256Field_init(ess);
-    Signature* sig = Signature_init(R, S);
-
-    printf("Verified: %d\n", S256Point_verify(point, Z, sig));
-
-    //signature 2
-    // mpz_t zee;
-    // mpz_t are;
-    // mpz_t ess;
-    // mpz_init_set_str(zee, "7c076ff316692a3d7eb3c3bb0f8b1488cf72e1afcd929e29307032997a838a3d", 16);
-    // mpz_init_set_str(are, "eff69ef2b1bd93a66ed5219add4fb51e11a840f404876325a1e8ffe0529a2c", 16);
-    // mpz_init_set_str(ess, "c7207fee197d27c618aea621406f6bf5ef6fca38681d82b2f06fddbdce6feab6", 16);
-    // S256Field* Z = S256Field_init(zee);
-    // S256Field* R = S256Field_init(are);
-    // S256Field* S = S256Field_init(ess);
-    // Signature* sig = Signature_init(R, S);
-
-    // printf("Verified: %d\n", S256Point_verify(point, Z, sig));
-
-    S256Point_free(point);
-    S256Field_free(Z);
-    Signature_free(sig);
+    S256Field_free(e);
+    S256Field_free(z);
+    S256Point_free(G);
     Free_prime();
     Free_a_and_b();
 
