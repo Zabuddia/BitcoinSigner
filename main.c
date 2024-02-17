@@ -26,8 +26,25 @@ int main() {
     const char* message = "my message";
     S256Field* e = hash_to_s256field((const unsigned char*)secret, strlen(secret));
     S256Field* z = hash_to_s256field((const unsigned char*)message, strlen(message));
-    S256Field_toString(e);
+
+    mpz_t kay;
+    mpz_init_set_ui(kay, 1234567890);
+    S256Field* k = S256Field_init(kay);
+
+    S256Field* r = S256Point_mul(G, k->num)->x;
+
+    S256Field* k_inv = S256Field_s_inv(k);
+
+    S256Field* r_times_e = S256Field_s_mul(r, e);
+    S256Field* z_plus_r_times_e = S256Field_add(z, r_times_e);
+    S256Field* s = S256Field_s_mul(z_plus_r_times_e, k_inv);
+
+    S256Point* point = S256Point_mul(G, e->num);
+
+    S256Point_toString(point);
     S256Field_toString(z);
+    S256Field_toString(r);
+    S256Field_toString(s);
 
     S256Field_free(e);
     S256Field_free(z);
