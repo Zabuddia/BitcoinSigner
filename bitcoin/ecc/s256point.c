@@ -189,3 +189,36 @@ mpz_clear(coef);
 
 return result;
 }
+
+int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
+    mpz_t gx;
+    mpz_t gy;
+    mpz_init_set_str(gx, GX, 16);
+    mpz_init_set_str(gy, GY, 16);
+
+    S256Field* x = S256Field_init(gx);
+    S256Field* y = S256Field_init(gy);
+
+    S256Point* G = S256Point_init(x, y);
+
+    S256Field* s_inv = S256Field_mod_inv(sig->s);
+    S256Field* u = S256Field_mul(z, s_inv);
+    S256Field* v = S256Field_mul(sig->r, s_inv);
+    S256Point* u_times_G = S256Point_mul(G, u->num);
+    S256Point* v_times_p = S256Point_mul(p, v->num);
+    S256Point* total = S256Point_add(u_times_G, v_times_p);
+
+    int isVerified = S256Field_eq(total->x, sig->r);
+    
+    S256Field_free(x);
+    S256Field_free(y);
+    S256Field_free(s_inv);
+    S256Field_free(u);
+    S256Field_free(v);
+    S256Point_free(G);
+    S256Point_free(u_times_G);
+    S256Point_free(v_times_p);
+    S256Point_free(total);
+
+    return isVerified;
+}

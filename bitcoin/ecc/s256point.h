@@ -5,10 +5,12 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "s256field.h"
+#include "signature.h"
 
 #define A 0
 #define B 7
+#define GX "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+#define GY "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
 
 typedef struct {
     S256Field* x;
@@ -30,5 +32,7 @@ int S256Point_ne(S256Point* p1, S256Point* p2);
 S256Point* S256Point_add(S256Point* p1, S256Point* p2);
 
 S256Point* S256Point_mul(S256Point* p1, mpz_t coefficient);
+
+int S256Point_verify(S256Point* p, S256Field* z, Signature* sig);
 
 #endif //S256POINT_H
