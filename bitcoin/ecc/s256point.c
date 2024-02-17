@@ -4,6 +4,9 @@
 
 #include "s256point.h"
 
+mpz_t A;
+mpz_t B;
+
 void Initialize_a_and_b() {
     mpz_init_set_ui(A, 0);
     mpz_init_set_ui(B, 7);

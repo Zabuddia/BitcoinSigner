@@ -5,6 +5,8 @@
 
 #include "s256field.h"
 
+mpz_t PRIME;
+
 void Initialize_prime() {
     mpz_init_set_str(PRIME, P, 16);
 }
