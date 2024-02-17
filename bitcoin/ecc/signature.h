@@ -13,6 +13,8 @@ typedef struct {
 
 Signature* Signature_init(S256Field* r, S256Field* s);
 
+void Signature_free(Signature* sig);
+
 void Signature_toString(Signature* sig);
 
 #endif //SIGNATURE_H

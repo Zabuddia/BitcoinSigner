@@ -20,9 +20,11 @@ S256Field* S256Field_init(mpz_t num) {
 }
 
 void S256Field_free(S256Field* element) {
-    mpz_clear(element->num);
-    mpz_clear(element->prime);
-    free(element);
+    if (element != NULL) {
+        mpz_clear(element->num);
+        mpz_clear(element->prime);
+        free(element);
+    }
 }
 
 void S256Field_toString(S256Field* element) {
