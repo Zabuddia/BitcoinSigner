@@ -80,6 +80,16 @@ S256Field* S256Field_mul(S256Field* e1, S256Field* e2) {
     return S256Field_init(num);
 }
 
+S256Field* S256Field_s_mul(S256Field* e1, S256Field* e2) {
+    mpz_t num;
+    mpz_t n;
+    mpz_init(num);
+    mpz_init_set_str(n, N, 16);
+    mpz_mul(num, e1->num, e2->num);
+    mpz_mod(num, num, n);
+    return S256Field_init(num);
+}
+
 S256Field* S256Field_mul_scalar(S256Field* e, mpz_t s) {
     mpz_t num;
     mpz_t prime;
@@ -112,6 +122,34 @@ S256Field* S256Field_mod_inv(S256Field* e) {
         }
         mpz_pow_ui(base, base, 2);
         mpz_mod(base, base, prime);
+        mpz_div_ui(exponent, exponent, 2);
+        mpz_clear(temp);
+    }
+    mpz_clear(exponent);
+    return S256Field_init(result);
+}
+
+S256Field* S256Field_s_inv(S256Field* e) {
+    mpz_t base;
+    mpz_t n;
+    mpz_t exponent;
+    mpz_t result;
+    mpz_init_set(base, e->num);
+    mpz_init_set_str(n, N, 16);
+    mpz_init(exponent);
+    mpz_sub_ui(exponent, n, 2); //Fermat's Little Theorem
+    mpz_init_set_ui(result, 1);
+
+    while (mpz_cmp_ui(exponent, 0) > 0) {
+        mpz_t temp;
+        mpz_init(temp);
+        mpz_mod_ui(temp, exponent, 2);
+        if (mpz_cmp_ui(temp, 1) == 0) {
+            mpz_mul(result, result, base);
+            mpz_mod(result, result, n);
+        }
+        mpz_pow_ui(base, base, 2);
+        mpz_mod(base, base, n);
         mpz_div_ui(exponent, exponent, 2);
         mpz_clear(temp);
     }

@@ -9,13 +9,13 @@
 #include "bitcoin/ecc/signature.h"
 
 int main() {
-    mpz_t gx;
-    mpz_t gy;
-    mpz_init_set_str(gx, GX, 16);
-    mpz_init_set_str(gy, GY, 16);
-    S256Field* x = S256Field_init(gx);
-    S256Field* y = S256Field_init(gy);
-    S256Point* G = S256Point_init(x, y);
+    // mpz_t gx;
+    // mpz_t gy;
+    // mpz_init_set_str(gx, GX, 16);
+    // mpz_init_set_str(gy, GY, 16);
+    // S256Field* x = S256Field_init(gx);
+    // S256Field* y = S256Field_init(gy);
+    // S256Point* G = S256Point_init(x, y);
 
     mpz_t ex;
     mpz_t why;

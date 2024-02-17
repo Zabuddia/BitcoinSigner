@@ -201,13 +201,13 @@ int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
 
     S256Point* G = S256Point_init(x, y);
 
-    S256Field* s_inv = S256Field_mod_inv(sig->s);
-    S256Field* u = S256Field_mul(z, s_inv);
-    S256Field* v = S256Field_mul(sig->r, s_inv);
+    S256Field* s_inv = S256Field_s_inv(sig->s);
+    S256Field* u = S256Field_s_mul(z, s_inv);
+    S256Field* v = S256Field_s_mul(sig->r, s_inv);
     S256Point* u_times_G = S256Point_mul(G, u->num);
     S256Point* v_times_p = S256Point_mul(p, v->num);
     S256Point* total = S256Point_add(u_times_G, v_times_p);
-
+    
     int isVerified = S256Field_eq(total->x, sig->r);
     
     S256Field_free(x);
