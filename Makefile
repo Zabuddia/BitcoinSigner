@@ -8,7 +8,7 @@ NAME=BitcoinSignerExecutable
 
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) -lbcm2835 -lgmp
+	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) -lbcm2835 -lgmp -lcrypto
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
