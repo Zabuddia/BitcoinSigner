@@ -138,9 +138,7 @@ Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
     mpz_t n;
     mpz_init_set_str(n, N, 16);
 
-    mpz_t kay;
-    mpz_init_set_ui(kay, 1234567890);
-    S256Field* k = S256Field_init(kay);
+    S256Field* k = Deterministic_k(key, z);
 
     S256Field* r = S256Point_mul(G, k->num)->x;
 
