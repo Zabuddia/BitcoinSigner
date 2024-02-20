@@ -265,3 +265,73 @@ void S256Point_sec_compressed(S256Point* p, unsigned char* output) {
     }
     mpz_to_32bytes(p->x->num, output + 1);
 }
+
+S256Point* S256Point_parse(S256Point* p, unsigned char* sec_bin) {
+    mpz_t X;
+    mpz_t Y;
+    mpz_init(X);
+    mpz_init(Y);
+    if (sec_bin[0] == 0x04) {
+        mpz_import(X, 32, 1, sizeof(sec_bin[0]), 1, 0, &sec_bin[1]);
+        mpz_import(Y, 32, 1, sizeof(sec_bin[0]), 1, 0, &sec_bin[33]);
+        S256Field* x = S256Field_init(X);
+        S256Field* y = S256Field_init(Y);
+        S256Point* result = S256Point_init(x, y);
+        return result;
+    } else if(sec_bin[0] == 0x02) {
+        mpz_t three;
+        mpz_init_set_ui(three, 3);
+        S256Field* temp_b = S256Field_init(B);
+        mpz_import(X, 32, 1, sizeof(sec_bin[0]), 1, 0, &sec_bin[1]);
+        S256Field* x = S256Field_init(X);
+        S256Field* x_cubed = S256Field_pow(x, three);
+        S256Field* alpha = S256Field_add(x_cubed, temp_b);
+        S256Field* beta = S256Field_sqrt(alpha);
+        mpz_t beta_mod_two;
+        mpz_init(beta_mod_two);
+        mpz_mod_ui(beta_mod_two, beta->num, 2);
+        if (mpz_cmp_ui(beta_mod_two, 0) == 0) {
+            S256Point* result = S256Point_init(x, beta);
+            return result;
+        } else {
+            mpz_t temp_p;
+            mpz_init_set_str(temp_p, P, 16);
+            mpz_sub(beta->num, temp_p, beta->num);
+            S256Point* result = S256Point_init(x, beta);
+            return result;
+        }
+        mpz_clear(three);
+        mpz_clear(beta_mod_two);
+        S256Field_free(x_cubed);
+        S256Field_free(alpha);
+        S256Field_free(temp_b);
+    } else //if(sec_bin[0] == 0x03)
+        {
+        mpz_t three;
+        mpz_init_set_ui(three, 3);
+        S256Field* temp_b = S256Field_init(B);
+        mpz_import(X, 32, 1, sizeof(sec_bin[0]), 1, 0, &sec_bin[1]);
+        S256Field* x = S256Field_init(X);
+        S256Field* x_cubed = S256Field_pow(x, three);
+        S256Field* alpha = S256Field_add(x_cubed, temp_b);
+        S256Field* beta = S256Field_sqrt(alpha);
+        mpz_t beta_mod_two;
+        mpz_init(beta_mod_two);
+        mpz_mod_ui(beta_mod_two, beta->num, 2);
+        if (mpz_cmp_ui(beta_mod_two, 0) != 0) {
+            S256Point* result = S256Point_init(x, beta);
+            return result;
+        } else {
+            mpz_t temp_p;
+            mpz_init_set_str(temp_p, P, 16);
+            mpz_sub(beta->num, temp_p, beta->num);
+            S256Point* result = S256Point_init(x, beta);
+            return result;
+        }
+        mpz_clear(three);
+        mpz_clear(beta_mod_two);
+        S256Field_free(x_cubed);
+        S256Field_free(alpha);
+        S256Field_free(temp_b);
+    }
+}

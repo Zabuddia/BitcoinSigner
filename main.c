@@ -24,9 +24,11 @@ int main() {
 
     mpz_init_set_ui(five_thousand, 5000);
 
-    PrivateKeyInt* key = PrivateKeyInt_init(five_thousand);
+    PrivateKey* key = PrivateKey_init("5000");
 
     S256Point* p = key->point;
+
+    S256Point_toString(p);
 
     unsigned char output[65];
     S256Point_sec_compressed(p, output);
@@ -35,6 +37,10 @@ int main() {
         printf("%02x", output[i]);
     }
     printf("\n");
+
+    S256Point* new_p = S256Point_parse(p, output);
+
+    S256Point_toString(new_p);
 
     S256Point_free(G);
     Free_prime();

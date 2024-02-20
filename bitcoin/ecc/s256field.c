@@ -218,3 +218,14 @@ S256Field* S256Field_div(S256Field* e1, S256Field* e2) {
     S256Field_free(inv_e2); // Clean up the temporary S256Field created for the inverse
     return S256Field_init(num);
 }
+
+S256Field* S256Field_sqrt(S256Field* e) {
+    mpz_t exponent;
+    mpz_init(exponent);
+    mpz_add_ui(exponent, PRIME, 1);
+    mpz_fdiv_q_ui(exponent, exponent, 4);
+
+    S256Field* result = S256Field_pow(e, exponent);
+    mpz_clear(exponent);
+    return result;
+}

@@ -48,4 +48,6 @@ S256Field* S256Field_pow(S256Field* e1, mpz_t exponent);
 
 S256Field* S256Field_div(S256Field* e1, S256Field* e2);
 
+S256Field* S256Field_sqrt(S256Field* e);
+
 #endif //S256FIELD_H
