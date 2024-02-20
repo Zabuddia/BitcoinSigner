@@ -16,7 +16,15 @@ typedef struct {
     S256Point* point;
 } PrivateKey;
 
-PrivateKey* PrivateKey_init(const char* secret);
+typedef struct {
+    mpz_t secret;
+    S256Field* e;
+    S256Point* point;
+} PrivateKeyInt;
+
+PrivateKey* PrivateKey_init_str(const char* secret);
+
+PrivateKeyInt* PrivateKey_init_int(mpz_t secret);
 
 //Not sure if this does the right thing
 S256Field* Deterministic_k(PrivateKey* key, S256Field* z);

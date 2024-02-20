@@ -4,7 +4,7 @@
 
 #include "privatekey.h"
 
-PrivateKey* PrivateKey_init(const char* secret) {
+PrivateKey* PrivateKey_init_str(const char* secret) {
     mpz_t gx;
     mpz_t gy;
     mpz_init_set_str(gx, GX, 16);
@@ -19,6 +19,26 @@ PrivateKey* PrivateKey_init(const char* secret) {
 
     PrivateKey* key = malloc(sizeof(PrivateKey));
     key->secret = secret;
+    key->e = e;
+    key->point = S256Point_mul(G, e->num);
+    return key;
+}
+
+PrivateKeyInt* PrivateKey_init_int(mpz_t secret) {
+    mpz_t gx;
+    mpz_t gy;
+    mpz_init_set_str(gx, GX, 16);
+    mpz_init_set_str(gy, GY, 16);
+
+    S256Field* x = S256Field_init(gx);
+    S256Field* y = S256Field_init(gy);
+
+    S256Point* G = S256Point_init(x, y);
+
+    S256Field* e = S256Field_init(secret);
+
+    PrivateKeyInt* key = malloc(sizeof(PrivateKey));
+    mpz_set(key->secret, secret);
     key->e = e;
     key->point = S256Point_mul(G, e->num);
     return key;

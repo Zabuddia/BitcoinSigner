@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include "s256point.h"
@@ -233,4 +234,34 @@ int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
     // S256Point_free(total);
 
     return isVerified;
+}
+
+void mpz_to_32bytes(mpz_t num, unsigned char *output) {
+    size_t count = 0;
+    mpz_export(output, &count, 1, 1, 1, 0, num);
+    if (count < 32) {
+        //If the number takes up less than 32 bytes, move the bytes to the end and prepend zeros
+        memmove(output + (32 - count), output, count);
+        memset(output, 0, 32 - count);
+    }
+}
+
+void S256Point_sec_uncompressed(S256Point* p, unsigned char* output) {
+    output[0] = 0x04;
+
+    mpz_to_32bytes(p->x->num, output + 1);
+
+    mpz_to_32bytes(p->y->num, output + 33);
+}
+
+void S256Point_sec_compressed(S256Point* p, unsigned char* output) {
+    mpz_t y_mod_2;
+    mpz_init(y_mod_2);
+    mpz_mod_ui(y_mod_2, p->y->num, 2);
+    if (mpz_cmp_ui(y_mod_2, 0) == 0) {
+        output[0] = 0x02;
+    } else {
+        output[0] = 0x03;
+    }
+    mpz_to_32bytes(p->x->num, output + 1);
 }

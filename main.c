@@ -18,28 +18,23 @@ int main() {
     Initialize_prime();
     Initialize_a_and_b();
     Initialize_G();
-    // mpz_t gx;
-    // mpz_t gy;
-    // mpz_init_set_str(gx, GX, 16);
-    // mpz_init_set_str(gy, GY, 16);
-    // S256Field* x = S256Field_init(gx);
-    // S256Field* y = S256Field_init(gy);
-    // S256Point* G = S256Point_init(x, y);
 
-    const char* secret = "my secret";
-    const char* message = "my message";
-    S256Field* e = hash_to_s256field((const unsigned char*)secret, strlen(secret));
-    S256Field* z = hash_to_s256field((const unsigned char*)message, strlen(message));
+    mpz_t five_thousand;
 
-    PrivateKey* key = PrivateKey_init("my secret");
-    Signature* sig = PrivateKey_sign(key, z);
+    mpz_init_set_ui(five_thousand, 5000);
 
-    S256Field* K = Deterministic_k(key, z);
+    PrivateKeyInt* key = PrivateKey_init_int(five_thousand);
 
-    S256Field_toString(K);
+    S256Point* p = key->point;
 
-    S256Field_free(e);
-    S256Field_free(z);
+    unsigned char output[65];
+    S256Point_sec_compressed(p, output);
+
+    for (int i = 0; i < 33; i++) {
+        printf("%02x", output[i]);
+    }
+    printf("\n");
+
     S256Point_free(G);
     Free_prime();
     Free_a_and_b();

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include "signature.h"
@@ -45,5 +46,11 @@ S256Point* S256Point_add(S256Point* p1, S256Point* p2);
 S256Point* S256Point_mul(S256Point* p1, mpz_t coefficient);
 
 int S256Point_verify(S256Point* p, S256Field* z, Signature* sig);
+
+void mpz_to_32bytes(mpz_t num, unsigned char *output);
+
+void S256Point_sec_uncompressed(S256Point* p, unsigned char* output);
+
+void S256Point_sec_compressed(S256Point* p, unsigned char* output);
 
 #endif //S256POINT_H
