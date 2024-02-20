@@ -45,7 +45,6 @@ int main() {
     S256Point_free(G);
     Free_prime();
     Free_a_and_b();
-    //Free_G();
 
     return 0;
 }
