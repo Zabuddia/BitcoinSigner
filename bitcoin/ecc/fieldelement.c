@@ -91,7 +91,7 @@ FieldElement* FieldElement_mul_scalar(FieldElement* e, mpz_t s) {
     return FieldElement_init(num, prime);
 }
 
-// Add a function to calculate the modular inverse
+//Add a function to calculate the modular inverse
 FieldElement* FieldElement_mod_inv(FieldElement* e) {
     mpz_t base;
     mpz_t prime;
