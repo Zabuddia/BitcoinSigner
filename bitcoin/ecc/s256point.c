@@ -266,7 +266,7 @@ void S256Point_sec_compressed(S256Point* p, unsigned char* output) {
     mpz_to_32bytes(p->x->num, output + 1);
 }
 
-S256Point* S256Point_parse(S256Point* p, unsigned char* sec_bin) {
+S256Point* S256Point_parse_sec(S256Point* p, unsigned char* sec_bin) {
     mpz_t X;
     mpz_t Y;
     mpz_init(X);
