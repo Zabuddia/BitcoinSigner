@@ -11,6 +11,7 @@
 #include "bitcoin/ecc/signature.h"
 #include "bitcoin/helper.h"
 #include "bitcoin/ecc/privatekey.h"
+#include "bitcoin/ecc/privatekeyint.h"
 
 extern S256Point* G;
 
@@ -23,7 +24,7 @@ int main() {
 
     mpz_init_set_ui(five_thousand, 5000);
 
-    PrivateKeyInt* key = PrivateKey_init_int(five_thousand);
+    PrivateKeyInt* key = PrivateKeyInt_init(five_thousand);
 
     S256Point* p = key->point;
 

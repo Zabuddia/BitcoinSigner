@@ -2,9 +2,9 @@
 #include <openssl/evp.h>
 #include <openssl/kdf.h>
 
-#include "privatekey.h"
+#include "privatekeyint.h"
 
-PrivateKey* PrivateKey_init(const char* secret) {
+PrivateKeyInt* PrivateKeyInt_init(mpz_t secret) {
     mpz_t gx;
     mpz_t gy;
     mpz_init_set_str(gx, GX, 16);
@@ -15,16 +15,16 @@ PrivateKey* PrivateKey_init(const char* secret) {
 
     S256Point* G = S256Point_init(x, y);
 
-    S256Field* e = hash_to_s256field((const unsigned char*)secret, strlen(secret));
+    S256Field* e = S256Field_init(secret);
 
-    PrivateKey* key = malloc(sizeof(PrivateKey));
-    key->secret = secret;
+    PrivateKeyInt* key = malloc(sizeof(PrivateKeyInt));
+    mpz_set(key->secret, secret);
     key->e = e;
     key->point = S256Point_mul(G, e->num);
     return key;
 }
 
-S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
+S256Field* PrivateKeyInt_deterministic_k(PrivateKeyInt* key, S256Field* z) {
     unsigned char k[32] = {0};
     size_t k_len = 32;
     unsigned char v[32];
@@ -105,7 +105,7 @@ S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
     return K;
 }
 
-Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
+Signature* PrivateKeyInt_sign(PrivateKeyInt* key, S256Field* z) {
     mpz_t gx;
     mpz_t gy;
     mpz_init_set_str(gx, GX, 16);
@@ -119,7 +119,7 @@ Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
     mpz_t n;
     mpz_init_set_str(n, N, 16);
 
-    S256Field* k = Deterministic_k(key, z);
+    S256Field* k = PrivateKeyInt_deterministic_k(key, z);
 
     S256Field* r = S256Point_mul(G, k->num)->x;
 
