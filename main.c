@@ -4,12 +4,9 @@
 #include <openssl/evp.h>
 
 #include "lib/all_libs.h"
-#include "bitcoin/ecc/point.h"
-#include "bitcoin/ecc/fieldelement.h"
 #include "bitcoin/ecc/s256field.h"
 #include "bitcoin/ecc/s256point.h"
 #include "bitcoin/ecc/signature.h"
-#include "bitcoin/helper.h"
 #include "bitcoin/ecc/privatekey.h"
 #include "bitcoin/ecc/privatekeyint.h"
 

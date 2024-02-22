@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "fieldelement.h": "c"
+        "fieldelement.h": "c",
+        "privatekeyint.h": "c"
     }
 }

@@ -236,16 +236,6 @@ int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
     return isVerified;
 }
 
-void mpz_to_32bytes(mpz_t num, unsigned char *output) {
-    size_t count = 0;
-    mpz_export(output, &count, 1, 1, 1, 0, num);
-    if (count < 32) {
-        //If the number takes up less than 32 bytes, move the bytes to the end and prepend zeros
-        memmove(output + (32 - count), output, count);
-        memset(output, 0, 32 - count);
-    }
-}
-
 void S256Point_sec_uncompressed(S256Point* p, unsigned char* output) {
     output[0] = 0x04;
 

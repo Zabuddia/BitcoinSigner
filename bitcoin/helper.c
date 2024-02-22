@@ -5,8 +5,7 @@
 
 #include "helper.h"
 
-S256Field* hash_to_s256field(const unsigned char* data, size_t data_len) {
-    mpz_t res;
+void hash_to_mpz_t(const unsigned char* data, size_t data_len, mpz_t res) {
     mpz_init(res);
 
     EVP_MD_CTX *mdctx;
@@ -61,14 +60,22 @@ S256Field* hash_to_s256field(const unsigned char* data, size_t data_len) {
 
     mpz_import(res, hash_len, 1, sizeof(hash[0]), 0, 0, hash);
 
-    S256Field* result = S256Field_init(res);
-
-    return result;
+    //S256Field* result = S256Field_init(res);
 }
 
 void mpz_to_bytes(const mpz_t op, unsigned char *out, size_t out_len) {
     size_t op_size = (mpz_sizeinbase(op, 2) + 7) / 8;
     mpz_export(out + (out_len - op_size), NULL, 1, 1, 0, 0, op);
+}
+
+void mpz_to_32bytes(mpz_t num, unsigned char *output) {
+    size_t count = 0;
+    mpz_export(output, &count, 1, 1, 1, 0, num);
+    if (count < 32) {
+        //If the number takes up less than 32 bytes, move the bytes to the end and prepend zeros
+        memmove(output + (32 - count), output, count);
+        memset(output, 0, 32 - count);
+    }
 }
 
 void compute_hmac_sha256(unsigned char *key, int key_len,

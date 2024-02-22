@@ -15,7 +15,10 @@ PrivateKey* PrivateKey_init(const char* secret) {
 
     S256Point* G = S256Point_init(x, y);
 
-    S256Field* e = hash_to_s256field((const unsigned char*)secret, strlen(secret));
+    mpz_t E;
+    hash_to_mpz_t((const unsigned char*)secret, strlen(secret), E);
+
+    S256Field* e = S256Field_init(E);
 
     PrivateKey* key = malloc(sizeof(PrivateKey));
     key->secret = secret;

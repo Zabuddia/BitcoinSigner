@@ -23,3 +23,7 @@ void Signature_free(Signature* sig) {
 void Signature_toString(Signature* sig) {
     gmp_printf("Signature(%Zx, %Zx)\n", sig->r->num, sig->s->num);
 }
+
+void Signature_der(Signature* sig) {
+    
+}
