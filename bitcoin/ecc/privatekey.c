@@ -37,7 +37,7 @@ S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
     S256Field* zee = z;
 
     mpz_t n;
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16);
 
     if (mpz_cmp(zee->num, n) > 0) {
         mpz_sub(zee->num, zee->num, n);
@@ -120,7 +120,7 @@ Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
     S256Point* G = S256Point_init(x, y);
 
     mpz_t n;
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16);
 
     S256Field* k = Deterministic_k(key, z);
 

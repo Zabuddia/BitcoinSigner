@@ -198,7 +198,7 @@ S256Point* S256Point_mul(S256Point* p, mpz_t coefficient) {
     S256Point* current = p;
     mpz_t coef;
     mpz_t n;
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16);
     mpz_init_set(coef, coefficient);
     mpz_mod(coef, coef, n);
     while (mpz_cmp_ui(coef, 0) > 0) { // While coef is greater than 0

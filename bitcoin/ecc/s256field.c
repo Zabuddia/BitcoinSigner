@@ -93,7 +93,7 @@ S256Field* S256Field_s_mul(S256Field* e1, S256Field* e2) {
     mpz_t num;
     mpz_t n;
     mpz_init(num);
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16);
     mpz_mul(num, e1->num, e2->num);
     mpz_mod(num, num, n);
     return S256Field_init(num);
@@ -144,7 +144,7 @@ S256Field* S256Field_s_inv(S256Field* e) {
     mpz_t exponent;
     mpz_t result;
     mpz_init_set(base, e->num);
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141", 16);
     mpz_init(exponent);
     mpz_sub_ui(exponent, n, 2); //Fermat's Little Theorem
     mpz_init_set_ui(result, 1);

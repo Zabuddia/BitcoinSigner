@@ -7,7 +7,7 @@
 #include <gmp.h>
 
 #define P "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"
-#define N "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
+//#define N "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
 
 extern mpz_t PRIME;
 
