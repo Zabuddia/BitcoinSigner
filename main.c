@@ -8,7 +8,6 @@
 #include "bitcoin/ecc/s256point.h"
 #include "bitcoin/ecc/signature.h"
 #include "bitcoin/ecc/privatekey.h"
-#include "bitcoin/ecc/privatekeyint.h"
 
 extern S256Point* G;
 
