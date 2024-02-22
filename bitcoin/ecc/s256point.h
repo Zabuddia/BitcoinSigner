@@ -9,14 +9,6 @@
 #include "signature.h"
 #include "../helper.h"
 
-#define GX "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
-#define GY "483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8"
-
-extern mpz_t A;
-extern mpz_t B;
-extern mpz_t gx;
-extern mpz_t gy;
-
 typedef struct {
     S256Field* x;
     S256Field* y;
