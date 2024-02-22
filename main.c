@@ -1,6 +1,5 @@
 #include <signal.h>
 #include <string.h>
-#include <assert.h>
 #include <openssl/evp.h>
 
 #include "lib/all_libs.h"
