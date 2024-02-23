@@ -280,6 +280,26 @@ static char* test_Deterministic_k() {
     return 0;
 }
 
+static char* test_PrivateKey_sign() {
+    mpz_t test_Z;
+    mpz_init_set_str(test_Z, TEST_Z, 16);
+    S256Field* test_z = S256Field_init(test_Z);
+    PrivateKey* test_key = PrivateKey_init("test secret");
+    Signature* test_sig = PrivateKey_sign(test_key, test_z);
+    mpz_t expected_r;
+    mpz_init_set_str(expected_r, "efed461e09407dabdd08cedcbc31f1f421572a7a32077d16b448fb0bf1237028", 16);
+    mpz_t expected_s;
+    mpz_init_set_str(expected_s, "3fbf0cd46391e0a60c592f078354e9011b5218d5e741b04dfa6f688293ff3e95", 16);
+    mu_assert("Error: PrivateKey_sign doesn't work", mpz_cmp(test_sig->r->num, expected_r) == 0);
+    mu_assert("Error: PrivateKey_sign doesn't work", mpz_cmp(test_sig->s->num, expected_s) == 0);
+    Signature_free(test_sig);
+    PrivateKey_free(test_key);
+    S256Field_free(test_z);
+    mpz_clear(expected_r);
+    mpz_clear(expected_s);
+    return 0;
+}
+
 static char* all_tests() {
     //S256Field tests
     mu_run_test(test_S256Field_add);
@@ -300,6 +320,7 @@ static char* all_tests() {
 
     //Private Key tests
     mu_run_test(test_Deterministic_k);
+    mu_run_test(test_PrivateKey_sign);
     return 0;
 }
 
