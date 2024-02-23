@@ -89,6 +89,7 @@ S256Field* S256Field_mul(S256Field* e1, S256Field* e2) {
     mpz_init_set(prime, e1->prime);
     mpz_mul(num, e1->num, e2->num);
     mpz_mod(num, num, prime);
+    mpz_clear(prime);
     return S256Field_init(num);
 }
 
