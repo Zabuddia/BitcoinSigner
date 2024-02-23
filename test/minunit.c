@@ -5,6 +5,7 @@
 #include "../bitcoin/ecc/s256field.h"
 #include "../bitcoin/ecc/s256point.h"
 #include "../bitcoin/ecc/signature.h"
+#include "../bitcoin/ecc/privatekey.h"
 
 #define TEST_A "887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c"
 #define TEST_B "61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34"
@@ -263,6 +264,22 @@ static char* test_S256Point_verify() {
     return 0;
 }
 
+static char* test_Deterministic_k() {
+    mpz_t test_Z;
+    mpz_init_set_str(test_Z, TEST_Z, 16);
+    S256Field* test_z = S256Field_init(test_Z);
+    PrivateKey* test_key = PrivateKey_init("test secret");
+    S256Field* test_k = Deterministic_k(test_key, test_z);
+    mpz_t expected_k;
+    mpz_init_set_str(expected_k, "76710a244f87c31c7e6024b6f7786908e49a82a658d3186ec3631a95350287e1", 16);
+    mu_assert("Error: Deterministic_k doesn't work", mpz_cmp(test_k->num, expected_k) == 0);
+    PrivateKey_free(test_key);
+    S256Field_free(test_k);
+    S256Field_free(test_z);
+    mpz_clear(expected_k);
+    return 0;
+}
+
 static char* all_tests() {
     //S256Field tests
     mu_run_test(test_S256Field_add);
@@ -280,6 +297,9 @@ static char* all_tests() {
     mu_run_test(test_S256Point_add);
     mu_run_test(test_S256Point_mul);
     mu_run_test(test_S256Point_verify);
+
+    //Private Key tests
+    mu_run_test(test_Deterministic_k);
     return 0;
 }
 

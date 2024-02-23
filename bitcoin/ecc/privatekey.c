@@ -27,6 +27,36 @@ PrivateKey* PrivateKey_init(const char* secret) {
     return key;
 }
 
+// PrivateKey* PrivateKey_init(mpz_t secret) {
+//     mpz_t gx;
+//     mpz_t gy;
+//     mpz_init_set_str(gx, GX, 16);
+//     mpz_init_set_str(gy, GY, 16);
+
+//     S256Field* x = S256Field_init(gx);
+//     S256Field* y = S256Field_init(gy);
+
+//     S256Point* G = S256Point_init(x, y);
+
+//     // mpz_t E;
+//     // hash_to_mpz_t((const unsigned char*)secret, strlen(secret), E);
+
+//     S256Field* e = S256Field_init(secret);
+//     PrivateKey* key = malloc(sizeof(PrivateKey));
+//     mpz_set(key->secret, secret);
+//     key->e = e;
+//     key->point = S256Point_mul(G, e->num);
+//     return key;
+// }
+
+void PrivateKey_free(PrivateKey* key) {
+    if (key != NULL) {
+        S256Field_free(key->e);
+        S256Point_free(key->point);
+        free(key);
+    }
+}
+
 S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
     unsigned char k[32] = {0};
     size_t k_len = 32;
