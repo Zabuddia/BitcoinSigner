@@ -79,6 +79,7 @@ S256Field* S256Field_sub(S256Field* e1, S256Field* e2) {
     mpz_sub(num, e1->num, e2->num);
     mpz_add(num, num, prime); //Ensure a positive result
     mpz_mod(num, num, prime);
+    mpz_clear(prime);
     return S256Field_init(num);
 }
 
@@ -100,6 +101,7 @@ S256Field* S256Field_s_mul(S256Field* e1, S256Field* e2) {
     mpz_init_set_str(n, N, 16);
     mpz_mul(num, e1->num, e2->num);
     mpz_mod(num, num, n);
+    mpz_clear(n);
     return S256Field_init(num);
 }
 
@@ -110,6 +112,7 @@ S256Field* S256Field_mul_scalar(S256Field* e, mpz_t s) {
     mpz_init_set(prime, e->prime);
     mpz_mul(num, e->num, s);
     mpz_mod(num, num, prime);
+    mpz_clear(prime);
     return S256Field_init(num);
 }
 
@@ -139,6 +142,8 @@ S256Field* S256Field_mod_inv(S256Field* e) {
         mpz_clear(temp);
     }
     mpz_clear(exponent);
+    mpz_clear(base);
+    mpz_clear(prime);
     return S256Field_init(result);
 }
 
