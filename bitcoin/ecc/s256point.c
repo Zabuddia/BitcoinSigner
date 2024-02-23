@@ -5,22 +5,6 @@
 
 #include "s256point.h"
 
-mpz_t gx;
-mpz_t gy;
-S256Point* G;
-
-void Initialize_G() {
-    mpz_init_set_str(gx, GX, 16);
-    mpz_init_set_str(gy, GY, 16);
-    S256Field* x = S256Field_init(gx);
-    S256Field* y = S256Field_init(gy);
-    G = S256Point_init(x, y);
-}
-
-void Free_G() {
-    S256Point_free(G);
-}
-
 S256Point* S256Point_init(S256Field* x, S256Field* y) {
     if (x == NULL && y == NULL) {
         return NULL; //The point at infinity
@@ -254,6 +238,7 @@ S256Point* S256Point_mul(S256Point* p, mpz_t coefficient) {
             }
             i++;
         }
+        //Where the memory leaks happen
         current = S256Point_add(current, current);
         // S256Point* tempCurrent = S256Point_add(current, current);
         // S256Point_half_free(current);
@@ -270,6 +255,14 @@ S256Point* S256Point_mul(S256Point* p, mpz_t coefficient) {
 }
 
 int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
+    mpz_t gx;
+    mpz_t gy;
+    mpz_init_set_str(gx, GX, 16);
+    mpz_init_set_str(gy, GY, 16);
+    S256Field* x = S256Field_init(gx);
+    S256Field* y = S256Field_init(gy);
+    S256Point* G = S256Point_init(x, y);
+
     S256Field* s_inv = S256Field_s_inv(sig->s);
     S256Field* u = S256Field_s_mul(z, s_inv);
     S256Field* v = S256Field_s_mul(sig->r, s_inv);
@@ -279,15 +272,13 @@ int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
 
     int isVerified = S256Field_eq(total->x, sig->r);
     
-    // S256Field_free(x);
-    // S256Field_free(y);
-    // S256Field_free(s_inv);
-    // S256Field_free(u);
-    // S256Field_free(v);
-    // S256Point_free(G);
-    // S256Point_free(u_times_G);
-    // S256Point_free(v_times_p);
-    // S256Point_free(total);
+    S256Field_free(s_inv);
+    S256Field_free(u);
+    S256Field_free(v);
+    S256Point_free(G);
+    S256Point_free(u_times_G);
+    S256Point_free(v_times_p);
+    S256Point_free(total);
 
     return isVerified;
 }

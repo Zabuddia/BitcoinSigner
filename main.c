@@ -8,12 +8,8 @@
 #include "bitcoin/ecc/signature.h"
 #include "bitcoin/ecc/privatekey.h"
 
-extern S256Point* G;
-
 int main() {
     Initialize_prime();
-    Initialize_a_and_b();
-    Initialize_G();
 
     mpz_t five_thousand;
 
@@ -37,9 +33,7 @@ int main() {
 
     S256Point_toString(new_p);
 
-    S256Point_free(G);
     Free_prime();
-    Free_a_and_b();
 
     return 0;
 }

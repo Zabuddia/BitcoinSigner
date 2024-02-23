@@ -16,10 +16,6 @@ typedef struct {
     S256Field* b;
 } S256Point;
 
-void Initialize_G();
-
-void Free_G();
-
 S256Point* S256Point_init(S256Field* x, S256Field* y);
 
 S256Point* S256Point_deepcopy(S256Point* p);

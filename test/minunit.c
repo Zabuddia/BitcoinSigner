@@ -4,11 +4,15 @@
 
 #include "../bitcoin/ecc/s256field.h"
 #include "../bitcoin/ecc/s256point.h"
+#include "../bitcoin/ecc/signature.h"
 
 #define TEST_A "887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c"
 #define TEST_B "61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34"
 #define TEST_X "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef12345678"
 #define TEST_Y "ffe4951c17e5edff2bb8f4a066b4bee9a962e60e709677d1cb376b38ea0d3bd8"
+#define TEST_Z "ec208baa0fc1c19f708a9ca96fdeff3ac3f230bb4a7ba4aede4942ad003c0f60"
+#define TEST_R "ac8d1c87e51d0d441be8b3dd5b05c8795b48875dffe00b7ffcfac23010d3a395"
+#define TEST_S "68342ceff8935ededd102dd876ffd6ba72d6a427a3edb13d26eb0781cb423c4"
 
 int tests_run = 0;
 
@@ -233,6 +237,32 @@ static char* test_S256Point_mul() {
     return 0;
 }
 
+static char* test_S256Point_verify() {
+    mpz_t test_A;
+    mpz_init_set_str(test_A, TEST_A, 16);
+    mpz_t test_B;
+    mpz_init_set_str(test_B, TEST_B, 16);
+    mpz_t test_Z;
+    mpz_init_set_str(test_Z, TEST_Z, 16);
+    mpz_t test_R;
+    mpz_init_set_str(test_R, TEST_R, 16);
+    mpz_t test_S;
+    mpz_init_set_str(test_S, TEST_S, 16);
+    S256Field* test_z = S256Field_init(test_Z);
+    S256Field* test_r = S256Field_init(test_R);
+    S256Field* test_s = S256Field_init(test_S);
+    S256Field* test_a = S256Field_init(test_A);
+    S256Field* test_b = S256Field_init(test_B);
+    Signature* test_sig = Signature_init(test_r, test_s);
+    S256Point* test_p = S256Point_init(test_a, test_b);
+    int result = S256Point_verify(test_p, test_z, test_sig);
+    mu_assert("Error: S256Point_verify doesn't work", result == 1);
+    S256Field_free(test_z);
+    Signature_free(test_sig);
+    S256Point_free(test_p);
+    return 0;
+}
+
 static char* all_tests() {
     //S256Field tests
     mu_run_test(test_S256Field_add);
@@ -249,6 +279,7 @@ static char* all_tests() {
     //S256Point tests
     mu_run_test(test_S256Point_add);
     mu_run_test(test_S256Point_mul);
+    mu_run_test(test_S256Point_verify);
     return 0;
 }
 
