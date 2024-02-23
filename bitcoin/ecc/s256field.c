@@ -172,6 +172,8 @@ S256Field* S256Field_s_inv(S256Field* e) {
         mpz_clear(temp);
     }
     mpz_clear(exponent);
+    mpz_clear(n);
+    mpz_clear(base);
     return S256Field_init(result);
 }
 
@@ -185,6 +187,7 @@ S256Field* S256Field_pow(S256Field* e, mpz_t exponent) {
         mpz_mul_si(positiveExponent, exponent, -1);
         S256Field* result = S256Field_pow(inv, positiveExponent);
         S256Field_free(inv);
+        mpz_clear(positiveExponent);
         return result;
     } else {
         mpz_t base;
@@ -212,6 +215,8 @@ S256Field* S256Field_pow(S256Field* e, mpz_t exponent) {
         }
         mpz_clear(temp);
         mpz_clear(exp);
+        mpz_clear(base);
+        mpz_clear(prime);
         return S256Field_init(result);
     }
 }
@@ -223,8 +228,9 @@ S256Field* S256Field_div(S256Field* e1, S256Field* e2) {
     mpz_init(num);
     mpz_init_set(prime, e1->prime);
     mpz_mul(num, e1->num, inv_e2->num);
-    mpz_mod(num, num, prime);  //Then multiply e1->num by this inverse, modulo prime
+    mpz_mod(num, num, prime); //Then multiply e1->num by this inverse, modulo prime
     S256Field_free(inv_e2); // Clean up the temporary S256Field created for the inverse
+    mpz_clear(prime);
     return S256Field_init(num);
 }
 
