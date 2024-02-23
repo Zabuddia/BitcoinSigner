@@ -74,21 +74,48 @@ S256Point* S256Point_init(S256Field* x, S256Field* y) {
     return p;
 }
 
+S256Point* S256Point_deepcopy(S256Point* p) {
+    mpz_t X;
+    mpz_init_set(X, p->x->num);
+    mpz_t Y;
+    mpz_init_set(Y, p->y->num);
+    S256Field* x = S256Field_init(X);
+    S256Field* y = S256Field_init(Y);
+    S256Point* p_copy = S256Point_init(x, y);
+    return p_copy;
+}
+
+void S256Point_half_deepcopy(S256Point* p, S256Point* p_copy) {
+    mpz_t X;
+    mpz_init_set(X, p->x->num);
+    mpz_t Y;
+    mpz_init_set(Y, p->y->num);
+    mpz_t A;
+    mpz_init_set(A, p->a->num);
+    mpz_t B;
+    mpz_init_set(B, p->b->num);
+    p_copy->x = S256Field_init(X);
+    p_copy->y = S256Field_init(Y);
+    p_copy->a = S256Field_init(A);
+    p_copy->b = S256Field_init(B);
+}
+
 void S256Point_free(S256Point* p) {
     if (p != NULL) {
-        mpz_clear(p->x->num);
-        mpz_clear(p->x->prime);
-        mpz_clear(p->y->num);
-        mpz_clear(p->y->prime);
-        mpz_clear(p->a->num);
-        mpz_clear(p->a->prime);
-        mpz_clear(p->b->num);
-        mpz_clear(p->b->prime);
-        free(p->x);
-        free(p->y);
-        free(p->a);
-        free(p->b);
+        S256Field_free(p->x);
+        S256Field_free(p->y);
+        S256Field_free(p->a);
+        S256Field_free(p->b);
         free(p);
+    }
+}
+
+void S256Point_half_free(S256Point* p) {
+    if (p != NULL) {
+        S256Field_free(p->x);
+        S256Field_free(p->y);
+        S256Field_free(p->a);
+        S256Field_free(p->b);
     }
 }
 
@@ -105,7 +132,19 @@ int S256Point_eq(S256Point* p1, S256Point* p2) {
 }
 
 int S256Point_ne(S256Point* p1, S256Point* p2) {
-    return (S256Field_ne(p1->x, p2->x) || S256Field_ne(p1->y, p2->y) || S256Field_ne(p1->a, p2->a) || S256Field_ne(p1->b, p2->b));
+    if (p1->x == NULL && p2->x != NULL) {
+        return 1;
+    }
+    if (p1->y == NULL && p2->y != NULL) {
+        return 1;
+    }
+    if (p2->x == NULL && p1->x != NULL) {
+        return 1;
+    }
+    if (p2->y == NULL && p1->y != NULL) {
+        return 1;
+    }
+    return (S256Field_ne(p1->x, p2->x) || S256Field_ne(p1->y, p2->y));
 }
 
 S256Point* S256Point_add(S256Point* p1, S256Point* p2) {
@@ -196,20 +235,36 @@ S256Point* S256Point_add(S256Point* p1, S256Point* p2) {
 
 S256Point* S256Point_mul(S256Point* p, mpz_t coefficient) {
     S256Point* result = S256Point_init(NULL, NULL);
-    S256Point* current = p;
+    S256Point* current = S256Point_deepcopy(p);
     mpz_t coef;
     mpz_t n;
     mpz_init_set_str(n, N, 16);
     mpz_init_set(coef, coefficient);
     mpz_mod(coef, coef, n);
+    int i = 0;
     while (mpz_cmp_ui(coef, 0) > 0) { // While coef is greater than 0
         if (mpz_tstbit(coef, 0) == 1) { // If the least significant bit of coef is 1
-            result = S256Point_add(result, current);
+            if (i == 0) {
+                result = S256Point_add(result, current);
+            } else {
+                S256Point* tempResult = S256Point_add(result, current);
+                S256Point_half_free(result);
+                S256Point_half_deepcopy(tempResult, result);
+                S256Point_free(tempResult);
+            }
+            i++;
         }
         current = S256Point_add(current, current);
+        // S256Point* tempCurrent = S256Point_add(current, current);
+        // S256Point_half_free(current);
+        // S256Point_half_deepcopy(tempCurrent, current);
+        // S256Point_free(tempCurrent);
+    
         mpz_fdiv_q_2exp(coef, coef, 1); // Right shift coef by 1
     }
+    S256Point_free(current);
     mpz_clear(coef);
+    mpz_clear(n);
 
     return result;
 }

@@ -208,21 +208,47 @@ static char* test_S256Point_add() {
     return 0;
 }
 
+static char* test_S256Point_mul() {
+    mpz_t test_A;
+    mpz_init_set_str(test_A, TEST_A, 16);
+    mpz_t test_X;
+    mpz_init_set_str(test_X, TEST_X, 16);
+    mpz_t test_Y;
+    mpz_init_set_str(test_Y, TEST_Y, 16);
+    mpz_t expected_x;
+    mpz_init_set_str(expected_x, "d148d491f77e6546f6a2f371727a5dc6e8034fe116eecb405fc4b84feeaed996", 16);
+    mpz_t expected_y;
+    mpz_init_set_str(expected_y, "35c349a4272354858ef3be984c31e16d09282c872ba9189a93237f54c56dc5c8", 16);
+    S256Field* test_x = S256Field_init(test_X);
+    S256Field* test_y = S256Field_init(test_Y);
+    S256Point* b = S256Point_init(test_x, test_y);
+    S256Point* result = S256Point_mul(b, test_A);
+    mu_assert("Error: S256Point_mul doesn't work", mpz_cmp(result->x->num, expected_x) == 0);
+    mu_assert("Error: S256Point_mul doesn't work", mpz_cmp(result->y->num, expected_y) == 0);
+    mpz_clear(test_A);
+    mpz_clear(expected_x);
+    mpz_clear(expected_y);
+    S256Point_free(b);
+    S256Point_free(result);
+    return 0;
+}
+
 static char* all_tests() {
     //S256Field tests
-    // mu_run_test(test_S256Field_add);
-    // mu_run_test(test_S256Field_sub);
-    // mu_run_test(test_S256Field_mul);
-    // mu_run_test(test_S256Field_s_mul);
-    // mu_run_test(test_S256Field_mul_scalar);
-    // mu_run_test(test_S256Field_mod_inv);
-    // mu_run_test(test_S256Field_s_inv);
-    // mu_run_test(test_S256Field_pow);
-    // mu_run_test(test_S256Field_div);
-    // mu_run_test(test_S256Field_sqrt);
+    mu_run_test(test_S256Field_add);
+    mu_run_test(test_S256Field_sub);
+    mu_run_test(test_S256Field_mul);
+    mu_run_test(test_S256Field_s_mul);
+    mu_run_test(test_S256Field_mul_scalar);
+    mu_run_test(test_S256Field_mod_inv);
+    mu_run_test(test_S256Field_s_inv);
+    mu_run_test(test_S256Field_pow);
+    mu_run_test(test_S256Field_div);
+    mu_run_test(test_S256Field_sqrt);
     
     //S256Point tests
     mu_run_test(test_S256Point_add);
+    mu_run_test(test_S256Point_mul);
     return 0;
 }
 

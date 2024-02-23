@@ -22,7 +22,13 @@ void Free_G();
 
 S256Point* S256Point_init(S256Field* x, S256Field* y);
 
+S256Point* S256Point_deepcopy(S256Point* p);
+
+void S256Point_half_deepcopy(S256Point* p, S256Point* p_copy);
+
 void S256Point_free(S256Point* p);
+
+void S256Point_half_free(S256Point* p);
 
 void S256Point_toString(S256Point* p);
 
