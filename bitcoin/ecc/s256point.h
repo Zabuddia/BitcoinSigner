@@ -20,10 +20,6 @@ void Initialize_G();
 
 void Free_G();
 
-void Initialize_a_and_b();
-
-void Free_a_and_b();
-
 S256Point* S256Point_init(S256Field* x, S256Field* y);
 
 void S256Point_free(S256Point* p);

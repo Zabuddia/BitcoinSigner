@@ -5,8 +5,6 @@
 
 #include "s256point.h"
 
-mpz_t A;
-mpz_t B;
 mpz_t gx;
 mpz_t gy;
 S256Point* G;
@@ -23,16 +21,6 @@ void Free_G() {
     S256Point_free(G);
 }
 
-void Initialize_a_and_b() {
-    mpz_init_set_ui(A, 0);
-    mpz_init_set_ui(B, 7);
-}
-
-void Free_a_and_b() {
-    mpz_clear(A);
-    mpz_clear(B);
-}
-
 S256Point* S256Point_init(S256Field* x, S256Field* y) {
     if (x == NULL && y == NULL) {
         return NULL; //The point at infinity
@@ -42,6 +30,10 @@ S256Point* S256Point_init(S256Field* x, S256Field* y) {
     mpz_t three;
     mpz_init_set_ui(two, 2);
     mpz_init_set_ui(three, 3);
+    mpz_t A;
+    mpz_t B;
+    mpz_init_set_ui(A, 0);
+    mpz_init_set_ui(B, 7);
 
     S256Field* temp_a = S256Field_init(A);
     S256Field* temp_b = S256Field_init(B);
@@ -78,15 +70,24 @@ S256Point* S256Point_init(S256Field* x, S256Field* y) {
     p->y = y;
     p->a = temp_a;
     p->b = temp_b;
+    
     return p;
 }
 
 void S256Point_free(S256Point* p) {
     if (p != NULL) {
-        S256Field_free(p->x);
-        S256Field_free(p->y);
-        S256Field_free(p->a);
-        S256Field_free(p->b);
+        mpz_clear(p->x->num);
+        mpz_clear(p->x->prime);
+        mpz_clear(p->y->num);
+        mpz_clear(p->y->prime);
+        mpz_clear(p->a->num);
+        mpz_clear(p->a->prime);
+        mpz_clear(p->b->num);
+        mpz_clear(p->b->prime);
+        free(p->x);
+        free(p->y);
+        free(p->a);
+        free(p->b);
         free(p);
     }
 }
@@ -269,6 +270,8 @@ S256Point* S256Point_parse_sec(S256Point* p, unsigned char* sec_bin) {
         S256Point* result = S256Point_init(x, y);
         return result;
     } else if(sec_bin[0] == 0x02) {
+        mpz_t B;
+        mpz_init_set_ui(B, 7);
         mpz_t three;
         mpz_init_set_ui(three, 3);
         S256Field* temp_b = S256Field_init(B);
@@ -297,6 +300,8 @@ S256Point* S256Point_parse_sec(S256Point* p, unsigned char* sec_bin) {
         S256Field_free(temp_b);
     } else //if(sec_bin[0] == 0x03)
         {
+        mpz_t B;
+        mpz_init_set_ui(B, 7);
         mpz_t three;
         mpz_init_set_ui(three, 3);
         S256Field* temp_b = S256Field_init(B);

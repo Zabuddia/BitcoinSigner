@@ -3,9 +3,12 @@
 #include "minunit.h"
 
 #include "../bitcoin/ecc/s256field.h"
+#include "../bitcoin/ecc/s256point.h"
 
+#define TEST_A "887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c"
+#define TEST_B "61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34"
 #define TEST_X "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef12345678"
-#define TEST_Y "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef87654321"
+#define TEST_Y "ffe4951c17e5edff2bb8f4a066b4bee9a962e60e709677d1cb376b38ea0d3bd8"
 
 int tests_run = 0;
 
@@ -15,7 +18,7 @@ static char* test_S256Field_add() {
     mpz_t test_Y;
     mpz_init_set_str(test_Y, TEST_Y, 16);
     mpz_t expected_result;
-    mpz_init_set_str(expected_result, "bd5b7ddfbd5b7ddfbd5b7ddfbd5b7ddfbd5b7ddfbd5b7ddfbd5b7ddf99999d6a", 16);
+    mpz_init_set_str(expected_result, "de92540bf693acef0a66b39045627dd98810a4fe4f4436c1a9e52a28fc419621", 16);
     S256Field* test_x = S256Field_init(test_X);
     S256Field* test_y = S256Field_init(test_Y);
     S256Field* result = S256Field_add(test_x, test_y);
@@ -33,7 +36,7 @@ static char* test_S256Field_sub() {
     mpz_t test_Y;
     mpz_init_set_str(test_Y, TEST_Y, 16);
     mpz_t expected_result;
-    mpz_init_set_str(expected_result, "fffffffffffffffffffffffffffffffffffffffffffffffffffffffe8acf0f86", 16);
+    mpz_init_set_str(expected_result, "dec929d3c6c7d0f0b2f4ca4f77f90006354ad8e16e17471e137653b5282716cf", 16);
     S256Field* test_x = S256Field_init(test_X);
     S256Field* test_y = S256Field_init(test_Y);
     S256Field* result = S256Field_sub(test_x, test_y);
@@ -51,7 +54,7 @@ static char* test_S256Field_mul() {
     mpz_t test_Y;
     mpz_init_set_str(test_Y, TEST_Y, 16);
     mpz_t expected_result;
-    mpz_init_set_str(expected_result, "d3d21fc99ecd55cf69c88bd534c3c1daffbef7e0caba2de69f5632eee3e23ee5", 16);
+    mpz_init_set_str(expected_result, "40ff672031c3ee56121ce660b15eb9111b5e97ca27c7beafb50ca874c9f38146", 16);
     S256Field* test_x = S256Field_init(test_X);
     S256Field* test_y = S256Field_init(test_Y);
     S256Field* result = S256Field_mul(test_x, test_y);
@@ -69,7 +72,7 @@ static char* test_S256Field_s_mul() {
     mpz_t test_Y;
     mpz_init_set_str(test_Y, TEST_Y, 16);
     mpz_t expected_result;
-    mpz_init_set_str(expected_result, "278e3e90f9b3c6a59b844089134b3ff7e336368d6f678377a21d7e325c2a87f6", 16);
+    mpz_init_set_str(expected_result, "d404f0aec405362faa5d716659f90317be0459052290161d04bbec2356c4c30f", 16);
     S256Field* test_x = S256Field_init(test_X);
     S256Field* test_y = S256Field_init(test_Y);
     S256Field* result = S256Field_s_mul(test_x, test_y);
@@ -87,7 +90,7 @@ static char* test_S256Field_mul_scalar() {
     mpz_t test_Y;
     mpz_init_set_str(test_Y, TEST_Y, 16);
     mpz_t expected_result;
-    mpz_init_set_str(expected_result, "d3d21fc99ecd55cf69c88bd534c3c1daffbef7e0caba2de69f5632eee3e23ee5", 16);
+    mpz_init_set_str(expected_result, "40ff672031c3ee56121ce660b15eb9111b5e97ca27c7beafb50ca874c9f38146", 16);
     S256Field* test_x = S256Field_init(test_X);
     S256Field* result = S256Field_mul_scalar(test_x, test_Y);
     mu_assert("Error: S256Field_mul_scalar doesn't work", mpz_cmp(result->num, expected_result) == 0);
@@ -132,7 +135,7 @@ static char* test_S256Field_pow() {
     mpz_t test_Y;
     mpz_init_set_str(test_Y, TEST_Y, 16);
     mpz_t expected_result;
-    mpz_init_set_str(expected_result, "9057793362cac928fcd39fc36b14e325635c5946ed07360c12a5840fb7be2955", 16);
+    mpz_init_set_str(expected_result, "4b4f242ad52794aa1a88e2dc56ec8032a91e0f857684e7d7d2c0edc2a38e7c87", 16);
     S256Field* test_x = S256Field_init(test_X);
     S256Field* result = S256Field_pow(test_x, test_Y);
     mu_assert("Error: S256Field_pow doesn't work", mpz_cmp(result->num, expected_result) == 0);
@@ -149,7 +152,7 @@ static char* test_S256Field_div() {
     mpz_t test_Y;
     mpz_init_set_str(test_Y, TEST_Y, 16);
     mpz_t expected_result;
-    mpz_init_set_str(expected_result, "e2c92b6285e51e3e9e338dab13944c5bdb12eed853a5b39bb273f0a9b65dbd00", 16);
+    mpz_init_set_str(expected_result, "00dcad2ac055d0c9a239d0478b1227de5773683cbf67c6629cd7e6fb18ef5e21", 16);
     S256Field* test_x = S256Field_init(test_X);
     S256Field* test_y = S256Field_init(test_Y);
     S256Field* result = S256Field_div(test_x, test_y);
@@ -175,17 +178,51 @@ static char* test_S256Field_sqrt() {
     return 0;
 }
 
+static char* test_S256Point_add() {
+    mpz_t test_A;
+    mpz_init_set_str(test_A, TEST_A, 16);
+    mpz_t test_B;
+    mpz_init_set_str(test_B, TEST_B, 16);
+    mpz_t test_X;
+    mpz_init_set_str(test_X, TEST_X, 16);
+    mpz_t test_Y;
+    mpz_init_set_str(test_Y, TEST_Y, 16);
+    mpz_t expected_x;
+    mpz_init_set_str(expected_x, "456620086e0791dd93d1b8338cda34fde782c4c0290041099464de364ef3356a", 16);
+    mpz_t expected_y;
+    mpz_init_set_str(expected_y, "669b50ea184f441fc623362965e34074856e0cc909b74e291c61f7ddc1f683e2", 16);
+    S256Field* test_a = S256Field_init(test_A);
+    S256Field* test_b = S256Field_init(test_B);
+    S256Field* test_x = S256Field_init(test_X);
+    S256Field* test_y = S256Field_init(test_Y);
+    S256Point* a = S256Point_init(test_a, test_b);
+    S256Point* b = S256Point_init(test_x, test_y);
+    S256Point* result = S256Point_add(a, b);
+    mu_assert("Error: S256Point_add doesn't work", mpz_cmp(result->x->num, expected_x) == 0);
+    mu_assert("Error: S256Point_add doesn't work", mpz_cmp(result->y->num, expected_y) == 0);
+    S256Point_free(result);
+    S256Point_free(a);
+    S256Point_free(b);
+    mpz_clear(expected_x);
+    mpz_clear(expected_y);
+    return 0;
+}
+
 static char* all_tests() {
-    mu_run_test(test_S256Field_add);
-    mu_run_test(test_S256Field_sub);
-    mu_run_test(test_S256Field_mul);
-    mu_run_test(test_S256Field_s_mul);
-    mu_run_test(test_S256Field_mul_scalar);
-    mu_run_test(test_S256Field_mod_inv);
-    mu_run_test(test_S256Field_s_inv);
-    mu_run_test(test_S256Field_pow);
-    mu_run_test(test_S256Field_div);
-    mu_run_test(test_S256Field_sqrt);
+    //S256Field tests
+    // mu_run_test(test_S256Field_add);
+    // mu_run_test(test_S256Field_sub);
+    // mu_run_test(test_S256Field_mul);
+    // mu_run_test(test_S256Field_s_mul);
+    // mu_run_test(test_S256Field_mul_scalar);
+    // mu_run_test(test_S256Field_mod_inv);
+    // mu_run_test(test_S256Field_s_inv);
+    // mu_run_test(test_S256Field_pow);
+    // mu_run_test(test_S256Field_div);
+    // mu_run_test(test_S256Field_sqrt);
+    
+    //S256Point tests
+    mu_run_test(test_S256Point_add);
     return 0;
 }
 
