@@ -24,12 +24,14 @@ S256Field* S256Field_init(mpz_t num) {
     }
     mpz_init_set(element->num, num);
     mpz_init_set(element->prime, PRIME);
+    mpz_clear(num);
     return element;
 }
 
 void S256Field_free(S256Field* element) {
     if (element != NULL) {
         mpz_clear(element->num);
+        mpz_clear(element->prime);
         free(element);
     }
 }
@@ -65,6 +67,7 @@ S256Field* S256Field_add(S256Field* e1, S256Field* e2) {
     mpz_init_set(prime, e1->prime);
     mpz_add(num, e1->num, e2->num);
     mpz_mod(num, num, prime);
+    mpz_clear(prime);
     return S256Field_init(num);
 }
 
