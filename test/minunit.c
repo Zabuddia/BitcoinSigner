@@ -7,12 +7,17 @@
 #include "../bitcoin/ecc/signature.h"
 #include "../bitcoin/ecc/privatekey.h"
 
+//For testing compressed sec and adding points with the same x
 #define TEST_N "6d183de4400510e40d4f32da2e72168a5eaa3ee28bf6250923603284adfe55af"
 #define TEST_O "434e7a05967edaf81ed577ad1956f5d517cf2370517e88c5c3da215c57bedc3f"
+#define TEST_P "bcb185fa69812507e12a8852e6a90a2ae830dc8fae81773a3c25dea2a8411ff0"
+
+//A and B can be a point and X and Y can be a point
 #define TEST_A "887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c"
 #define TEST_B "61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34"
 #define TEST_X "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef12345678"
 #define TEST_Y "ffe4951c17e5edff2bb8f4a066b4bee9a962e60e709677d1cb376b38ea0d3bd8"
+
 #define TEST_Z "ec208baa0fc1c19f708a9ca96fdeff3ac3f230bb4a7ba4aede4942ad003c0f60"
 #define TEST_R "ac8d1c87e51d0d441be8b3dd5b05c8795b48875dffe00b7ffcfac23010d3a395"
 #define TEST_S "68342ceff8935ededd102dd876ffd6ba72d6a427a3edb13d26eb0781cb423c4"
@@ -186,6 +191,7 @@ static char* test_S256Field_sqrt() {
 }
 
 static char* test_S256Point_add() {
+    //Adding two points with different x and y
     mpz_t test_A;
     mpz_init_set_str(test_A, TEST_A, 16);
     mpz_t test_B;
@@ -212,6 +218,54 @@ static char* test_S256Point_add() {
     S256Point_free(b);
     mpz_clear(expected_x);
     mpz_clear(expected_y);
+    
+    //Adding two points with the same x and different y
+    mpz_t test_N1;
+    mpz_init_set_str(test_N1, TEST_N, 16);
+    mpz_t test_N2;
+    mpz_init_set_str(test_N2, TEST_N, 16);
+    mpz_t test_O;
+    mpz_init_set_str(test_O, TEST_O, 16);
+    mpz_t test_P;
+    mpz_init_set_str(test_P, TEST_P, 16);
+    S256Field* test_n1 = S256Field_init(test_N1);
+    S256Field* test_n2 = S256Field_init(test_N2);
+    S256Field* test_o = S256Field_init(test_O);
+    S256Field* test_p = S256Field_init(test_P);
+    S256Point* c = S256Point_init(test_n1, test_o);
+    S256Point* d = S256Point_init(test_n2, test_p);
+    S256Point* result2 = S256Point_add(c, d);
+    mu_assert("Error: S256Point_add doesn't work", result2 == NULL);
+    S256Point_free(c);
+    S256Point_free(d);
+
+    //Adding two points with the same x and y
+    mpz_t test_X1;
+    mpz_init_set_str(test_X1, TEST_X, 16);
+    mpz_t test_Y1;
+    mpz_init_set_str(test_Y1, TEST_Y, 16);
+    mpz_t test_X2;
+    mpz_init_set_str(test_X2, TEST_X, 16);
+    mpz_t test_Y2;
+    mpz_init_set_str(test_Y2, TEST_Y, 16);
+    mpz_t expected_x2;
+    mpz_init_set_str(expected_x2, "4c528d70d1702dab37a7e442aa2331ac04884582de6f0fb23285d0ff8b1d9b8f", 16);
+    mpz_t expected_y2;
+    mpz_init_set_str(expected_y2, "e6f30b8af8fc994ed48f11ab8a560bb8d1fd7c4474e738c61a2fcc27398cbe25", 16);
+    S256Field* test_x1 = S256Field_init(test_X1);
+    S256Field* test_y1 = S256Field_init(test_Y1);
+    S256Field* test_x2 = S256Field_init(test_X2);
+    S256Field* test_y2 = S256Field_init(test_Y2);
+    S256Point* e = S256Point_init(test_x1, test_y1);
+    S256Point* f = S256Point_init(test_x2, test_y2);
+    S256Point* result3 = S256Point_add(e, f);
+    mu_assert("Error: S256Point_add doesn't work", mpz_cmp(result3->x->num, expected_x2) == 0);
+    mu_assert("Error: S256Point_add doesn't work", mpz_cmp(result3->y->num, expected_y2) == 0);
+    S256Point_free(result3);
+    S256Point_free(e);
+    S256Point_free(f);
+    mpz_clear(expected_x2);
+    mpz_clear(expected_y2);
     return 0;
 }
 
