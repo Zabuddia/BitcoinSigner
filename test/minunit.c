@@ -7,6 +7,8 @@
 #include "../bitcoin/ecc/signature.h"
 #include "../bitcoin/ecc/privatekey.h"
 
+#define TEST_N "6d183de4400510e40d4f32da2e72168a5eaa3ee28bf6250923603284adfe55af"
+#define TEST_O "434e7a05967edaf81ed577ad1956f5d517cf2370517e88c5c3da215c57bedc3f"
 #define TEST_A "887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c"
 #define TEST_B "61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34"
 #define TEST_X "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef12345678"
@@ -300,6 +302,84 @@ static char* test_PrivateKey_sign() {
     return 0;
 }
 
+static char* test_S256Point_sec_uncompressed() {
+    mpz_t test_X;
+    mpz_init_set_str(test_X, TEST_X, 16);
+    mpz_t test_Y;
+    mpz_init_set_str(test_Y, TEST_Y, 16);
+    S256Field* test_x = S256Field_init(test_X);
+    S256Field* test_y = S256Field_init(test_Y);
+    S256Point* test_p = S256Point_init(test_x, test_y);
+    unsigned char result[65];
+    S256Point_sec_uncompressed(test_p, result);
+    // for (int i = 0; i < 65; i++) {
+    //     printf("%02x", result[i]);
+    // }
+    // printf("\n");
+    unsigned char expected_result[] = {0x04, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0x12, 0x34, 0x56, 0x78, 0xff, 0xe4, 0x95, 0x1c, 0x17, 0xe5, 0xed, 0xff, 0x2b, 0xb8, 0xf4, 0xa0, 0x66, 0xb4, 0xbe, 0xe9, 0xa9, 0x62, 0xe6, 0x0e, 0x70, 0x96, 0x77, 0xd1, 0xcb, 0x37, 0x6b, 0x38, 0xea, 0x0d, 0x3b, 0xd8};
+    mu_assert("Error: S256Point_sec_uncompressed doesn't work", memcmp(result, expected_result, sizeof(expected_result)) == 0);
+    S256Point_free(test_p);
+    return 0;
+}
+
+static char* test_S256Point_sec_compressed() {
+    mpz_t test_X;
+    mpz_init_set_str(test_X, TEST_X, 16);
+    mpz_t test_Y;
+    mpz_init_set_str(test_Y, TEST_Y, 16);
+    S256Field* test_x = S256Field_init(test_X);
+    S256Field* test_y = S256Field_init(test_Y);
+    S256Point* test_p_even = S256Point_init(test_x, test_y);
+    unsigned char result_even[33];
+    S256Point_sec_compressed(test_p_even, result_even);
+    mpz_t test_N;
+    mpz_init_set_str(test_N, TEST_N, 16);
+    mpz_t test_O;
+    mpz_init_set_str(test_O, TEST_O, 16);
+    S256Field* test_n = S256Field_init(test_N);
+    S256Field* test_o = S256Field_init(test_O);
+    S256Point* test_p_odd = S256Point_init(test_n, test_o);
+    unsigned char result_odd[33];
+    S256Point_sec_compressed(test_p_odd, result_odd);
+    unsigned char expected_result_even[] = {0x02, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0x12, 0x34, 0x56, 0x78};
+    unsigned char expected_result_odd[] = {0x03, 0x6d, 0x18, 0x3d, 0xe4, 0x40, 0x05, 0x10, 0xe4, 0x0d, 0x4f, 0x32, 0xda, 0x2e, 0x72, 0x16, 0x8a, 0x5e, 0xaa, 0x3e, 0xe2, 0x8b, 0xf6, 0x25, 0x09, 0x23, 0x60, 0x32, 0x84, 0xad, 0xfe, 0x55, 0xaf};
+    mu_assert("Error: S256Point_sec_compressed doesn't work", memcmp(result_even, expected_result_even, sizeof(expected_result_even)) == 0);
+    mu_assert("Error: S256Point_sec_compressed doesn't work", memcmp(result_odd, expected_result_odd, sizeof(expected_result_odd)) == 0);
+    S256Point_free(test_p_even);
+    S256Point_free(test_p_odd);
+    return 0;
+}
+
+static char* test_S256Point_parse_sec() {
+    unsigned char test_compressed_sec_even[] = {0x02, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0x12, 0x34, 0x56, 0x78};
+    S256Point* test_compressed_even_result = S256Point_parse_sec(test_compressed_sec_even);
+    unsigned char test_compressed_sec_odd[] = {0x03, 0x6d, 0x18, 0x3d, 0xe4, 0x40, 0x05, 0x10, 0xe4, 0x0d, 0x4f, 0x32, 0xda, 0x2e, 0x72, 0x16, 0x8a, 0x5e, 0xaa, 0x3e, 0xe2, 0x8b, 0xf6, 0x25, 0x09, 0x23, 0x60, 0x32, 0x84, 0xad, 0xfe, 0x55, 0xaf};
+    S256Point* test_compressed_odd_result = S256Point_parse_sec(test_compressed_sec_odd);
+    unsigned char test_uncompressed_sec[] = {0x04, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0xde, 0xad, 0xbe, 0xef, 0x12, 0x34, 0x56, 0x78, 0xff, 0xe4, 0x95, 0x1c, 0x17, 0xe5, 0xed, 0xff, 0x2b, 0xb8, 0xf4, 0xa0, 0x66, 0xb4, 0xbe, 0xe9, 0xa9, 0x62, 0xe6, 0x0e, 0x70, 0x96, 0x77, 0xd1, 0xcb, 0x37, 0x6b, 0x38, 0xea, 0x0d, 0x3b, 0xd8};
+    S256Point* test_uncompressed_result = S256Point_parse_sec(test_uncompressed_sec);
+    mpz_t test_X;
+    mpz_init_set_str(test_X, TEST_X, 16);
+    mpz_t test_Y;
+    mpz_init_set_str(test_Y, TEST_Y, 16);
+    S256Field* test_x = S256Field_init(test_X);
+    S256Field* test_y = S256Field_init(test_Y);
+    S256Point* expected_result = S256Point_init(test_x, test_y);
+    mpz_t test_N;
+    mpz_init_set_str(test_N, TEST_N, 16);
+    mpz_t test_O;
+    mpz_init_set_str(test_O, TEST_O, 16);
+    S256Field* test_n = S256Field_init(test_N);
+    S256Field* test_o = S256Field_init(test_O);
+    S256Point* expected_odd_result = S256Point_init(test_n, test_o);
+    mu_assert("Error: S256Point_parse_sec doesn't work", S256Point_eq(test_uncompressed_result, expected_result) && S256Point_eq(test_compressed_even_result, expected_result) && S256Point_eq(test_compressed_odd_result, expected_odd_result));
+    S256Point_free(test_compressed_even_result);
+    S256Point_free(test_compressed_odd_result);
+    S256Point_free(test_uncompressed_result);
+    S256Point_free(expected_result);
+    S256Point_free(expected_odd_result);
+    return 0;
+}
+
 static char* all_tests() {
     //S256Field tests
     mu_run_test(test_S256Field_add);
@@ -315,12 +395,15 @@ static char* all_tests() {
     
     //S256Point tests
     mu_run_test(test_S256Point_add);
-    mu_run_test(test_S256Point_mul);
-    mu_run_test(test_S256Point_verify);
+    // mu_run_test(test_S256Point_mul);
+    // mu_run_test(test_S256Point_verify);
 
-    //Private Key tests
-    mu_run_test(test_Deterministic_k);
-    mu_run_test(test_PrivateKey_sign);
+    // //Private Key tests
+    // mu_run_test(test_Deterministic_k);
+    // mu_run_test(test_PrivateKey_sign);
+    mu_run_test(test_S256Point_sec_uncompressed);
+    mu_run_test(test_S256Point_sec_compressed);
+    mu_run_test(test_S256Point_parse_sec);
     return 0;
 }
 

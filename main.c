@@ -29,7 +29,7 @@ int main() {
     }
     printf("\n");
 
-    S256Point* new_p = S256Point_parse_sec(p, output);
+    S256Point* new_p = S256Point_parse_sec(output);
 
     S256Point_toString(new_p);
 

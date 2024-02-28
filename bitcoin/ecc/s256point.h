@@ -42,6 +42,6 @@ void S256Point_sec_uncompressed(S256Point* p, unsigned char* output);
 
 void S256Point_sec_compressed(S256Point* p, unsigned char* output);
 
-S256Point* S256Point_parse_sec(S256Point* p, unsigned char* sec_bin);
+S256Point* S256Point_parse_sec(unsigned char* sec_bin);
 
 #endif //S256POINT_H
