@@ -17,6 +17,6 @@ void Signature_free(Signature* sig);
 
 void Signature_toString(Signature* sig);
 
-void Signature_der(Signature* sig);
+void Signature_der(Signature* sig, unsigned char* output);
 
 #endif //SIGNATURE_H
