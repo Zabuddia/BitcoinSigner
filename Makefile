@@ -1,8 +1,8 @@
 CC=gcc
 CFLAGS=-Wall -g
-HEADERS=test/minunit.h lib/buttons.h lib/device.h lib/display.h lib/lcd.h lib/log.h lib/colors.h lib/fonts/fonts.h bitcoin/ecc/s256field.h bitcoin/ecc/s256point.h bitcoin/ecc/signature.h bitcoin/helper.h bitcoin/ecc/privatekey.h
-SRCS=main.c test/minunit.c lib/buttons.c lib/device.c lib/display.c lib/lcd.c lib/log.c lib/fonts/font8.c lib/fonts/font12.c lib/fonts/font16.c lib/fonts/font20.c lib/fonts/font24.c bitcoin/ecc/s256field.c bitcoin/ecc/s256point.c bitcoin/ecc/signature.c bitcoin/helper.c bitcoin/ecc/privatekey.c
-TEST_SRCS=test/minunit.c lib/buttons.c lib/device.c lib/display.c lib/lcd.c lib/log.c lib/fonts/font8.c lib/fonts/font12.c lib/fonts/font16.c lib/fonts/font20.c lib/fonts/font24.c bitcoin/ecc/s256field.c bitcoin/ecc/s256point.c bitcoin/ecc/signature.c bitcoin/helper.c bitcoin/ecc/privatekey.c
+HEADERS=test/minunit.h lib/buttons.h lib/device.h lib/display.h lib/lcd.h lib/log.h lib/colors.h lib/fonts/fonts.h bitcoin/ecc/s256field.h bitcoin/ecc/s256point.h bitcoin/ecc/signature.h bitcoin/helper/helper.h bitcoin/ecc/privatekey.h
+SRCS=main.c test/minunit.c lib/buttons.c lib/device.c lib/display.c lib/lcd.c lib/log.c lib/fonts/font8.c lib/fonts/font12.c lib/fonts/font16.c lib/fonts/font20.c lib/fonts/font24.c bitcoin/ecc/s256field.c bitcoin/ecc/s256point.c bitcoin/ecc/signature.c bitcoin/helper/helper.c bitcoin/ecc/privatekey.c
+TEST_SRCS=test/minunit.c lib/buttons.c lib/device.c lib/display.c lib/lcd.c lib/log.c lib/fonts/font8.c lib/fonts/font12.c lib/fonts/font16.c lib/fonts/font20.c lib/fonts/font24.c bitcoin/ecc/s256field.c bitcoin/ecc/s256point.c bitcoin/ecc/signature.c bitcoin/helper/helper.c bitcoin/ecc/privatekey.c
 OBJS=$(SRCS:.c=.o)
 TEST_OBJS=$(TEST_SRCS:.c=.o)
 TARGET=main

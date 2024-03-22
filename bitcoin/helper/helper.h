@@ -2,10 +2,12 @@
 #define HELPER_H
 
 #include <stdio.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gmp.h>
 #include <openssl/evp.h>
+#include <sys/types.h>
 
 #define P "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"
 #define N "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
@@ -27,5 +29,9 @@ void mpz_to_32bytes(mpz_t num, unsigned char *output);
 void compute_hmac_sha256(unsigned char *key, int key_len,
                          unsigned char *data, int data_len,
                          unsigned char *output, size_t *output_len);
+
+void memzero(void* const pnt, const size_t len);
+
+void encode_base58(char *b58, size_t *b58sz, const void *data, size_t binsz);
 
 #endif //HELPER_H

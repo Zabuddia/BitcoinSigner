@@ -466,6 +466,26 @@ static char* test_Signature_der() {
     return 0;
 }
 
+static char* test_encode_base58() {
+    const char test1[] = {0x7c, 0x07, 0x6f, 0xf3, 0x16, 0x69, 0x2a, 0x3d, 0x7e, 0xb3, 0xc3, 0xbb, 0x0f, 0x8b, 0x14, 0x88, 0xcf, 0x72, 0xe1, 0xaf, 0xcd, 0x92, 0x9e, 0x29, 0x30, 0x70, 0x32, 0x99, 0x7a, 0x83, 0x8a, 0x3d};
+    char result1[1024];
+    size_t size = 1024;
+    encode_base58(result1, &size, test1, sizeof(test1));
+    char* expected_result1 = "9MA8fRQrT4u8Zj8ZRd6MAiiyaxb2Y1CMpvVkHQu5hVM6";
+    mu_assert("Error: encode_base58 doesn't work (result 1)", strcmp(result1, expected_result1) == 0);
+    const char test2[] = {0xef, 0xf6, 0x9e, 0xf2, 0xb1, 0xbd, 0x93, 0xa6, 0x6e, 0xd5, 0x21, 0x9a, 0xdd, 0x4f, 0xb5, 0x1e, 0x11, 0xa8, 0x40, 0xf4, 0x04, 0x87, 0x63, 0x25, 0xa1, 0xe8, 0xff, 0xe0, 0x52, 0x9a, 0x2c};
+    char result2[1024];
+    encode_base58(result2, &size, test2, sizeof(test2));
+    char* expected_result2 = "4fE3H2E6XMp4SsxtwinF7w9a34ooUrwWe4WsW1458Pd";
+    mu_assert("Error: encode_base58 doesn't work (result 2)", strcmp(result2, expected_result2) == 0);
+    const char test3[] = {0xc7, 0x20, 0x7f, 0xee, 0x19, 0x7d, 0x27, 0xc6, 0x18, 0xae, 0xa6, 0x21, 0x40, 0x6f, 0x6b, 0xf5, 0xef, 0x6f, 0xca, 0x38, 0x68, 0x1d, 0x82, 0xb2, 0xf0, 0x6f, 0xdd, 0xbd, 0xce, 0x6f, 0xea, 0xb6};
+    char result3[1024];
+    encode_base58(result3, &size, test3, sizeof(test3));
+    char* expected_result3 = "EQJsjkd6JaGwxrjEhfeqPenqHwrBmPQZjJGNSCHBkcF7";
+    mu_assert("Error: encode_base58 doesn't work (result 3)", strcmp(result3, expected_result3) == 0);
+    return 0;
+}
+
 static char* all_tests() {
     // //S256Field tests
     // mu_run_test(test_S256Field_add);
@@ -493,7 +513,10 @@ static char* all_tests() {
 
     // //Signature tests
     // mu_run_test(test_Signature_der);
-    
+
+    //Helper tests
+    mu_run_test(test_encode_base58);
+
     return 0;
 }
 

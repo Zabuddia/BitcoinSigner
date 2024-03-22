@@ -8,7 +8,7 @@
 
 #include "s256point.h"
 #include "signature.h"
-#include "../helper.h"
+#include "../helper/helper.h"
 
 typedef struct {
     const char* secret;

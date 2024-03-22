@@ -1,9 +1,12 @@
 #include <stdio.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <openssl/evp.h>
 
 #include "helper.h"
+
+const char b58digits_ordered[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 void hash_to_mpz_t(const unsigned char* data, size_t data_len, mpz_t res) {
     mpz_init(res);
@@ -90,4 +93,43 @@ void compute_hmac_sha256(unsigned char *key, int key_len,
 
     EVP_MD_CTX_free(ctx);
     EVP_PKEY_free(pkey);
+}
+
+void memzero(void *const pnt, const size_t len) {
+  volatile unsigned char *volatile pnt_ = (volatile unsigned char *volatile)pnt;
+  size_t i = (size_t)0U;
+
+  while (i < len) {
+    pnt_[i++] = 0U;
+  }
+}
+
+void encode_base58(char *b58, size_t *b58sz, const void *data, size_t binsz) {
+  const uint8_t *bin = data;
+  int carry;
+  ssize_t i, j, high, zcount = 0;
+  size_t size;
+
+  while (zcount < (ssize_t)binsz && !bin[zcount]) ++zcount;
+
+  size = (binsz - zcount) * 138 / 100 + 1;
+  uint8_t buf[size];
+  memzero(buf, size);
+
+  for (i = zcount, high = size - 1; i < (ssize_t)binsz; ++i, high = j) {
+    for (carry = bin[i], j = size - 1; (j > high) || carry; --j) {
+      carry += 256 * buf[j];
+      buf[j] = carry % 58;
+      carry /= 58;
+    }
+  }
+
+  for (j = 0; j < (ssize_t)size && !buf[j]; ++j)
+    ;
+
+  if (zcount) memset(b58, '1', zcount);
+  for (i = zcount; j < (ssize_t)size; ++i, ++j)
+    b58[i] = b58digits_ordered[buf[j]];
+  b58[i] = '\0';
+  *b58sz = i + 1;
 }

@@ -6,7 +6,7 @@
 #include <math.h>
 #include <gmp.h>
 
-#include "../helper.h"
+#include "../helper/helper.h"
 
 typedef struct {
     mpz_t num;

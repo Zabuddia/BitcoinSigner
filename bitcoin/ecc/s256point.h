@@ -7,7 +7,7 @@
 #include <math.h>
 
 #include "signature.h"
-#include "../helper.h"
+#include "../helper/helper.h"
 
 typedef struct {
     S256Field* x;
