@@ -7,7 +7,11 @@
 #include <string.h>
 #include <gmp.h>
 #include <openssl/evp.h>
+#include <openssl/ripemd.h>
 #include <sys/types.h>
+
+#define TRUE 1
+#define FALSE 0
 
 #define P "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"
 #define N "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
@@ -19,6 +23,14 @@ extern mpz_t A;
 extern mpz_t B;
 extern mpz_t gx;
 extern mpz_t gy;
+
+void sha256(const unsigned char *message, size_t message_len, unsigned char *digest);
+
+void ripemd160(const unsigned char *message, size_t message_len, unsigned char *digest);
+
+void hash160(const unsigned char *message, size_t message_len, unsigned char *digest);
+
+void hash256(const unsigned char *message, size_t message_len, unsigned char *digest);
 
 void hash_to_mpz_t(const unsigned char* data, size_t data_len, mpz_t res);
 
@@ -33,5 +45,7 @@ void compute_hmac_sha256(unsigned char *key, int key_len,
 void memzero(void* const pnt, const size_t len);
 
 void encode_base58(char *b58, size_t *b58sz, const void *data, size_t binsz);
+
+void encode_base58_checksum(char *b58c, size_t *b58c_sz, const void *data, size_t binsz);
 
 #endif //HELPER_H

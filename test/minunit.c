@@ -486,6 +486,30 @@ static char* test_encode_base58() {
     return 0;
 }
 
+static char* test_S256Point_address() {
+    // PrivateKey* test_key = PrivateKey_init("test secret");
+    // char result[1024];
+    // S256Point_address(test_key->point, result, FALSE, TRUE);
+    // char* expected_result = "oDXeZKUNbGkmjpw9adB79LHZ3w2kGdDtkkmLwjEA36cPD";
+    // mu_assert("Error: S256Point_address doesn't work", strcmp(result, expected_result) == 0);
+    // PrivateKey_free(test_key);
+
+    mpz_t test_X;
+    mpz_init_set_str(test_X, TEST_X, 16);
+    mpz_t test_Y;
+    mpz_init_set_str(test_Y, TEST_Y, 16);
+    S256Field* test_x = S256Field_init(test_X);
+    S256Field* test_y = S256Field_init(test_Y);
+    S256Point* test_p = S256Point_init(test_x, test_y);
+    char result[1024];
+    S256Point_address(test_p, result, FALSE, FALSE);
+    printf("%s\n", result);
+    char* expected_result = "o5rPUuFDcLU3DHfR1NfeAerDmorfhEzNfwySozaYeG1LS";
+    mu_assert("Error: S256Point_address doesn't work", strcmp(result, expected_result) == 0);
+    S256Point_free(test_p);
+    return 0;
+}
+
 static char* all_tests() {
     // //S256Field tests
     // mu_run_test(test_S256Field_add);
@@ -503,19 +527,20 @@ static char* all_tests() {
     // mu_run_test(test_S256Point_add);
     // // mu_run_test(test_S256Point_mul);
     // // mu_run_test(test_S256Point_verify);
+    // mu_run_test(test_S256Point_sec_uncompressed);
+    // mu_run_test(test_S256Point_sec_compressed);
+    // mu_run_test(test_S256Point_parse_sec);
+    mu_run_test(test_S256Point_address);
 
     // //Private Key tests
     // // mu_run_test(test_Deterministic_k);
     // // mu_run_test(test_PrivateKey_sign);
-    // mu_run_test(test_S256Point_sec_uncompressed);
-    // mu_run_test(test_S256Point_sec_compressed);
-    // mu_run_test(test_S256Point_parse_sec);
 
     // //Signature tests
     // mu_run_test(test_Signature_der);
 
-    //Helper tests
-    mu_run_test(test_encode_base58);
+    // //Helper tests
+    // mu_run_test(test_encode_base58);
 
     return 0;
 }

@@ -8,6 +8,43 @@
 
 const char b58digits_ordered[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
+void sha256(const unsigned char *message, size_t message_len, unsigned char *digest) {
+    EVP_MD_CTX *mdctx;
+    
+    if((mdctx = EVP_MD_CTX_new()) == NULL)
+        return;
+    
+    if(1 != EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL))
+        return;
+    
+    if(1 != EVP_DigestUpdate(mdctx, message, message_len))
+        return;
+    
+    unsigned int digest_len;
+    if(1 != EVP_DigestFinal_ex(mdctx, digest, &digest_len))
+        return;
+    
+    EVP_MD_CTX_free(mdctx);
+}
+
+void ripemd160(const unsigned char *message, size_t message_len, unsigned char *digest) {
+    RIPEMD160_CTX ctx;
+    RIPEMD160_Init(&ctx);
+    RIPEMD160_Update(&ctx, message, message_len);
+    RIPEMD160_Final(digest, &ctx);
+}
+
+void hash160(const unsigned char *message, size_t message_len, unsigned char *digest) {
+    unsigned char sha256_digest[32];
+    sha256(message, message_len, sha256_digest);
+    ripemd160(sha256_digest, 32, digest);
+}
+
+void hash256(const unsigned char *message, size_t message_len, unsigned char *digest) {
+    sha256(message, message_len, digest);
+    sha256(digest, 32, digest);
+}
+
 void hash_to_mpz_t(const unsigned char* data, size_t data_len, mpz_t res) {
     mpz_init(res);
 
@@ -128,8 +165,18 @@ void encode_base58(char *b58, size_t *b58sz, const void *data, size_t binsz) {
     ;
 
   if (zcount) memset(b58, '1', zcount);
-  for (i = zcount; j < (ssize_t)size; ++i, ++j)
+  for (i = zcount; j < (ssize_t)size; ++i, ++j) {
     b58[i] = b58digits_ordered[buf[j]];
+  }
+  printf("b58: %s\n", b58);
   b58[i] = '\0';
   *b58sz = i + 1;
+}
+
+void encode_base58_checksum(char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {
+  uint8_t buf[32 + 4];
+  uint8_t hash[32];
+  memcpy(buf, data, binsz);
+  hash256(buf, binsz, hash);
+  encode_base58(b58c, b58c_sz, hash, sizeof(hash));
 }

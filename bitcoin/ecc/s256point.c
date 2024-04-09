@@ -387,3 +387,32 @@ S256Point* S256Point_parse_sec(unsigned char* sec_bin) {
         }
     }
 }
+
+void S256Point_hash160(S256Point* p, unsigned char* output, uint8_t compressed) {
+    if (compressed) {
+        unsigned char sec[33];
+        S256Point_sec_compressed(p, sec);
+        hash160(sec, 33, output);
+        return;
+    }
+    unsigned char sec[65];
+    S256Point_sec_uncompressed(p, sec);
+    hash160(sec, 65, output);
+}
+
+void S256Point_address(S256Point* p, char* output, uint8_t compressed, uint8_t testnet) {
+    unsigned char h160[20];
+    S256Point_hash160(p, h160, compressed);
+    char* mainnet1 = "\0";
+    char* testnet1 = "o";
+    printf("h160: %s\n", h160);
+    if (testnet) {
+        strcpy(output, testnet1);
+    } else {
+        strcpy(output, mainnet1);
+    }
+    strcpy(output + 1, h160);
+    printf("output: %.*s\n", (int)sizeof(output) * 8 - 1, output);
+    size_t size = 21;
+    encode_base58_checksum(output + 1, &size, h160, 20);
+}
