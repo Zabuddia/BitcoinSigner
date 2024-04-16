@@ -468,17 +468,17 @@ static char* test_encode_base58() {
     size_t size = 1024;
     encode_base58(result1, &size, test1, sizeof(test1));
     char* expected_result1 = "9MA8fRQrT4u8Zj8ZRd6MAiiyaxb2Y1CMpvVkHQu5hVM6";
-    mu_assert("Error: encode_base58 doesn't work (result 1)", strcmp(result1, expected_result1) == 0);
+    mu_assert("Error: encode_base58 doesn't work (result 1)", strcmp((char*)result1, expected_result1) == 0);
     const char test2[] = {0xef, 0xf6, 0x9e, 0xf2, 0xb1, 0xbd, 0x93, 0xa6, 0x6e, 0xd5, 0x21, 0x9a, 0xdd, 0x4f, 0xb5, 0x1e, 0x11, 0xa8, 0x40, 0xf4, 0x04, 0x87, 0x63, 0x25, 0xa1, 0xe8, 0xff, 0xe0, 0x52, 0x9a, 0x2c};
     unsigned char result2[1024];
     encode_base58(result2, &size, test2, sizeof(test2));
     char* expected_result2 = "4fE3H2E6XMp4SsxtwinF7w9a34ooUrwWe4WsW1458Pd";
-    mu_assert("Error: encode_base58 doesn't work (result 2)", strcmp(result2, expected_result2) == 0);
+    mu_assert("Error: encode_base58 doesn't work (result 2)", strcmp((char*)result2, expected_result2) == 0);
     const char test3[] = {0xc7, 0x20, 0x7f, 0xee, 0x19, 0x7d, 0x27, 0xc6, 0x18, 0xae, 0xa6, 0x21, 0x40, 0x6f, 0x6b, 0xf5, 0xef, 0x6f, 0xca, 0x38, 0x68, 0x1d, 0x82, 0xb2, 0xf0, 0x6f, 0xdd, 0xbd, 0xce, 0x6f, 0xea, 0xb6};
     unsigned char result3[1024];
     encode_base58(result3, &size, test3, sizeof(test3));
     char* expected_result3 = "EQJsjkd6JaGwxrjEhfeqPenqHwrBmPQZjJGNSCHBkcF7";
-    mu_assert("Error: encode_base58 doesn't work (result 3)", strcmp(result3, expected_result3) == 0);
+    mu_assert("Error: encode_base58 doesn't work (result 3)", strcmp((char*)result3, expected_result3) == 0);
     return 0;
 }
 
@@ -514,46 +514,46 @@ static char* test_S256Point_address() {
     S256Point_address(test_p, result4, TRUE, TRUE);
     char* expected_result4 = "muHL325JqqftwkDshsM9HxAKGPtZNLmusA";
 
-    mu_assert("Error: S256Point_address doesn't work", strcmp(result1, expected_result1) == 0);
-    mu_assert("Error: S256Point_address doesn't work", strcmp(result2, expected_result2) == 0);
-    mu_assert("Error: S256Point_address doesn't work", strcmp(result3, expected_result3) == 0);
-    mu_assert("Error: S256Point_address doesn't work", strcmp(result4, expected_result4) == 0);
+    mu_assert("Error: S256Point_address doesn't work", strcmp((char*)result1, expected_result1) == 0);
+    mu_assert("Error: S256Point_address doesn't work", strcmp((char*)result2, expected_result2) == 0);
+    mu_assert("Error: S256Point_address doesn't work", strcmp((char*)result3, expected_result3) == 0);
+    mu_assert("Error: S256Point_address doesn't work", strcmp((char*)result4, expected_result4) == 0);
 
     S256Point_free(test_p);
     return 0;
 }
 
 static char* all_tests() {
-    // //S256Field tests
-    // mu_run_test(test_S256Field_add);
-    // mu_run_test(test_S256Field_sub);
-    // mu_run_test(test_S256Field_mul);
-    // mu_run_test(test_S256Field_s_mul);
-    // mu_run_test(test_S256Field_mul_scalar);
-    // mu_run_test(test_S256Field_mod_inv);
-    // mu_run_test(test_S256Field_s_inv);
-    // mu_run_test(test_S256Field_pow);
-    // mu_run_test(test_S256Field_div);
-    // mu_run_test(test_S256Field_sqrt);
+    //S256Field tests
+    mu_run_test(test_S256Field_add);
+    mu_run_test(test_S256Field_sub);
+    mu_run_test(test_S256Field_mul);
+    mu_run_test(test_S256Field_s_mul);
+    mu_run_test(test_S256Field_mul_scalar);
+    mu_run_test(test_S256Field_mod_inv);
+    mu_run_test(test_S256Field_s_inv);
+    mu_run_test(test_S256Field_pow);
+    mu_run_test(test_S256Field_div);
+    mu_run_test(test_S256Field_sqrt);
     
-    // //S256Point tests
-    // mu_run_test(test_S256Point_add);
-    // // mu_run_test(test_S256Point_mul);
-    // // mu_run_test(test_S256Point_verify);
-    // mu_run_test(test_S256Point_sec_uncompressed);
-    // mu_run_test(test_S256Point_sec_compressed);
-    // mu_run_test(test_S256Point_parse_sec);
+    //S256Point tests
+    mu_run_test(test_S256Point_add);
+    mu_run_test(test_S256Point_mul);
+    mu_run_test(test_S256Point_verify);
+    mu_run_test(test_S256Point_sec_uncompressed);
+    mu_run_test(test_S256Point_sec_compressed);
+    mu_run_test(test_S256Point_parse_sec);
     mu_run_test(test_S256Point_address);
 
-    // //Private Key tests
-    // // mu_run_test(test_Deterministic_k);
-    // // mu_run_test(test_PrivateKey_sign);
+    //Private Key tests
+    mu_run_test(test_Deterministic_k);
+    mu_run_test(test_PrivateKey_sign);
 
-    // //Signature tests
-    // mu_run_test(test_Signature_der);
+    //Signature tests
+    mu_run_test(test_Signature_der);
 
-    // //Helper tests
-    // mu_run_test(test_encode_base58);
+    //Helper tests
+    mu_run_test(test_encode_base58);
 
     return 0;
 }
