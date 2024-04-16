@@ -400,19 +400,14 @@ void S256Point_hash160(S256Point* p, unsigned char* output, uint8_t compressed) 
     hash160(sec, 65, output);
 }
 
-void S256Point_address(S256Point* p, char* output, uint8_t compressed, uint8_t testnet) {
-    unsigned char h160[20];
-    S256Point_hash160(p, h160, compressed);
-    char* mainnet1 = "\0";
-    char* testnet1 = "o";
-    printf("h160: %s\n", h160);
+void S256Point_address(S256Point* p, unsigned char* output, uint8_t compressed, uint8_t testnet) {
+    unsigned char h160[21] = {0};
     if (testnet) {
-        strcpy(output, testnet1);
+        h160[0] = 0x6f;
     } else {
-        strcpy(output, mainnet1);
+        h160[0] = 0x00;
     }
-    strcpy(output + 1, h160);
-    printf("output: %.*s\n", (int)sizeof(output) * 8 - 1, output);
-    size_t size = 21;
-    encode_base58_checksum(output + 1, &size, h160, 20);
+    S256Point_hash160(p, h160 + 1, compressed);
+    size_t output_len = 34;
+    encode_base58_checksum(output, &output_len, h160, 21);
 }

@@ -141,7 +141,7 @@ void memzero(void *const pnt, const size_t len) {
   }
 }
 
-void encode_base58(char *b58, size_t *b58sz, const void *data, size_t binsz) {
+void encode_base58(unsigned char *b58, size_t *b58sz, const void *data, size_t binsz) {
   const uint8_t *bin = data;
   int carry;
   ssize_t i, j, high, zcount = 0;
@@ -168,15 +168,15 @@ void encode_base58(char *b58, size_t *b58sz, const void *data, size_t binsz) {
   for (i = zcount; j < (ssize_t)size; ++i, ++j) {
     b58[i] = b58digits_ordered[buf[j]];
   }
-  printf("b58: %s\n", b58);
   b58[i] = '\0';
   *b58sz = i + 1;
 }
 
-void encode_base58_checksum(char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {
-  uint8_t buf[32 + 4];
-  uint8_t hash[32];
+void encode_base58_checksum(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {
+  uint8_t buf[21 + 4] = {0};
+  uint8_t hash[21] = {0};
   memcpy(buf, data, binsz);
   hash256(buf, binsz, hash);
-  encode_base58(b58c, b58c_sz, hash, sizeof(hash));
+  memcpy(buf + binsz, hash, 4);
+  encode_base58(b58c, b58c_sz, buf, sizeof(buf));
 }

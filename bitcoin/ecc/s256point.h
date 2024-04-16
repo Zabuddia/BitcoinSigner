@@ -46,6 +46,6 @@ S256Point* S256Point_parse_sec(unsigned char* sec_bin);
 
 void S256Point_hash160(S256Point* p, unsigned char* output, uint8_t compressed);
 
-void S256Point_address(S256Point* p, char* output, uint8_t compressed, uint8_t testnet);
+void S256Point_address(S256Point* p, unsigned char* output, uint8_t compressed, uint8_t testnet);
 
 #endif //S256POINT_H

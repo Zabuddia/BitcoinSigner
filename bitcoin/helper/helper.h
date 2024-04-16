@@ -44,8 +44,8 @@ void compute_hmac_sha256(unsigned char *key, int key_len,
 
 void memzero(void* const pnt, const size_t len);
 
-void encode_base58(char *b58, size_t *b58sz, const void *data, size_t binsz);
+void encode_base58(unsigned char *b58, size_t *b58sz, const void *data, size_t binsz);
 
-void encode_base58_checksum(char *b58c, size_t *b58c_sz, const void *data, size_t binsz);
+void encode_base58_checksum(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz);
 
 #endif //HELPER_H
