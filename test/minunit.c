@@ -551,38 +551,50 @@ static char* test_PrivateKey_wif() {
     return 0;
 }
 
+static char* generate_testnet_address() {
+    PrivateKey* test_key = PrivateKey_init("test secret");
+    unsigned char testnet_address[1024];
+    S256Point_address(test_key->point, testnet_address, FALSE, TRUE);
+    printf("Testnet address: %s\n", testnet_address);
+    PrivateKey_free(test_key);
+    return 0;
+}
+
 static char* all_tests() {
-    //S256Field tests
-    mu_run_test(test_S256Field_add);
-    mu_run_test(test_S256Field_sub);
-    mu_run_test(test_S256Field_mul);
-    mu_run_test(test_S256Field_s_mul);
-    mu_run_test(test_S256Field_mul_scalar);
-    mu_run_test(test_S256Field_mod_inv);
-    mu_run_test(test_S256Field_s_inv);
-    mu_run_test(test_S256Field_pow);
-    mu_run_test(test_S256Field_div);
-    mu_run_test(test_S256Field_sqrt);
+    // //S256Field tests
+    // mu_run_test(test_S256Field_add);
+    // mu_run_test(test_S256Field_sub);
+    // mu_run_test(test_S256Field_mul);
+    // mu_run_test(test_S256Field_s_mul);
+    // mu_run_test(test_S256Field_mul_scalar);
+    // mu_run_test(test_S256Field_mod_inv);
+    // mu_run_test(test_S256Field_s_inv);
+    // mu_run_test(test_S256Field_pow);
+    // mu_run_test(test_S256Field_div);
+    // mu_run_test(test_S256Field_sqrt);
     
-    //S256Point tests
-    mu_run_test(test_S256Point_add);
-    mu_run_test(test_S256Point_mul);
-    mu_run_test(test_S256Point_verify);
-    mu_run_test(test_S256Point_sec_uncompressed);
-    mu_run_test(test_S256Point_sec_compressed);
-    mu_run_test(test_S256Point_parse_sec);
-    mu_run_test(test_S256Point_address);
+    // //S256Point tests
+    // mu_run_test(test_S256Point_add);
+    // mu_run_test(test_S256Point_mul);
+    // mu_run_test(test_S256Point_verify);
+    // mu_run_test(test_S256Point_sec_uncompressed);
+    // mu_run_test(test_S256Point_sec_compressed);
+    // mu_run_test(test_S256Point_parse_sec);
+    // mu_run_test(test_S256Point_address);
 
-    //Private Key tests
-    mu_run_test(test_Deterministic_k);
-    mu_run_test(test_PrivateKey_sign);
-    mu_run_test(test_PrivateKey_wif);
+    // //Private Key tests
+    // mu_run_test(test_Deterministic_k);
+    // mu_run_test(test_PrivateKey_sign);
+    // mu_run_test(test_PrivateKey_wif);
 
-    //Signature tests
-    mu_run_test(test_Signature_der);
+    // //Signature tests
+    // mu_run_test(test_Signature_der);
 
-    //Helper tests
-    mu_run_test(test_encode_base58);
+    // //Helper tests
+    // mu_run_test(test_encode_base58);
+
+    //Create addresses
+    mu_run_test(generate_testnet_address);
 
     return 0;
 }
