@@ -175,3 +175,28 @@ Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
         return sig;
     }
 }
+
+void PrivateKey_wif(PrivateKey* key, unsigned char* output, uint8_t compressed, uint8_t testnet) {
+    if (compressed) {
+        unsigned char wif[34] = {0};
+        if (testnet) {
+            wif[0] = 0xef;
+        } else {
+            wif[0] = 0x80;
+        }
+        wif[33] = 0x01;
+        mpz_to_bytes(key->e->num, wif + 1, 32);
+        size_t output_len = 52;
+        encode_base58_checksum_wif_compressed(output, &output_len, wif, 34);
+    } else {
+        unsigned char wif[33] = {0};
+        if (testnet) {
+            wif[0] = 0xef;
+        } else {
+            wif[0] = 0x80;
+        }
+        mpz_to_bytes(key->e->num, wif + 1, 32);
+        size_t output_len = 52;
+        encode_base58_checksum_wif_uncompressed(output, &output_len, wif, 33);
+    }
+}

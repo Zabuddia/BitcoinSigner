@@ -409,5 +409,5 @@ void S256Point_address(S256Point* p, unsigned char* output, uint8_t compressed, 
     }
     S256Point_hash160(p, h160 + 1, compressed);
     size_t output_len = 34;
-    encode_base58_checksum(output, &output_len, h160, 21);
+    encode_base58_checksum_address(output, &output_len, h160, 21);
 }

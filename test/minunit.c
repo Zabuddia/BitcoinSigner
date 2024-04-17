@@ -523,6 +523,34 @@ static char* test_S256Point_address() {
     return 0;
 }
 
+static char* test_PrivateKey_wif() {
+    PrivateKey* test_key = PrivateKey_init("test secret");
+
+    unsigned char result1[1024];
+    PrivateKey_wif(test_key, result1, FALSE, FALSE);
+    char* expected_result1 = "5K4T5kjMFenTMzWNNwAjBcBrBVwhLqWuWm2MPBfAnb9LnexWEmJ";
+
+    unsigned char result2[1024];
+    PrivateKey_wif(test_key, result2, TRUE, FALSE);
+    char* expected_result2 = "L2iE7z1vPfmdMepdMp5wBpJt5LkR4Z8znMJxxv3UCDhpL6DGw9pC";
+
+    unsigned char result3[1024];
+    PrivateKey_wif(test_key, result3, FALSE, TRUE);
+    char* expected_result3 = "92q5fVYtqsrbL41f1H4e4CjoqAJQW146rhtJTp1g8KtPZgBaKKL";
+
+    unsigned char result4[1024];
+    PrivateKey_wif(test_key, result4, TRUE, TRUE);
+    char* expected_result4 = "cT5Dau1mpjTtX6HtkDu4Z8owha3pj1EgrPTS5LVyhLMpaqPXeAbg";
+
+    mu_assert("Error: PrivateKey_wif doesn't work", strcmp((char*)result1, expected_result1) == 0);
+    mu_assert("Error: PrivateKey_wif doesn't work", strcmp((char*)result2, expected_result2) == 0);
+    mu_assert("Error: PrivateKey_wif doesn't work", strcmp((char*)result3, expected_result3) == 0);
+    mu_assert("Error: PrivateKey_wif doesn't work", strcmp((char*)result4, expected_result4) == 0);
+
+    PrivateKey_free(test_key);
+    return 0;
+}
+
 static char* all_tests() {
     //S256Field tests
     mu_run_test(test_S256Field_add);
@@ -548,6 +576,7 @@ static char* all_tests() {
     //Private Key tests
     mu_run_test(test_Deterministic_k);
     mu_run_test(test_PrivateKey_sign);
+    mu_run_test(test_PrivateKey_wif);
 
     //Signature tests
     mu_run_test(test_Signature_der);

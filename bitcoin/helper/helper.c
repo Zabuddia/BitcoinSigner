@@ -133,50 +133,68 @@ void compute_hmac_sha256(unsigned char *key, int key_len,
 }
 
 void memzero(void *const pnt, const size_t len) {
-  volatile unsigned char *volatile pnt_ = (volatile unsigned char *volatile)pnt;
-  size_t i = (size_t)0U;
+    volatile unsigned char *volatile pnt_ = (volatile unsigned char *volatile)pnt;
+    size_t i = (size_t)0U;
 
-  while (i < len) {
+    while (i < len) {
     pnt_[i++] = 0U;
-  }
+    }
 }
 
 void encode_base58(unsigned char *b58, size_t *b58sz, const void *data, size_t binsz) {
-  const uint8_t *bin = data;
-  int carry;
-  ssize_t i, j, high, zcount = 0;
-  size_t size;
+    const uint8_t *bin = data;
+    int carry;
+    ssize_t i, j, high, zcount = 0;
+    size_t size;
 
-  while (zcount < (ssize_t)binsz && !bin[zcount]) ++zcount;
+    while (zcount < (ssize_t)binsz && !bin[zcount]) ++zcount;
 
-  size = (binsz - zcount) * 138 / 100 + 1;
-  uint8_t buf[size];
-  memzero(buf, size);
+    size = (binsz - zcount) * 138 / 100 + 1;
+    uint8_t buf[size];
+    memzero(buf, size);
 
-  for (i = zcount, high = size - 1; i < (ssize_t)binsz; ++i, high = j) {
+    for (i = zcount, high = size - 1; i < (ssize_t)binsz; ++i, high = j) {
     for (carry = bin[i], j = size - 1; (j > high) || carry; --j) {
-      carry += 256 * buf[j];
-      buf[j] = carry % 58;
-      carry /= 58;
+        carry += 256 * buf[j];
+        buf[j] = carry % 58;
+        carry /= 58;
     }
-  }
+    }
 
-  for (j = 0; j < (ssize_t)size && !buf[j]; ++j)
+    for (j = 0; j < (ssize_t)size && !buf[j]; ++j)
     ;
 
-  if (zcount) memset(b58, '1', zcount);
-  for (i = zcount; j < (ssize_t)size; ++i, ++j) {
+    if (zcount) memset(b58, '1', zcount);
+    for (i = zcount; j < (ssize_t)size; ++i, ++j) {
     b58[i] = b58digits_ordered[buf[j]];
-  }
-  b58[i] = '\0';
-  *b58sz = i + 1;
+    }
+    b58[i] = '\0';
+    *b58sz = i + 1;
 }
 
-void encode_base58_checksum(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {
-  uint8_t buf[21 + 4] = {0};
-  uint8_t hash[21] = {0};
-  memcpy(buf, data, binsz);
-  hash256(buf, binsz, hash);
-  memcpy(buf + binsz, hash, 4);
-  encode_base58(b58c, b58c_sz, buf, sizeof(buf));
+void encode_base58_checksum_address(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {
+    uint8_t buf[21 + 4] = {0};
+    uint8_t hash[21] = {0};
+    memcpy(buf, data, binsz);
+    hash256(buf, binsz, hash);
+    memcpy(buf + binsz, hash, 4);
+    encode_base58(b58c, b58c_sz, buf, sizeof(buf));
+}
+
+void encode_base58_checksum_wif_uncompressed(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {
+    uint8_t buf[33 + 4] = {0};
+    uint8_t hash[33] = {0};
+    memcpy(buf, data, binsz);
+    hash256(buf, binsz, hash);
+    memcpy(buf + binsz, hash, 4);
+    encode_base58(b58c, b58c_sz, buf, sizeof(buf));
+}
+
+void encode_base58_checksum_wif_compressed(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {
+    uint8_t buf[34 + 4] = {0};
+    uint8_t hash[34] = {0};
+    memcpy(buf, data, binsz);
+    hash256(buf, binsz, hash);
+    memcpy(buf + binsz, hash, 4);
+    encode_base58(b58c, b58c_sz, buf, sizeof(buf));
 }

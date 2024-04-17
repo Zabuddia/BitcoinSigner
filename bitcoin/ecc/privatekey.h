@@ -33,4 +33,6 @@ S256Field* Deterministic_k(PrivateKey* key, S256Field* z);
 
 Signature* PrivateKey_sign(PrivateKey* key, S256Field* z);
 
+void PrivateKey_wif(PrivateKey* key, unsigned char* output, uint8_t compressed, uint8_t testnet);
+
 #endif //PRIVATEKEY_H
