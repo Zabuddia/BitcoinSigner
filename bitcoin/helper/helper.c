@@ -198,3 +198,32 @@ void encode_base58_checksum_wif_compressed(unsigned char *b58c, size_t *b58c_sz,
     memcpy(buf + binsz, hash, 4);
     encode_base58(b58c, b58c_sz, buf, sizeof(buf));
 }
+
+int little_endian_to_int(const unsigned char *data, size_t data_len) {
+    int result = 0;
+    for (int i = 0; i < data_len; i++) {
+        result += data[i] << (8 * i);
+    }
+    return result;
+}
+
+void int_to_little_endian(int num, unsigned char *output, size_t output_len) {
+    for (int i = 0; i < output_len; i++) {
+        output[i] = (num >> (8 * i)) & 0xff;
+    }
+}
+
+void print_formatted_bytes(const unsigned char* hex) {
+    int len = strlen(hex);
+    printf("Formatted output:\n");
+    for (int i = 0; i < len; i += 2) {
+        unsigned int byte;
+        sscanf(hex + i, "%2x", &byte);
+        printf("0x%02x, ", byte);
+
+        if (i + 2 < len) {
+            printf(", ");
+        }
+    }
+    printf("\n");
+}

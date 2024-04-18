@@ -7,7 +7,7 @@
 
 typedef struct {
     unsigned char* version;
-    TxIn** tx_ins;
+    unsigned char** tx_ins;
     unsigned char** tx_outs;
     unsigned char* locktime;
     __uint8_t testnet;
@@ -22,5 +22,9 @@ unsigned char* Tx_id(Tx* tx);
 unsigned char* Tx_hash(Tx* tx);
 
 unsigned char* Tx_serialize(Tx* tx);
+
+void Tx_free(Tx* tx);
+
+Tx* Tx_parse(unsigned char* s, uint8_t testnet);
 
 #endif //TX_H

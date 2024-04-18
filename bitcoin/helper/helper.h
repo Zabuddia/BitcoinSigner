@@ -52,4 +52,12 @@ void encode_base58_checksum_wif_uncompressed(unsigned char *b58c, size_t *b58c_s
 
 void encode_base58_checksum_wif_compressed(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz);
 
+//Max data_len is 4
+int little_endian_to_int(const unsigned char *data, size_t data_len);
+
+//Max output_len is 4
+void int_to_little_endian(int num, unsigned char *output, size_t output_len);
+
+void print_formatted_bytes(const unsigned char* hex);
+
 #endif //HELPER_H

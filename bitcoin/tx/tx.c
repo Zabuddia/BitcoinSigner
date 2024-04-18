@@ -50,3 +50,12 @@ unsigned char* Tx_serialize(Tx* tx) {
     sprintf(result, "%s%s%s%s", tx->version, tx->tx_ins, tx->tx_outs, tx->locktime);
     return result;
 }
+
+void Tx_free(Tx* tx) {
+    free(tx);
+}
+
+Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
+    unsigned char version[4] = {s[0], s[1], s[2], s[3]};
+    printf("version: %s\n", version);
+}
