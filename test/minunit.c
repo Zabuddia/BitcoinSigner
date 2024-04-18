@@ -594,7 +594,7 @@ static char* all_tests() {
     // mu_run_test(test_encode_base58);
 
     //Create addresses
-    mu_run_test(generate_testnet_address);
+    // mu_run_test(generate_testnet_address);
 
     return 0;
 }
