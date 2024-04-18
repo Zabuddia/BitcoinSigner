@@ -1,0 +1,26 @@
+#ifndef TX_H
+#define TX_H
+
+#include <stdio.h>
+
+#include "../helper/helper.h"
+
+typedef struct {
+    unsigned char* version;
+    TxIn** tx_ins;
+    unsigned char** tx_outs;
+    unsigned char* locktime;
+    __uint8_t testnet;
+} Tx;
+
+Tx* Tx_init(unsigned char* version, unsigned char* tx_ins, unsigned char* tx_outs, unsigned char* locktime, __uint8_t testnet);
+
+void Tx_toString(Tx* tx);
+
+unsigned char* Tx_id(Tx* tx);
+
+unsigned char* Tx_hash(Tx* tx);
+
+unsigned char* Tx_serialize(Tx* tx);
+
+#endif //TX_H
