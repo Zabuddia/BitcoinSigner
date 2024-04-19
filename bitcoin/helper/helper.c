@@ -207,7 +207,21 @@ int little_endian_to_int(const unsigned char *data, size_t data_len) {
     return result;
 }
 
+unsigned long long little_endian_to_long(const unsigned char *data, size_t data_len) {
+    unsigned long long result = 0;
+    for (int i = 0; i < data_len; i++) {
+        result += (unsigned long long)data[i] << (8 * i);
+    }
+    return result;
+}
+
 void int_to_little_endian(int num, unsigned char *output, size_t output_len) {
+    for (int i = 0; i < output_len; i++) {
+        output[i] = (num >> (8 * i)) & 0xff;
+    }
+}
+
+void long_to_little_endian(unsigned long long num, unsigned char *output, size_t output_len) {
     for (int i = 0; i < output_len; i++) {
         output[i] = (num >> (8 * i)) & 0xff;
     }
@@ -222,4 +236,32 @@ void print_formatted_bytes(const unsigned char* hex) {
         printf("0x%02x, ", byte);
     }
     printf("\n");
+}
+
+unsigned long long read_varint(unsigned char* data) {
+    unsigned char i = data[0];
+    if (i == 0xfd) {
+        return (unsigned long long)little_endian_to_int(data + 1, 2);
+    } else if (i == 0xfe) {
+        return (unsigned long long)little_endian_to_int(data + 1, 4);
+    } else if (i == 0xff) {
+        return little_endian_to_long(data + 1, 8);
+    } else {
+        return (unsigned long long)i;
+    }
+}
+
+void encode_varint(unsigned char* output, unsigned long long num) {
+    if (num < 0xfd) {
+        output[0] = num;
+    } else if (num <= 0xffff) {
+        output[0] = 0xfd;
+        int_to_little_endian(num, output + 1, 2);
+    } else if (num <= 0xffffffff) {
+        output[0] = 0xfe;
+        int_to_little_endian(num, output + 1, 4);
+    } else {
+        output[0] = 0xff;
+        long_to_little_endian(num, output + 1, 8);
+    }
 }

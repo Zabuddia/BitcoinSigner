@@ -58,6 +58,7 @@ void Tx_free(Tx* tx) {
 Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
     unsigned char version_raw[4] = {s[0], s[1], s[2], s[3]};
     int version = little_endian_to_int(version_raw, 4);
+    
     Tx* tx = Tx_init(version, NULL, NULL, NULL, testnet);
     return tx;
 }
