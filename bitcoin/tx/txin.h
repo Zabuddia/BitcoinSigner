@@ -16,6 +16,8 @@ TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, unsigned char* script
 
 void TxIn_toString(TxIn* tx_in);
 
+void TxIn_free(TxIn* tx_in);
+
 TxIn* TxIn_parse(unsigned char* s);
 
 #endif //TXIN_H

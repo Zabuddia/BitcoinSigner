@@ -24,6 +24,11 @@ void TxIn_toString(TxIn* tx_in) {
     }
 }
 
+void TxIn_free(TxIn* tx_in) {
+    free(tx_in->script_sig);
+    free(tx_in);
+}
+
 TxIn* TxIn_parse(unsigned char* s) {
     int script_sig_len = 108;
     unsigned char prev_tx[32];

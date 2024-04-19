@@ -57,6 +57,11 @@ unsigned char* Tx_serialize(Tx* tx) {
 }
 
 void Tx_free(Tx* tx) {
+    for (unsigned long long i = 0; i < tx->num_inputs; i++) {
+        TxIn_free(tx->tx_ins[i]);
+    }
+    free(tx->tx_ins);
+    free(tx->tx_outs);
     free(tx);
 }
 

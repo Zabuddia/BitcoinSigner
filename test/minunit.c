@@ -748,7 +748,7 @@ static char* all_tests() {
     // mu_run_test(test_Signature_der);
 
     //Tx tests
-    // mu_run_test(test_Tx_parse_version);
+    mu_run_test(test_Tx_parse_version);
     mu_run_test(test_Tx_parse_inputs);
 
     // //Helper tests
