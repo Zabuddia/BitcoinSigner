@@ -654,6 +654,35 @@ static char* test_read_varint() {
     return 0;
 }
 
+static char* test_encode_varint() {
+    unsigned long long num1 = 100;
+    unsigned char result1[1024];
+    encode_varint(result1, num1);
+    unsigned char expected_result1[] = {0x64};
+    mu_assert("Error: encode_varint doesn't work", memcmp(result1, expected_result1, sizeof(expected_result1)) == 0);
+    unsigned long long num2 = 255;
+    unsigned char result2[1024];
+    encode_varint(result2, num2);
+    unsigned char expected_result2[] = {0xfd, 0xff, 0x00};
+    mu_assert("Error: encode_varint doesn't work", memcmp(result2, expected_result2, sizeof(expected_result2)) == 0);
+    unsigned long long num3 = 555;
+    unsigned char result3[1024];
+    encode_varint(result3, num3);
+    unsigned char expected_result3[] = {0xfd, 0x2b, 0x02};
+    mu_assert("Error: encode_varint doesn't work", memcmp(result3, expected_result3, sizeof(expected_result3)) == 0);
+    unsigned long long num4 = 70015;
+    unsigned char result4[1024];
+    encode_varint(result4, num4);
+    unsigned char expected_result4[] = {0xfe, 0x7f, 0x11, 0x01, 0x00};
+    mu_assert("Error: encode_varint doesn't work", memcmp(result4, expected_result4, sizeof(expected_result4)) == 0);
+    unsigned long long num5 = 18005558675309;
+    unsigned char result5[1024];
+    encode_varint(result5, num5);
+    unsigned char expected_result5[] = {0xff, 0x6d, 0xc7, 0xed, 0x3e, 0x60, 0x10, 0x00, 0x00};
+    mu_assert("Error: encode_varint doesn't work", memcmp(result5, expected_result5, sizeof(expected_result5)) == 0);
+    return 0;
+}
+
 static char* all_tests() {
     // //S256Field tests
     // mu_run_test(test_S256Field_add);
@@ -691,10 +720,11 @@ static char* all_tests() {
     // mu_run_test(test_encode_base58);
     // mu_run_test(test_little_endian_to_int);
     // mu_run_test(test_int_to_little_endian);
-    mu_run_test(test_little_endian_to_long);
-    mu_run_test(test_long_to_little_endian);
+    // mu_run_test(test_little_endian_to_long);
+    // mu_run_test(test_long_to_little_endian);
     // mu_run_test(test_print_formatted_bytes);
-    mu_run_test(test_read_varint);
+    // mu_run_test(test_read_varint);
+    // mu_run_test(test_encode_varint);
 
     //Create addresses
     // mu_run_test(generate_testnet_address);
