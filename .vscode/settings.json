@@ -3,6 +3,7 @@
         "fieldelement.h": "c",
         "privatekeyint.h": "c",
         "evp.h": "c",
-        "s256field.h": "c"
+        "s256field.h": "c",
+        "helper.h": "c"
     }
 }

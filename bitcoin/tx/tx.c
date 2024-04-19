@@ -1,6 +1,6 @@
 #include "tx.h"
 
-Tx* Tx_init(unsigned char* version, unsigned char* tx_ins, unsigned char* tx_outs, unsigned char* locktime, __uint8_t testnet) {
+Tx* Tx_init(int version, unsigned char* tx_ins, unsigned char* tx_outs, unsigned char* locktime, __uint8_t testnet) {
     Tx* tx = (Tx*)malloc(sizeof(Tx));
     if (tx == NULL) {
         printf("Memory allocation failed\n");
@@ -20,7 +20,7 @@ void Tx_toString(Tx* tx) {
     } else {
         printf("Tx_(\n");
         printf("  tx: %s\n", Tx_id(tx));
-        printf("  version: %s\n", tx->version);
+        printf("  version: %d\n", tx->version);
         printf("  tx_ins: %s\n", tx->tx_ins);
         printf("  tx_outs: %s\n", tx->tx_outs);
         printf("  locktime: %s\n", tx->locktime);
@@ -47,7 +47,7 @@ unsigned char* Tx_serialize(Tx* tx) {
         printf("Memory allocation failed\n");
         exit(1);
     }
-    sprintf(result, "%s%s%s%s", tx->version, tx->tx_ins, tx->tx_outs, tx->locktime);
+    sprintf(result, "%d%s%s%s", tx->version, tx->tx_ins, tx->tx_outs, tx->locktime);
     return result;
 }
 
@@ -56,6 +56,8 @@ void Tx_free(Tx* tx) {
 }
 
 Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
-    unsigned char version[4] = {s[0], s[1], s[2], s[3]};
-    printf("version: %s\n", version);
+    unsigned char version_raw[4] = {s[0], s[1], s[2], s[3]};
+    int version = little_endian_to_int(version_raw, 4);
+    Tx* tx = Tx_init(version, NULL, NULL, NULL, testnet);
+    return tx;
 }

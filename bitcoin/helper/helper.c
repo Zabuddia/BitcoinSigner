@@ -214,16 +214,12 @@ void int_to_little_endian(int num, unsigned char *output, size_t output_len) {
 }
 
 void print_formatted_bytes(const unsigned char* hex) {
-    int len = strlen(hex);
+    int len = strlen((const char*)hex);
     printf("Formatted output:\n");
     for (int i = 0; i < len; i += 2) {
         unsigned int byte;
-        sscanf(hex + i, "%2x", &byte);
+        sscanf((const char*)hex + i, "%2x", &byte);
         printf("0x%02x, ", byte);
-
-        if (i + 2 < len) {
-            printf(", ");
-        }
     }
     printf("\n");
 }

@@ -6,14 +6,14 @@
 #include "../helper/helper.h"
 
 typedef struct {
-    unsigned char* version;
-    unsigned char** tx_ins;
-    unsigned char** tx_outs;
+    int version;
+    unsigned char* tx_ins;
+    unsigned char* tx_outs;
     unsigned char* locktime;
     __uint8_t testnet;
 } Tx;
 
-Tx* Tx_init(unsigned char* version, unsigned char* tx_ins, unsigned char* tx_outs, unsigned char* locktime, __uint8_t testnet);
+Tx* Tx_init(int version, unsigned char* tx_ins, unsigned char* tx_outs, unsigned char* locktime, __uint8_t testnet);
 
 void Tx_toString(Tx* tx);
 
