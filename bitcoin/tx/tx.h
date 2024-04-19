@@ -13,11 +13,11 @@ typedef struct {
     TxIn** tx_ins;
     unsigned long long num_outputs;
     TxOut** tx_outs;
-    unsigned char* locktime;
+    unsigned long long locktime;
     __uint8_t testnet;
 } Tx;
 
-Tx* Tx_init(int version, unsigned long long num_inputs, TxIn** tx_ins, unsigned long long num_outputs, TxOut** tx_outs, unsigned char* locktime, __uint8_t testnet);
+Tx* Tx_init(int version, unsigned long long num_inputs, TxIn** tx_ins, unsigned long long num_outputs, TxOut** tx_outs, unsigned long long locktime, __uint8_t testnet);
 
 void Tx_toString(Tx* tx);
 

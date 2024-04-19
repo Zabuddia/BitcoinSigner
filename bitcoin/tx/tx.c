@@ -1,6 +1,6 @@
 #include "tx.h"
 
-Tx* Tx_init(int version, unsigned long long num_inputs, TxIn** tx_ins, unsigned long long num_outputs, TxOut** tx_outs, unsigned char* locktime, __uint8_t testnet) {
+Tx* Tx_init(int version, unsigned long long num_inputs, TxIn** tx_ins, unsigned long long num_outputs, TxOut** tx_outs, unsigned long long locktime, __uint8_t testnet) {
     Tx* tx = (Tx*)malloc(sizeof(Tx));
     if (tx == NULL) {
         printf("Memory allocation failed\n");
@@ -103,6 +103,7 @@ Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
         tx_outs[i] = tx_out;
         s += 8 + 26;
     }
-    Tx* tx = Tx_init(version, num_inputs, tx_ins, num_outputs, tx_outs, NULL, testnet);
+    unsigned long long locktime = little_endian_to_long(s, 4);
+    Tx* tx = Tx_init(version, num_inputs, tx_ins, num_outputs, tx_outs, locktime, testnet);
     return tx;
 }
