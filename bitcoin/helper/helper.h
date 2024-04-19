@@ -70,4 +70,6 @@ unsigned long long read_varint(unsigned char* data);
 
 void encode_varint(unsigned char* output, unsigned long long num);
 
+void little_endian_to_big_endian(unsigned char* data, size_t data_len);
+
 #endif //HELPER_H

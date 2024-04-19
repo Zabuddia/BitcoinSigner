@@ -265,3 +265,16 @@ void encode_varint(unsigned char* output, unsigned long long num) {
         long_to_little_endian(num, output + 1, 8);
     }
 }
+
+void little_endian_to_big_endian(unsigned char* data, size_t data_len) {
+    unsigned char* temp = (unsigned char*)malloc(data_len);
+    if (temp == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    for (int i = 0; i < data_len; i++) {
+        temp[i] = data[data_len - i - 1];
+    }
+    memcpy(data, temp, data_len);
+    free(temp);
+}
