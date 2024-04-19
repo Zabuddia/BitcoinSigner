@@ -34,6 +34,10 @@ TxIn* TxIn_parse(unsigned char* s) {
     unsigned char prev_tx[32];
     unsigned char prev_index_raw[4];
     unsigned char* script_sig = (unsigned char*)malloc(script_sig_len);
+    if (script_sig == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
     unsigned char sequence_raw[4];
     memcpy(prev_tx, s, 32);
     memcpy(prev_index_raw, s + 32, 4);

@@ -14,4 +14,8 @@ TxOut* TxOut_init(unsigned long long amount, unsigned char* script_pubkey);
 
 void TxOut_toString(TxOut* tx_out);
 
+void TxOut_free(TxOut* tx_out);
+
+TxOut* TxOut_parse(unsigned char* s);
+
 #endif //TXOUT_H

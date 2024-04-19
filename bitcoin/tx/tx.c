@@ -1,6 +1,6 @@
 #include "tx.h"
 
-Tx* Tx_init(int version, unsigned long long num_inputs, TxIn** tx_ins, unsigned long long num_outputs, unsigned char* tx_outs, unsigned char* locktime, __uint8_t testnet) {
+Tx* Tx_init(int version, unsigned long long num_inputs, TxIn** tx_ins, unsigned long long num_outputs, TxOut** tx_outs, unsigned char* locktime, __uint8_t testnet) {
     Tx* tx = (Tx*)malloc(sizeof(Tx));
     if (tx == NULL) {
         printf("Memory allocation failed\n");
@@ -60,6 +60,9 @@ void Tx_free(Tx* tx) {
     for (unsigned long long i = 0; i < tx->num_inputs; i++) {
         TxIn_free(tx->tx_ins[i]);
     }
+    for (unsigned long long i = 0; i < tx->num_outputs; i++) {
+        TxOut_free(tx->tx_outs[i]);
+    }
     free(tx->tx_ins);
     free(tx->tx_outs);
     free(tx);
@@ -82,8 +85,24 @@ Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
     for (unsigned long long i = 0; i < num_inputs; i++) {
         TxIn* tx_in = TxIn_parse(s);
         tx_ins[i] = tx_in;
-        s += 36 + strlen((const char*)tx_in->script_sig);
+        s += 40 + 108;
     }
-    Tx* tx = Tx_init(version, num_inputs, tx_ins, 0, NULL, NULL, testnet);
+    unsigned long long num_outputs = read_varint(s);
+    if (s[0] == 0xfd) {
+        s += 3;
+    } else if (s[0] == 0xfe) {
+        s += 5;
+    } else if (s[0] == 0xff) {
+        s += 9;
+    } else {
+        s += 1;
+    }
+    TxOut** tx_outs = (TxOut**)malloc(num_outputs * sizeof(TxOut*));
+    for (unsigned long long i = 0; i < num_outputs; i++) {
+        TxOut* tx_out = TxOut_parse(s);
+        tx_outs[i] = tx_out;
+        s += 8 + 26;
+    }
+    Tx* tx = Tx_init(version, num_inputs, tx_ins, num_outputs, tx_outs, NULL, testnet);
     return tx;
 }
