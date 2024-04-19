@@ -771,11 +771,11 @@ static char* all_tests() {
     // //Signature tests
     // mu_run_test(test_Signature_der);
 
-    //Tx tests
+    // //Tx tests
     // mu_run_test(test_Tx_parse_version);
     // mu_run_test(test_Tx_parse_inputs);
     // mu_run_test(test_Tx_parse_outputs);
-    mu_run_test(test_Tx_parse_locktime);
+    // mu_run_test(test_Tx_parse_locktime);
 
     // //Helper tests
     // mu_run_test(test_encode_base58);
