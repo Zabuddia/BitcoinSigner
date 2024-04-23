@@ -7,7 +7,7 @@ TxOut* TxOut_init(unsigned long long amount, unsigned char* script_pubkey) {
         exit(1);
     }
     tx_out->amount = amount;
-    tx_out->script_pubkey = script_pubkey;
+    memcpy(tx_out->script_pubkey, script_pubkey, 26);
     return tx_out;
 }
 
@@ -23,18 +23,18 @@ void TxOut_toString(TxOut* tx_out) {
 }
 
 void TxOut_free(TxOut* tx_out) {
-    free(tx_out->script_pubkey);
     free(tx_out);
 }
 
 TxOut* TxOut_parse(unsigned char* s) {
     int script_pubkey_len = 26;
     unsigned long long amount = little_endian_to_long(s, 8);
-    unsigned char* script_pubkey = (unsigned char*)malloc(script_pubkey_len);
-    if (script_pubkey == NULL) {
-        printf("Memory allocation failed\n");
-        exit(1);
-    }
+    unsigned char script_pubkey[script_pubkey_len];
     memcpy(script_pubkey, s + 8, script_pubkey_len);
     return TxOut_init(amount, script_pubkey);
+}
+
+void TxOut_serialize(TxOut* tx_out, unsigned char* result) {
+    long_to_little_endian(tx_out->amount, result, 8);
+    memcpy(result + 8, tx_out->script_pubkey, 26);
 }

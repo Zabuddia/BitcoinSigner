@@ -741,6 +741,17 @@ static char* test_little_endian_to_big_endian() {
     return 0;
 }
 
+static char* test_TxOut_serialize() {
+    unsigned char script_pubkey[26] = {0x19, 0x76, 0xa9, 0x14, 0xbc, 0x3b, 0x65, 0x4d, 0xca, 0x7e, 0x56, 0xb0, 0x4d, 0xca, 0x18, 0xf2, 0x56, 0x6c, 0xda, 0xf0, 0x2e, 0x8d, 0x9a, 0xda, 0x88, 0xac};
+    TxOut* tx_out = TxOut_init(32454049, script_pubkey);
+    unsigned char result[36];
+    TxOut_serialize(tx_out, result);
+    unsigned char expected_result[] = {0xa1, 0x35, 0xef, 0x01, 0x00, 0x00, 0x00, 0x00, 0x19, 0x76, 0xa9, 0x14, 0xbc, 0x3b, 0x65, 0x4d, 0xca, 0x7e, 0x56, 0xb0, 0x4d, 0xca, 0x18, 0xf2, 0x56, 0x6c, 0xda, 0xf0, 0x2e, 0x8d, 0x9a, 0xda, 0x88, 0xac};
+    mu_assert("Error: TxOut_serialize doesn't work", memcmp(result, expected_result, 31) == 0);
+    TxOut_free(tx_out);
+    return 0;
+}
+
 static char* all_tests() {
     // //S256Field tests
     // mu_run_test(test_S256Field_add);
@@ -772,10 +783,11 @@ static char* all_tests() {
     // mu_run_test(test_Signature_der);
 
     // //Tx tests
-    // mu_run_test(test_Tx_parse_version);
-    // mu_run_test(test_Tx_parse_inputs);
-    // mu_run_test(test_Tx_parse_outputs);
-    // mu_run_test(test_Tx_parse_locktime);
+    mu_run_test(test_Tx_parse_version);
+    mu_run_test(test_Tx_parse_inputs);
+    mu_run_test(test_Tx_parse_outputs);
+    mu_run_test(test_Tx_parse_locktime);
+    mu_run_test(test_TxOut_serialize);
 
     // //Helper tests
     // mu_run_test(test_encode_base58);
