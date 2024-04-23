@@ -16,46 +16,6 @@ Tx* Tx_init(int version, unsigned long long num_inputs, TxIn** tx_ins, unsigned 
     return tx;
 }
 
-void Tx_toString(Tx* tx) {
-    if (tx == NULL) {
-        printf("Tx_(NULL)\n");
-    } else {
-        printf("Tx_(\n");
-        printf("  tx: %s\n", Tx_id(tx));
-        printf("  version: %d\n", tx->version);
-        printf("  tx_ins: ");
-        for (unsigned long long i = 0; i < tx->num_inputs; i++) {
-            TxIn_toString(tx->tx_ins[i]);
-        }
-        printf("  tx_outs: %s\n", tx->tx_outs);
-        printf("  locktime: %s\n", tx->locktime);
-        printf("  testnet: %d\n", tx->testnet);
-        printf(")\n");
-    }
-}
-
-unsigned char* Tx_id(Tx* tx) {
-    return Tx_hash(tx);
-}
-
-unsigned char* Tx_hash(Tx* tx) {
-    unsigned char result[32];
-    unsigned char* tx_str = Tx_serialize(tx);
-    hash256(tx_str, strlen(tx_str), result);
-    free(tx_str);
-    return result;
-}
-
-unsigned char* Tx_serialize(Tx* tx) {
-    unsigned char* result = (unsigned char*)malloc(1000);
-    if (result == NULL) {
-        printf("Memory allocation failed\n");
-        exit(1);
-    }
-    sprintf(result, "%d%s%s%s", tx->version, tx->tx_ins, tx->tx_outs, tx->locktime);
-    return result;
-}
-
 void Tx_free(Tx* tx) {
     for (unsigned long long i = 0; i < tx->num_inputs; i++) {
         TxIn_free(tx->tx_ins[i]);
@@ -106,4 +66,37 @@ Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
     unsigned long long locktime = little_endian_to_long(s, 4);
     Tx* tx = Tx_init(version, num_inputs, tx_ins, num_outputs, tx_outs, locktime, testnet);
     return tx;
+}
+
+void Tx_serialize(Tx* tx, unsigned char* result) {
+    int_to_little_endian(tx->version, result, 4);
+    encode_varint(result + 4, tx->num_inputs);
+    if (tx->num_inputs < 253) {
+        result += 5;
+    } else if (tx->num_inputs < 65535) {
+        result += 7;
+    } else if (tx->num_inputs < 4294967295) {
+        result += 9;
+    } else {
+        result += 17;
+    }
+    for (unsigned long long i = 0; i < tx->num_inputs; i++) {
+        TxIn_serialize(tx->tx_ins[i], result + i * 148);
+    }
+    result += tx->num_inputs * 148;
+    encode_varint(result, tx->num_outputs);
+    if (tx->num_outputs < 253) {
+        result += 1;
+    } else if (tx->num_outputs < 65535) {
+        result += 3;
+    } else if (tx->num_outputs < 4294967295) {
+        result += 5;
+    } else {
+        result += 9;
+    }
+    for (unsigned long long i = 0; i < tx->num_outputs; i++) {
+        TxOut_serialize(tx->tx_outs[i], result + i * 34);
+    }
+    result += tx->num_outputs * 34;
+    long_to_little_endian(tx->locktime, result, 4);
 }
