@@ -111,3 +111,15 @@ void Tx_serialize(Tx* tx, unsigned char* result) {
     result += tx->num_outputs * 34;
     long_to_little_endian(tx->locktime, result, 4);
 }
+
+unsigned long long fee(Tx* tx, size_t testnet) {
+    unsigned long long input_sum = 0;
+    for (unsigned long long i = 0; i < tx->num_inputs; i++) {
+        input_sum += value(tx->tx_ins[i], testnet);
+    }
+    unsigned long long output_sum = 0;
+    for (unsigned long long i = 0; i < tx->num_outputs; i++) {
+        output_sum += tx->tx_outs[i]->amount;
+    }
+    return input_sum - output_sum;
+}

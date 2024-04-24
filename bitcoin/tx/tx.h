@@ -27,4 +27,6 @@ Tx* Tx_parse(unsigned char* s, uint8_t testnet);
 
 void Tx_serialize(Tx* tx, unsigned char* result);
 
+unsigned long long fee(Tx* tx, size_t testnet);
+
 #endif //TX_H
