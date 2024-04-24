@@ -123,3 +123,187 @@ unsigned long long fee(Tx* tx, size_t testnet) {
     }
     return input_sum - output_sum;
 }
+
+//Txin
+TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, unsigned char* script_sig, int sequence) {
+    TxIn* tx_in = (TxIn*)malloc(sizeof(TxIn));
+    if (tx_in == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    memcpy(tx_in->prev_tx, prev_tx, 32);
+    tx_in->prev_index = prev_index;
+    memcpy(tx_in->script_sig, script_sig, 108);
+    tx_in->sequence = sequence;
+    return tx_in;
+}
+
+void TxIn_toString(TxIn* tx_in) {
+    if (tx_in == NULL) {
+        printf("TxIn_(NULL)\n");
+    } else {
+        printf("TxIn_(\n");
+        printf("  prev_tx: %s\n", tx_in->prev_tx);
+        printf("  prev_index: %d\n", tx_in->prev_index);
+        printf(")\n");
+    }
+}
+
+void TxIn_free(TxIn* tx_in) {
+    free(tx_in);
+}
+
+TxIn* TxIn_parse(unsigned char* s) {
+    int script_sig_len = 108;
+    unsigned char prev_tx[32];
+    unsigned char prev_index_raw[4];
+    unsigned char script_sig[script_sig_len];
+    unsigned char sequence_raw[4];
+    memcpy(prev_tx, s, 32);
+    memcpy(prev_index_raw, s + 32, 4);
+    memcpy(script_sig, s + 36, script_sig_len);
+    memcpy(sequence_raw, s + 36 + script_sig_len, 4);
+    little_endian_to_big_endian(prev_tx, 32);
+    int prev_index = little_endian_to_int(prev_index_raw, 4);
+    int sequence = little_endian_to_int(sequence_raw, 4);
+    return TxIn_init(prev_tx, prev_index, script_sig, sequence);
+}
+
+void TxIn_serialize(TxIn* tx_in, unsigned char* result) {
+    memcpy(result, tx_in->prev_tx, 32);
+    int_to_little_endian(tx_in->prev_index, result + 32, 4);
+    memcpy(result + 36, tx_in->script_sig, 108);
+    int_to_little_endian(tx_in->sequence, result + 36 + 108, 4);
+}
+
+Tx* fetch_tx(TxIn* txin, size_t testnet) {
+    Tx* tx = fetch(txin->prev_tx, testnet);
+    return tx;
+}
+
+unsigned long long value(TxIn* txin, size_t testnet) {
+    Tx* tx = fetch_tx(txin, testnet);
+    unsigned long long value = tx->tx_outs[txin->prev_index]->amount;
+    free(tx);
+    return value;
+}
+
+void script_pubkey(TxIn* txin, size_t testnet, unsigned char* result) {
+    Tx* tx = fetch_tx(txin, testnet);
+    result = tx->tx_outs[txin->prev_index]->script_pubkey;
+    free(tx);
+}
+
+//Txout
+TxOut* TxOut_init(unsigned long long amount, unsigned char* script_pubkey) {
+    TxOut* tx_out = (TxOut*)malloc(sizeof(TxOut));
+    if (tx_out == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    tx_out->amount = amount;
+    memcpy(tx_out->script_pubkey, script_pubkey, 26);
+    return tx_out;
+}
+
+void TxOut_toString(TxOut* tx_out) {
+    if (tx_out == NULL) {
+        printf("TxOut_(NULL)\n");
+    } else {
+        printf("TxOut_(\n");
+        printf("  amount: %llu\n", tx_out->amount);
+        printf("  script_pubkey: %s\n", tx_out->script_pubkey);
+        printf(")\n");
+    }
+}
+
+void TxOut_free(TxOut* tx_out) {
+    free(tx_out);
+}
+
+TxOut* TxOut_parse(unsigned char* s) {
+    int script_pubkey_len = 26;
+    unsigned long long amount = little_endian_to_long(s, 8);
+    unsigned char script_pubkey[script_pubkey_len];
+    memcpy(script_pubkey, s + 8, script_pubkey_len);
+    return TxOut_init(amount, script_pubkey);
+}
+
+void TxOut_serialize(TxOut* tx_out, unsigned char* result) {
+    long_to_little_endian(tx_out->amount, result, 8);
+    memcpy(result + 8, tx_out->script_pubkey, 26);
+}
+
+//Txfetcher
+size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+    size_t real_size = size * nmemb;
+    char **response_ptr = (char **)userdata;
+    char *old_response = *response_ptr;
+    size_t old_len = old_response ? strlen(old_response) : 0;
+
+    char *new_response = realloc(old_response, old_len + real_size + 1);
+    if (new_response == NULL) {
+        fprintf(stderr, "Failed to allocate memory\n");
+        return 0;
+    }
+
+    memcpy(new_response + old_len, ptr, real_size); // append new data
+    new_response[old_len + real_size] = '\0'; // null-terminate
+
+    *response_ptr = new_response;
+    free(new_response);
+    return real_size;
+}
+
+char *http_get(const char *url) {
+    CURL *curl;
+    CURLcode res;
+    char *response = calloc(10000 ,sizeof(char)); // Allocate response buffer
+    if (response == NULL) {
+        fprintf(stderr, "Failed to allocate memory\n");
+        return NULL;
+    }
+    memset(response, 0, 10000 * sizeof(char)); // Initialize response buffer
+    response[0] = '\0';
+    
+    curl = curl_easy_init();
+    if(curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, url);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)response);
+        res = curl_easy_perform(curl);
+        if(res != CURLE_OK)
+            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        curl_easy_cleanup(curl);
+    }
+    return response;
+}
+
+const char *get_url(int testnet) {
+    if (testnet)
+        return "https://blockstream.info/testnet/api/";
+    else
+        return "https://blockstream.info/api/";
+}
+
+Tx *fetch(unsigned char *tx_id, size_t testnet) {
+    char url[MAX_URL_LENGTH];
+    snprintf(url, sizeof(url), "%s/tx/%s/hex", get_url(testnet), tx_id);
+    
+    char *response = http_get(url);
+    unsigned char* raw = (unsigned char*)response;
+    // Assuming not a segwit transaction
+    Tx* tx = Tx_parse(raw, testnet);
+
+    unsigned char tx_id_result[32];
+    Tx_id(tx, tx_id_result);
+    if (memcmp(tx_id_result, tx_id, 32) != 0) {
+        fprintf(stderr, "Tx ID mismatch\n");
+        return NULL;
+    }
+
+    free(response);
+    free(raw);
+
+    return tx;
+}

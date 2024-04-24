@@ -4,6 +4,8 @@
         "privatekeyint.h": "c",
         "evp.h": "c",
         "s256field.h": "c",
-        "helper.h": "c"
+        "helper.h": "c",
+        "txout.h": "c",
+        "stdio.h": "c"
     }
 }
