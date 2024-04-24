@@ -288,8 +288,13 @@ const char *get_url(int testnet) {
 
 Tx *fetch(unsigned char *tx_id, size_t testnet) {
     char url[MAX_URL_LENGTH];
-    snprintf(url, sizeof(url), "%s/tx/%s/hex", get_url(testnet), tx_id);
-    
+    snprintf(url, sizeof(url), "%stx/", get_url(testnet));
+    int start = strlen(url);
+    for (int i = 0; i < 32; i++) {
+        snprintf(url + start + 2 * i, 3, "%02x", tx_id[i]);
+    }
+    snprintf(url + start + 64, 5, "%s", "/hex");
+    printf("URL: %s\n", url);
     char *response = http_get(url);
     unsigned char* raw = (unsigned char*)response;
     // Assuming not a segwit transaction
