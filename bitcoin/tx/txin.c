@@ -50,3 +50,22 @@ void TxIn_serialize(TxIn* tx_in, unsigned char* result) {
     memcpy(result + 36, tx_in->script_sig, 108);
     int_to_little_endian(tx_in->sequence, result + 36 + 108, 4);
 }
+
+Tx* fetch_tx(TxIn* txin, size_t testnet) {
+    Tx* tx = fetch(txin->prev_tx, testnet);
+    return tx;
+}
+
+unsigned long long value(TxIn* txin, size_t testnet) {
+    Tx* tx = fetch_tx(txin, testnet);
+    unsigned long long value = tx->tx_outs[txin->prev_index]->amount;
+    free(tx);
+    return value;
+}
+
+unsigned char* script_pubkey(TxIn* txin, size_t testnet) {
+    Tx* tx = fetch_tx(txin, testnet);
+    unsigned char script_pubkey[26] = tx->tx_outs[txin->prev_index]->script_pubkey;
+    free(tx);
+    return script_pubkey;
+}

@@ -28,6 +28,17 @@ void Tx_free(Tx* tx) {
     free(tx);
 }
 
+void Tx_id(Tx* tx, unsigned char* result) {
+    unsigned char* serial = (unsigned char*)malloc(10000);
+    if (serial == NULL) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    Tx_serialize(tx, serial);
+    hash256(serial, 148 * tx->num_inputs + 34 * tx->num_outputs + 10, result);
+    free(serial);
+}
+
 Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
     unsigned char version_raw[4] = {s[0], s[1], s[2], s[3]};
     int version = little_endian_to_int(version_raw, 4);

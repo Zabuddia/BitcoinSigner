@@ -9,6 +9,7 @@
 #include "../bitcoin/tx/tx.h"
 #include "../bitcoin/tx/txin.h"
 #include "../bitcoin/tx/txout.h"
+#include "../bitcoin/tx/txfetcher.h"
 
 //For testing compressed sec and adding points with the same x
 #define TEST_N "6d183de4400510e40d4f32da2e72168a5eaa3ee28bf6250923603284adfe55af"
@@ -822,6 +823,35 @@ static char* test_Tx_serialize() {
     return 0;
 }
 
+static char* test_write_callback() {
+    char* data = "Sample data that simulates what might be received from a server.";
+    size_t data_length = strlen(data);
+    char* response = calloc(1, 1);
+
+    // Simulate calling the callback multiple times with parts of the data
+    size_t chunk_size = 10; // Assume each call gives us 10 bytes of data
+    for (size_t offset = 0; offset < data_length; offset += chunk_size) {
+        size_t size = chunk_size;
+        if (offset + size > data_length) size = data_length - offset;
+        size_t processed = write_callback(data + offset, 1, size, &response);
+        if (processed != size) {
+            fprintf(stderr, "write_callback processed an unexpected number of bytes: %zu expected, %zu actual\n", size, processed);
+            break;
+        }
+    }
+    mu_assert("Error: write_callback doesn't work", strcmp(data, response) == 0);
+    free(response);
+    return 0;
+}
+
+static char* test_http_get() {
+    char* url = "http://httpbin.org/get";
+    char* response = http_get(url);
+    mu_assert("Error: http_get doesn't work", response);
+    free(response);
+    return 0;
+}
+
 static char* all_tests() {
     // //S256Field tests
     // mu_run_test(test_S256Field_add);
@@ -861,6 +891,8 @@ static char* all_tests() {
     // mu_run_test(test_TxOut_serialize);
     // mu_run_test(test_TxIn_serialize);
     // mu_run_test(test_Tx_serialize);
+    // mu_run_test(test_write_callback);
+    mu_run_test(test_http_get);
 
     // //Helper tests
     // mu_run_test(test_encode_base58);

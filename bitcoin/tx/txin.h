@@ -4,6 +4,8 @@
 #include <stdio.h>
 
 #include "../helper/helper.h"
+#include "tx.h"
+#include "txfetcher.h"
 
 typedef struct {
     unsigned char prev_tx[32];
@@ -21,5 +23,9 @@ void TxIn_free(TxIn* tx_in);
 TxIn* TxIn_parse(unsigned char* s);
 
 void TxIn_serialize(TxIn* tx_in, unsigned char* result);
+
+Tx* fetch_tx(TxIn* txin, size_t testnet);
+
+unsigned long long value(TxIn* txin, size_t testnet);
 
 #endif //TXIN_H

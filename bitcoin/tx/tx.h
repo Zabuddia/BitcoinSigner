@@ -21,6 +21,8 @@ Tx* Tx_init(int version, unsigned long long num_inputs, TxIn** tx_ins, unsigned 
 
 void Tx_free(Tx* tx);
 
+unsigned char* Tx_id(Tx* tx, unsigned char* result);
+
 Tx* Tx_parse(unsigned char* s, uint8_t testnet);
 
 void Tx_serialize(Tx* tx, unsigned char* result);
