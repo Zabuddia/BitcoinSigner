@@ -251,7 +251,6 @@ size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
     new_response[old_len + real_size] = '\0'; // null-terminate
 
     *response_ptr = new_response;
-    free(new_response);
     return real_size;
 }
 
@@ -265,7 +264,6 @@ char *http_get(const char *url) {
     }
     memset(response, 0, 10000 * sizeof(char)); // Initialize response buffer
     response[0] = '\0';
-    
     curl = curl_easy_init();
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_URL, url);
