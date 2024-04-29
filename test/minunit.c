@@ -922,6 +922,29 @@ static char* test_decode_num() {
     return 0;
 }
 
+static char* test_hash160() {
+    unsigned char test[11] = "hello world";
+    unsigned char result[20];
+    hash160(test, 11, result);
+    unsigned char expected_result[] = {0xd7, 0xd5, 0xee, 0x78, 0x24, 0xff, 0x93, 0xf9, 0x4c, 0x30, 0x55, 0xaf, 0x93, 0x82, 0xc8, 0x6c, 0x68, 0xb5, 0xca, 0x92};
+    mu_assert("Error: hash160 doesn0t work", memcmp(result, expected_result, 20) == 0);
+    return 0;
+}
+
+static char* test_op_hash160() {
+    Op* test_op = op_init();
+    unsigned char test[11] = "hello world";
+    push(test_op, test, 11);
+    size_t worked = op_hash160(test_op);
+    unsigned char result[20] = {0};
+    peek(test_op, result);
+    unsigned char expected_result[20] = {0xd7, 0xd5, 0xee, 0x78, 0x24, 0xff, 0x93, 0xf9, 0x4c, 0x30, 0x55, 0xaf, 0x93, 0x82, 0xc8, 0x6c, 0x68, 0xb5, 0xca, 0x92};
+    op_free(test_op);
+    mu_assert("Error: op_hash160 doesn't work", worked);
+    mu_assert("Error: op_hash160 doesn't work", memcmp(result, expected_result, 20) == 0);
+    return 0;
+}
+
 static char* all_tests() {
     // //S256Field tests
     // mu_run_test(test_S256Field_add);
@@ -968,6 +991,7 @@ static char* all_tests() {
     // //Op tests
     // mu_run_test(test_encode_num);
     // mu_run_test(test_decode_num);
+    mu_run_test(test_op_hash160);
 
     // //Helper tests
     // mu_run_test(test_encode_base58);
@@ -979,6 +1003,7 @@ static char* all_tests() {
     // mu_run_test(test_read_varint);
     // mu_run_test(test_encode_varint);
     // mu_run_test(test_little_endian_to_big_endian);
+    // mu_run_test(test_hash160);
 
     // //Create addresses
     // mu_run_test(generate_testnet_address);
