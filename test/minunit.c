@@ -7,6 +7,8 @@
 #include "../bitcoin/ecc/signature.h"
 #include "../bitcoin/ecc/privatekey.h"
 #include "../bitcoin/tx/tx.h"
+#include "../bitcoin/script/op.h"
+#include "../bitcoin/script/script.h"
 
 //For testing compressed sec and adding points with the same x
 #define TEST_N "6d183de4400510e40d4f32da2e72168a5eaa3ee28bf6250923603284adfe55af"
@@ -858,6 +860,68 @@ static char* test_fee() {
     return 0;
 }
 
+static char* test_encode_num() {
+    long long num_1 = 0;
+    unsigned char result_1[1];
+    encode_num(num_1, result_1);
+    unsigned char expected_result_1[1] = {0x00};
+    mu_assert("Error: encode_num doesn't work", memcmp(result_1, expected_result_1, 1) == 0);
+    long long num_2 = 252;
+    unsigned char result_2[2];
+    encode_num(num_2, result_2);
+    unsigned char expected_result_2[2] = {0xfc, 0x00};
+    mu_assert("Error: encode_num doesn't work", memcmp(result_2, expected_result_2, 1) == 0);
+    long long num_3 = -1;
+    unsigned char result_3[1];
+    encode_num(num_3, result_3);
+    unsigned char expected_result_3[1] = {0x81};
+    mu_assert("Error: encode_num doesn't work", memcmp(result_3, expected_result_3, 1) == 0);
+    long long num_4 = 1098523;
+    unsigned char result_4[3];
+    encode_num(num_4, result_4);
+    unsigned char expected_result_4[3] = {0x1b, 0xc3, 0x10};
+    mu_assert("Error: encode_num doesn't work", memcmp(result_4, expected_result_4, 3) == 0);
+    long long num_5 = -1098523;
+    unsigned char result_5[3];
+    encode_num(num_5, result_5);
+    unsigned char expected_result_5[3] = {0x1b, 0xc3, 0x90};
+    mu_assert("Error: encode_num doesn't work", memcmp(result_5, expected_result_5, 3) == 0);
+    long long num_6 = -252;
+    unsigned char result_6[2];
+    encode_num(num_6, result_6);
+    unsigned char expected_result_6[2] = {0xfc, 0x80};
+    mu_assert("Error: encode_num doesn't work", memcmp(result_6, expected_result_6, 2) == 0);
+    return 0;
+}
+
+static char* test_decode_num() {
+    unsigned char raw_num_1[] = {0x00};
+    long long result_1 = decode_num(raw_num_1, 1);
+    long long expected_result_1 = 0;
+    mu_assert("Error: decode_num doesn't work", result_1 == expected_result_1);
+    unsigned char raw_num_2[] = {0xfc, 0x00};
+    long long result_2 = decode_num(raw_num_2, 2);
+    long long expected_result_2 = 252;
+    mu_assert("Error: decode_num doesn't work", result_2 == expected_result_2);
+    unsigned char raw_num_3[] = {0x81};
+    long long result_3 = decode_num(raw_num_3, 1);
+    long long expected_result_3 = -1;
+    mu_assert("Error: decode_num doesn't work", result_3 == expected_result_3);
+    unsigned char raw_num_4[] = {0x1b, 0xc3, 0x10};
+    long long result_4 = decode_num(raw_num_4, 3);
+    long long expected_result_4 = 1098523;
+    mu_assert("Error: decode_num doesn't work", result_4 == expected_result_4);
+    unsigned char raw_num_5[] = {0x1b, 0xc3, 0x90};
+    long long result_5 = decode_num(raw_num_5, 3);
+    long long expected_result_5 = -1098523;
+    mu_assert("Error: decode_num doesn't work", result_5 == expected_result_5);
+    unsigned char raw_num_6[] = {0xfc, 0x80};
+    long long result_6 = decode_num(raw_num_6, 2);
+    long long expected_result_6 = -252;
+    mu_assert("Error: decode_num doesn't work", result_6 == expected_result_6);
+    return 0;
+}
+
 static char* all_tests() {
     // //S256Field tests
     // mu_run_test(test_S256Field_add);
@@ -897,9 +961,13 @@ static char* all_tests() {
     // mu_run_test(test_TxOut_serialize);
     // mu_run_test(test_TxIn_serialize);
     // mu_run_test(test_Tx_serialize);
-    mu_run_test(test_fee);
+    // mu_run_test(test_fee);
     // mu_run_test(test_write_callback);
     // mu_run_test(test_http_get);
+
+    // //Op tests
+    // mu_run_test(test_encode_num);
+    // mu_run_test(test_decode_num);
 
     // //Helper tests
     // mu_run_test(test_encode_base58);
