@@ -84,4 +84,10 @@ size_t op_hash256(Op* op);
 
 size_t op_checksig(Op* op, S256Field* z);
 
+char* op_code_functions(int cmd_int);
+
+void op_perform_operation_basic(Op* op, int cmd_int);
+
+void op_perform_operation_z(Op* op, int cmd_int, S256Field* z);
+
 #endif // OP_H

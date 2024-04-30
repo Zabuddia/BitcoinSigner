@@ -135,3 +135,50 @@ Script* script_add(Script* script_1, Script* script_2) {
     }
     return script;
 }
+
+void cmds_deep_copy(Command* dest, Command* src, int len) {
+    for (int i = 0; i < len; i++) {
+        memcpy(dest[i].data, src[i].data, src[i].data_len);
+        dest[i].data_len = src[i].data_len;
+    }
+}
+
+void script_deep_copy(Script* dest, Script* src) {
+    cmds_deep_copy(dest->cmds, src->cmds, src->cmds_len);
+    dest->cmds_len = src->cmds_len;
+}
+
+size_t script_evaluate(Script* script, S256Field* z) {
+    Script* script_copy = script_init();
+    script_deep_copy(script_copy, script);
+    Op* op_1 = op_init();
+    Op* op_2 = op_init();
+    int j = 0;
+    while (script_copy->cmds_len > 0) {
+        Command cmd = script_copy->cmds[j];
+        j++;
+        script_copy->cmds_len--;
+        if (cmd.data_len == 1) {
+            int cmd_int = little_endian_to_int(cmd.data, 1);
+            // char* cmd_str = op_code_functions(cmd_int);
+            if (cmd_int == 172) {
+                op_perform_operation_z(op_1, cmd_int, z);
+            } else {
+                op_perform_operation_basic(op_1, cmd_int);
+            }
+        } else {
+            push(op_1, cmd.data, cmd.data_len);
+        }
+    }
+    
+    if (op_1->top == -1) {
+        op_free(op_1);
+        op_free(op_2);
+        script_free(script_copy);
+        return 0;
+    }
+    op_free(op_1);
+    op_free(op_2);
+    script_free(script_copy);
+    return 1;
+}
