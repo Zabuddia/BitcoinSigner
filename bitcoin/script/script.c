@@ -158,6 +158,11 @@ size_t script_evaluate(Script* script, S256Field* z) {
         Command cmd = script_copy->cmds[j];
         j++;
         script_copy->cmds_len--;
+        // printf("Command: ");
+        // for (int i = 0; i < cmd.data_len; i++) {
+        //     printf("%02x", cmd.data[i]);
+        // }
+        // printf("\n");
         if (cmd.data_len == 1) {
             int cmd_int = little_endian_to_int(cmd.data, 1);
             // char* cmd_str = op_code_functions(cmd_int);
@@ -172,8 +177,15 @@ size_t script_evaluate(Script* script, S256Field* z) {
         } else {
             push(op_1, cmd.data, cmd.data_len);
         }
+        // printf("Stack: ");
+        // for (int i = 0; i < op_1->top + 1; i++) {
+        //     for (int k = 0; k < op_1->element_length[i]; k++) {
+        //         printf("%02x", op_1->stack[i][k]);
+        //     }
+        //     printf("\n");
+        // }
+        // printf("\n");
     }
-    
     if (op_1->top == -1) {
         op_free(op_1);
         op_free(op_2);

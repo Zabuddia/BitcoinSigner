@@ -716,7 +716,7 @@ static char* test_Tx_parse() {
 }
 
 static char* test_print_formatted_bytes() {
-    const unsigned char* hex_string = "04887387e452b8eacc4acfde10d9aaf7f6d9a0f975aabb10d006e4da568744d06c61de6d95231cd89026e286df3b6ae4a894a3378e393e93a0f45b666329a0ae34";
+    const unsigned char* hex_string = "e2951e007b834eb61e995de8122b6d3afeceeb42";
     print_formatted_bytes(hex_string);
     const unsigned char* hex_string_2 = "3045022000eff69ef2b1bd93a66ed5219add4fb51e11a840f404876325a1e8ffe0529a2c022100c7207fee197d27c618aea621406f6bf5ef6fca38681d82b2f06fddbdce6feab601";
     print_formatted_bytes(hex_string_2);
@@ -1110,7 +1110,47 @@ static char* test_p2pk() {
 }
 
 static char* test_p2pkh() {
-
+    mpz_t test_Z;
+    mpz_init_set_str(test_Z, TEST_Z_2, 16);
+    S256Field* test_z = S256Field_init(test_Z);
+    unsigned char hash[20] = {0xe2, 0x95, 0x1e, 0x00, 0x7b, 0x83, 0x4e, 0xb6, 0x1e, 0x99, 0x5d, 0xe8, 0x12, 0x2b, 0x6d, 0x3a, 0xfe, 0xce, 0xeb, 0x42};
+    unsigned char sig[72] = {0x30, 0x45, 0x02, 0x20, 0x00, 0xef, 0xf6, 0x9e, 0xf2, 0xb1, 0xbd, 0x93, 0xa6, 0x6e, 0xd5, 0x21, 0x9a, 0xdd, 0x4f, 0xb5, 0x1e, 0x11, 0xa8, 0x40, 0xf4, 0x04, 0x87, 0x63, 0x25, 0xa1, 0xe8, 0xff, 0xe0, 0x52, 0x9a, 0x2c, 0x02, 0x21, 0x00, 0xc7, 0x20, 0x7f, 0xee, 0x19, 0x7d, 0x27, 0xc6, 0x18, 0xae, 0xa6, 0x21, 0x40, 0x6f, 0x6b, 0xf5, 0xef, 0x6f, 0xca, 0x38, 0x68, 0x1d, 0x82, 0xb2, 0xf0, 0x6f, 0xdd, 0xbd, 0xce, 0x6f, 0xea, 0xb6, 0x01};
+    unsigned char pubkey[65] = {0x04, 0x88, 0x73, 0x87, 0xe4, 0x52, 0xb8, 0xea, 0xcc, 0x4a, 0xcf, 0xde, 0x10, 0xd9, 0xaa, 0xf7, 0xf6, 0xd9, 0xa0, 0xf9, 0x75, 0xaa, 0xbb, 0x10, 0xd0, 0x06, 0xe4, 0xda, 0x56, 0x87, 0x44, 0xd0, 0x6c, 0x61, 0xde, 0x6d, 0x95, 0x23, 0x1c, 0xd8, 0x90, 0x26, 0xe2, 0x86, 0xdf, 0x3b, 0x6a, 0xe4, 0xa8, 0x94, 0xa3, 0x37, 0x8e, 0x39, 0x3e, 0x93, 0xa0, 0xf4, 0x5b, 0x66, 0x63, 0x29, 0xa0, 0xae, 0x34};
+    Command cmd_opdup;
+    cmd_opdup.data[0] = 0x76;
+    cmd_opdup.data_len = 1;
+    Command cmd_ophash160;
+    cmd_ophash160.data[0] = 0xa9;
+    cmd_ophash160.data_len = 1;
+    Command cmd_hash;
+    memcpy(cmd_hash.data, hash, 20);
+    cmd_hash.data_len = 20;
+    Command cmd_opequalverify;
+    cmd_opequalverify.data[0] = 0x88;
+    cmd_opequalverify.data_len = 1;
+    Command cmd_opchecksig;
+    cmd_opchecksig.data[0] = 0xac;
+    cmd_opchecksig.data_len = 1;
+    Command cmds_pubkey[5] = {cmd_opdup, cmd_ophash160, cmd_hash, cmd_opequalverify, cmd_opchecksig};
+    Script* scriptpubkey = script_init();
+    script_set_cmds(scriptpubkey, cmds_pubkey, 5);
+    Command cmd_sig;
+    memcpy(cmd_sig.data, sig, 72);
+    cmd_sig.data_len = 72;
+    Command cmd_pubkey;
+    memcpy(cmd_pubkey.data, pubkey, 65);
+    cmd_pubkey.data_len = 65;
+    Command cmds_sig[2] = {cmd_sig, cmd_pubkey};
+    Script* scriptsig = script_init();
+    script_set_cmds(scriptsig, cmds_sig, 2);
+    Script* combined_script = script_add(scriptsig, scriptpubkey);
+    size_t worked = script_evaluate(combined_script, test_z);
+    mu_assert("Error: script_evaluate doesn't work", worked);
+    script_free(scriptpubkey);
+    script_free(scriptsig);
+    script_free(combined_script);
+    S256Field_free(test_z);
+    return 0;
 }
 
 static char* all_tests() {
@@ -1169,7 +1209,7 @@ static char* all_tests() {
     // mu_run_test(test_script_add);
     // mu_run_test(test_script_evaluate);
     // mu_run_test(test_p2pk);
-    mu_run_test(test_p2pkh);
+    // mu_run_test(test_p2pkh);
 
     // //Helper tests
     // mu_run_test(test_encode_base58);
