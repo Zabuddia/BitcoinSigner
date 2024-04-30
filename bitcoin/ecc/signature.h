@@ -19,4 +19,6 @@ void Signature_toString(Signature* sig);
 
 void Signature_der(Signature* sig, unsigned char* output);
 
+Signature* Signature_parse(unsigned char* s);
+
 #endif //SIGNATURE_H

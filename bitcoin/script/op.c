@@ -294,3 +294,30 @@ size_t op_hash256(Op* op) {
     push(op, hash, 32);
     return 1;
 }
+
+size_t op_checksig(Op* op, S256Field* z) {
+    if (op->top < 1) {
+        return 0;
+    }
+    unsigned char sec_pubkey[op->element_length[op->top]];
+    size_t sec_pubkey_len = op->element_length[op->top];
+    pop(op, sec_pubkey);
+    unsigned char der_signature[op->element_length[op->top]];
+    size_t der_signature_len = op->element_length[op->top];
+    pop(op, der_signature);
+    S256Point* point = S256Point_parse_sec(sec_pubkey);
+    Signature* sig = Signature_parse(der_signature);
+    int result = S256Point_verify(point, sig, z);
+    free(point);
+    free(sig);
+    if (result) {
+        unsigned char element[1];
+        encode_num(1, element);
+        push(op, element, 1);
+    } else {
+        unsigned char element[1];
+        encode_num(0, element);
+        push(op, element, 1);
+    }
+    return 1;
+}

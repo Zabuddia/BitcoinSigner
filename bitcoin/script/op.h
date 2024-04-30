@@ -2,6 +2,7 @@
 #define OP_H
 
 #include "../helper/helper.h"
+#include "../ecc/s256point.h"
 
 #define STACK_SIZE 1000
 
@@ -80,5 +81,7 @@ size_t op_ripemd160(Op* op);
 size_t op_sha256(Op* op);
 
 size_t op_hash256(Op* op);
+
+size_t op_checksig(Op* op, S256Field* z);
 
 #endif // OP_H
