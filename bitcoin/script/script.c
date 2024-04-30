@@ -160,8 +160,8 @@ size_t script_evaluate(Script* script, S256Field* z) {
         script_copy->cmds_len--;
         if (cmd.data_len == 1) {
             int cmd_int = little_endian_to_int(cmd.data, 1);
-            char* cmd_str = op_code_functions(cmd_int);
-            printf("%s\n", cmd_str);
+            // char* cmd_str = op_code_functions(cmd_int);
+            // printf("%s\n", cmd_str);
             if (cmd_int == 172) {
                 op_perform_operation_z(op_1, cmd_int, z);
             } else if (cmd_int == 107 || cmd_int == 108) {

@@ -570,8 +570,7 @@ size_t op_mul(Op* op) {
 }
 
 size_t op_equalverify(Op* op) {
-    printf("Not implemented\n");
-    return 0;
+    return op_equal(op) && op_verify(op);
 }
 
 size_t op_1add(Op* op) {
