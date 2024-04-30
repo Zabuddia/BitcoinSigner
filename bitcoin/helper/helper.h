@@ -24,6 +24,8 @@ extern mpz_t B;
 extern mpz_t gx;
 extern mpz_t gy;
 
+void sha1(const unsigned char* message, size_t message_len, unsigned char* digest);
+
 void sha256(const unsigned char *message, size_t message_len, unsigned char *digest);
 
 void ripemd160(const unsigned char *message, size_t message_len, unsigned char *digest);

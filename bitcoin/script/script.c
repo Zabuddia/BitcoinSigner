@@ -163,6 +163,7 @@ size_t script_evaluate(Script* script, S256Field* z) {
         //     printf("%02x", cmd.data[i]);
         // }
         // printf("\n");
+        // printf("\n");
         if (cmd.data_len == 1) {
             int cmd_int = little_endian_to_int(cmd.data, 1);
             // char* cmd_str = op_code_functions(cmd_int);
@@ -182,6 +183,7 @@ size_t script_evaluate(Script* script, S256Field* z) {
         //     for (int k = 0; k < op_1->element_length[i]; k++) {
         //         printf("%02x", op_1->stack[i][k]);
         //     }
+        //     printf("\n");
         //     printf("\n");
         // }
         // printf("\n");

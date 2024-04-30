@@ -8,6 +8,25 @@
 
 const char b58digits_ordered[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
+void sha1(const unsigned char* message, size_t message_len, unsigned char* digest) {
+    EVP_MD_CTX *mdctx;
+    
+    if((mdctx = EVP_MD_CTX_new()) == NULL)
+        return;
+    
+    if(1 != EVP_DigestInit_ex(mdctx, EVP_sha1(), NULL))
+        return;
+    
+    if(1 != EVP_DigestUpdate(mdctx, message, message_len))
+        return;
+    
+    unsigned int digest_len;
+    if(1 != EVP_DigestFinal_ex(mdctx, digest, &digest_len))
+        return;
+    
+    EVP_MD_CTX_free(mdctx);
+}
+
 void sha256(const unsigned char *message, size_t message_len, unsigned char *digest) {
     EVP_MD_CTX *mdctx;
     

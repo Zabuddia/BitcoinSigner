@@ -40,7 +40,6 @@ void peek(Op* op, unsigned char* result) {
         exit(1);
     }
     size_t element_len = op->element_length[op->top];
-    printf("\n");
     memcpy(result, op->stack[op->top], element_len);
 }
 
@@ -364,10 +363,13 @@ size_t op_2dup(Op* op) {
     if (op->top < 1) {
         return 0;
     }
-    unsigned char element[op->element_length[op->top]];
-    peek(op, element);
-    push(op, element, op->element_length[op->top]);
-    push(op, element, op->element_length[op->top]);
+    unsigned char element_2[op->element_length[op->top]];
+    pop(op, element_2);
+    unsigned char element_1[op->element_length[op->top]];
+    peek(op, element_1);
+    push(op, element_2, op->element_length[op->top]);
+    push(op, element_1, op->element_length[op->top]);
+    push(op, element_2, op->element_length[op->top]);
     return 1;
 }
 
@@ -504,9 +506,12 @@ size_t op_swap(Op* op) {
     if (op->top < 1) {
         return 0;
     }
-    unsigned char element[op->element_length[op->top]];
-    peek(op, element);
-    push(op, element, op->element_length[op->top]);
+    unsigned char element_2[op->element_length[op->top]];
+    pop(op, element_2);
+    unsigned char element_1[op->element_length[op->top]];
+    pop(op, element_1);
+    push(op, element_2, op->element_length[op->top]);
+    push(op, element_1, op->element_length[op->top]);
     return 1;
 }
 
@@ -594,8 +599,20 @@ size_t op_abs(Op* op) {
 }
 
 size_t op_not(Op* op) {
-    printf("Not implemented\n");
-    return 0;
+    if (op->top < 0) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    pop(op, element);
+    long long num = decode_num(element, op->element_length[op->top]);
+    unsigned char result[1];
+    if (num == 0) {
+        encode_num(1, result);
+    } else {
+        encode_num(0, result);
+    }
+    push(op, result, 1);
+    return 1;
 }
 
 size_t op_0notequal(Op* op) {
@@ -686,8 +703,16 @@ size_t op_within(Op* op) {
 }
 
 size_t op_sha1(Op* op) {
-    printf("Not implemented\n");
-    return 0;
+    if (op->top < 0) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    size_t element_len = op->element_length[op->top];
+    pop(op, element);
+    unsigned char hash[20];
+    sha1(element, element_len, hash);
+    push(op, hash, 20);
+    return 1;
 }
 
 size_t op_checksigverify(Op* op, S256Field* z) {
