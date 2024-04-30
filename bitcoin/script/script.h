@@ -24,4 +24,6 @@ void script_set_cmds(Script* script, Command* cmds, int cmds_len);
 
 Script* script_parse(unsigned char* s);
 
+Script* script_add(Script* script_1, Script* script_2);
+
 #endif // SCRIPT_H

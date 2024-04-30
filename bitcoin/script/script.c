@@ -103,9 +103,35 @@ void script_serialize(Script* script, unsigned char* result) {
         result += 9;
     }
     for (int i = 0; i < script->cmds_len; i++) {
-        int_to_little_endian(script->cmds[i].data_len, result, 1);
-        result++;
+        if (script->cmds[i].data_len < 75) {
+            int_to_little_endian(script->cmds[i].data_len, result, 1);
+            result++;
+        } else if (script->cmds[i].data_len < 0x100) {
+            result[0] = 76;
+            int_to_little_endian(script->cmds[i].data_len, result + 1, 1);
+            result += 2;
+        } else if (script->cmds[i].data_len < 520) {
+            result[0] = 77;
+            int_to_little_endian(script->cmds[i].data_len, result + 1, 2);
+            result += 3;
+        } else {
+            printf("Command length too long\n");
+            exit(1);
+        }
         memcpy(result, script->cmds[i].data, script->cmds[i].data_len);
         result += script->cmds[i].data_len;
     }
+}
+
+Script* script_add(Script* script_1, Script* script_2) {
+    Script* script = script_init();
+    for (int i = 0; i < script_1->cmds_len; i++) {
+        script->cmds[i] = script_1->cmds[i];
+        script->cmds_len++;
+    }
+    for (int i = 0; i < script_2->cmds_len; i++) {
+        script->cmds[script->cmds_len] = script_2->cmds[i];
+        script->cmds_len++;
+    }
+    return script;
 }

@@ -229,13 +229,15 @@ void long_to_little_endian(unsigned long long num, unsigned char *output, size_t
 
 void print_formatted_bytes(const unsigned char* hex) {
     int len = strlen((const char*)hex);
+    int i;
     printf("Formatted output:\n");
-    for (int i = 0; i < len; i += 2) {
+    for (i = 0; i < len; i += 2) {
         unsigned int byte;
         sscanf((const char*)hex + i, "%2x", &byte);
         printf("0x%02x, ", byte);
     }
     printf("\n");
+    printf("Length: %d\n", i / 2);
 }
 
 unsigned long long read_varint(unsigned char* data) {
