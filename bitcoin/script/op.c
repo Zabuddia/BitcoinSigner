@@ -300,14 +300,12 @@ size_t op_checksig(Op* op, S256Field* z) {
         return 0;
     }
     unsigned char sec_pubkey[op->element_length[op->top]];
-    size_t sec_pubkey_len = op->element_length[op->top];
     pop(op, sec_pubkey);
     unsigned char der_signature[op->element_length[op->top]];
-    size_t der_signature_len = op->element_length[op->top];
     pop(op, der_signature);
     S256Point* point = S256Point_parse_sec(sec_pubkey);
     Signature* sig = Signature_parse(der_signature);
-    int result = S256Point_verify(point, sig, z);
+    int result = S256Point_verify(point, z, sig);
     free(point);
     free(sig);
     if (result) {

@@ -1064,7 +1064,7 @@ static char* all_tests() {
 
     // //Signature tests
     // mu_run_test(test_Signature_der);
-    mu_run_test(test_Signature_parse);
+    // mu_run_test(test_Signature_parse);
 
     // //Tx tests
     // mu_run_test(test_Tx_parse_version);
@@ -1083,7 +1083,7 @@ static char* all_tests() {
     // mu_run_test(test_encode_num);
     // mu_run_test(test_decode_num);
     // mu_run_test(test_op_hash160);
-    // mu_run_test(test_op_checksig);
+    mu_run_test(test_op_checksig);
 
     // //Script tests
     // mu_run_test(test_script_parse);
