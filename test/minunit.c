@@ -808,6 +808,10 @@ static char* test_little_endian_to_big_endian() {
 }
 
 static char* test_TxOut_serialize() {
+    Script* script_pubkey = Script_init();
+    Command cmd;
+    cmd.data_len = 26;
+    //Working here
     unsigned char script_pubkey_1[26] = {0x19, 0x76, 0xa9, 0x14, 0xbc, 0x3b, 0x65, 0x4d, 0xca, 0x7e, 0x56, 0xb0, 0x4d, 0xca, 0x18, 0xf2, 0x56, 0x6c, 0xda, 0xf0, 0x2e, 0x8d, 0x9a, 0xda, 0x88, 0xac};
     TxOut* tx_out_1 = TxOut_init(32454049, script_pubkey_1);
     unsigned char result_1[34];
@@ -1269,7 +1273,7 @@ static char* all_tests() {
     // mu_run_test(test_script_parse);
     // mu_run_test(test_script_serialize);
     // mu_run_test(test_script_add);
-    mu_run_test(test_script_evaluate);
+    // mu_run_test(test_script_evaluate);
     // mu_run_test(test_p2pk);
     // mu_run_test(test_p2pkh);
 

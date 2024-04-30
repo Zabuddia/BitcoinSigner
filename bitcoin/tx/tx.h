@@ -8,19 +8,20 @@
 #include <jansson.h>
 
 #include "../helper/helper.h"
+#include "../script/script.h"
 
 #define MAX_URL_LENGTH 256
 
 typedef struct {
     unsigned char prev_tx[32];
     int prev_index;
-    unsigned char script_sig[108];
+    Script* script_sig;
     int sequence;
 } TxIn;
 
 typedef struct {
     unsigned long long amount;
-    unsigned char script_pubkey[26];
+    Script* script_pubkey;
 } TxOut;
 
 typedef struct {
@@ -46,7 +47,7 @@ void Tx_serialize(Tx* tx, unsigned char* result);
 unsigned long long fee(Tx* tx, size_t testnet);
 
 //Txin
-TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, unsigned char* script_sig, int sequence);
+TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, int sequence);
 
 void TxIn_toString(TxIn* tx_in);
 
@@ -60,10 +61,10 @@ Tx* fetch_tx(TxIn* txin, size_t testnet);
 
 unsigned long long value(TxIn* txin, size_t testnet);
 
-void script_pubkey(TxIn* txin, size_t testnet, unsigned char* result);
+Script* script_pubkey(TxIn* txin, size_t testnet);
 
 //Txout
-TxOut* TxOut_init(unsigned long long amount, unsigned char* script_pubkey);
+TxOut* TxOut_init(unsigned long long amount, Script* script_pubkey);
 
 void TxOut_toString(TxOut* tx_out);
 

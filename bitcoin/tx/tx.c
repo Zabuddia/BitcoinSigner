@@ -125,7 +125,7 @@ unsigned long long fee(Tx* tx, size_t testnet) {
 }
 
 //Txin
-TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, unsigned char* script_sig, int sequence) {
+TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, int sequence) {
     TxIn* tx_in = (TxIn*)malloc(sizeof(TxIn));
     if (tx_in == NULL) {
         printf("Memory allocation failed\n");
@@ -133,8 +133,9 @@ TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, unsigned char* script
     }
     memcpy(tx_in->prev_tx, prev_tx, 32);
     tx_in->prev_index = prev_index;
-    memcpy(tx_in->script_sig, script_sig, 108);
+    script_deep_copy(tx_in->script_sig, script_sig);
     tx_in->sequence = sequence;
+    script_free(script_sig);
     return tx_in;
 }
 
@@ -150,18 +151,18 @@ void TxIn_toString(TxIn* tx_in) {
 }
 
 void TxIn_free(TxIn* tx_in) {
+    script_free(tx_in->script_sig);
     free(tx_in);
 }
 
 TxIn* TxIn_parse(unsigned char* s) {
-    int script_sig_len = 108;
     unsigned char prev_tx[32];
     unsigned char prev_index_raw[4];
-    unsigned char script_sig[script_sig_len];
+    Script* script_sig = script_parse(s + 36);
+    unsigned long long script_sig_len = read_varint(s + 36);
     unsigned char sequence_raw[4];
     memcpy(prev_tx, s, 32);
     memcpy(prev_index_raw, s + 32, 4);
-    memcpy(script_sig, s + 36, script_sig_len);
     memcpy(sequence_raw, s + 36 + script_sig_len, 4);
     little_endian_to_big_endian(prev_tx, 32);
     int prev_index = little_endian_to_int(prev_index_raw, 4);
@@ -170,10 +171,15 @@ TxIn* TxIn_parse(unsigned char* s) {
 }
 
 void TxIn_serialize(TxIn* tx_in, unsigned char* result) {
+    unsigned long long script_sig_len = 0;
+    for (int i = 0; i < tx_in->script_sig->cmds_len; i++) {
+        script_sig_len += tx_in->script_sig->cmds[i].data_len;
+    }
+    script_sig_len += tx_in->script_sig->cmds_len;
     memcpy(result, tx_in->prev_tx, 32);
     int_to_little_endian(tx_in->prev_index, result + 32, 4);
-    memcpy(result + 36, tx_in->script_sig, 108);
-    int_to_little_endian(tx_in->sequence, result + 36 + 108, 4);
+    script_serialize(tx_in->script_sig, result + 36);
+    int_to_little_endian(tx_in->sequence, result + 36 + script_sig_len, 4);
 }
 
 Tx* fetch_tx(TxIn* txin, size_t testnet) {
@@ -188,21 +194,24 @@ unsigned long long value(TxIn* txin, size_t testnet) {
     return value;
 }
 
-void script_pubkey(TxIn* txin, size_t testnet, unsigned char* result) {
+Script* script_pubkey(TxIn* txin, size_t testnet) {
     Tx* tx = fetch_tx(txin, testnet);
-    result = tx->tx_outs[txin->prev_index]->script_pubkey;
+    Script* result = script_init();
+    script_deep_copy(result, tx->tx_outs[txin->prev_index]->script_pubkey);
     free(tx);
+    return result;
 }
 
 //Txout
-TxOut* TxOut_init(unsigned long long amount, unsigned char* script_pubkey) {
+TxOut* TxOut_init(unsigned long long amount, Script* script_pubkey) {
     TxOut* tx_out = (TxOut*)malloc(sizeof(TxOut));
     if (tx_out == NULL) {
         printf("Memory allocation failed\n");
         exit(1);
     }
     tx_out->amount = amount;
-    memcpy(tx_out->script_pubkey, script_pubkey, 26);
+    script_deep_copy(tx_out->script_pubkey, script_pubkey);
+    script_free(script_pubkey);
     return tx_out;
 }
 
@@ -212,26 +221,25 @@ void TxOut_toString(TxOut* tx_out) {
     } else {
         printf("TxOut_(\n");
         printf("  amount: %llu\n", tx_out->amount);
-        printf("  script_pubkey: %s\n", tx_out->script_pubkey);
         printf(")\n");
     }
 }
 
 void TxOut_free(TxOut* tx_out) {
+    script_free(tx_out->script_pubkey);
     free(tx_out);
 }
 
 TxOut* TxOut_parse(unsigned char* s) {
-    int script_pubkey_len = 26;
+    unsigned long long script_pubkey_len = read_varint(s + 8);
     unsigned long long amount = little_endian_to_long(s, 8);
-    unsigned char script_pubkey[script_pubkey_len];
-    memcpy(script_pubkey, s + 8, script_pubkey_len);
+    Script* script_pubkey = script_parse(s + 8);
     return TxOut_init(amount, script_pubkey);
 }
 
 void TxOut_serialize(TxOut* tx_out, unsigned char* result) {
     long_to_little_endian(tx_out->amount, result, 8);
-    memcpy(result + 8, tx_out->script_pubkey, 26);
+    script_serialize(tx_out->script_pubkey, result + 8);
 }
 
 //Txfetcher
