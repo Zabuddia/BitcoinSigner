@@ -40,9 +40,6 @@ void peek(Op* op, unsigned char* result) {
         exit(1);
     }
     size_t element_len = op->element_length[op->top];
-    for (int i = 0; i < element_len; i++) {
-        printf("%02x ", op->stack[op->top][i]);
-    }
     printf("\n");
     memcpy(result, op->stack[op->top], element_len);
 }
