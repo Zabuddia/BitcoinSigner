@@ -44,10 +44,10 @@ void peek(Op* op, unsigned char* result) {
     memcpy(result, op->stack[op->top], element_len);
 }
 
-void encode_num(long long num, unsigned char* result) {
+size_t encode_num(long long num, unsigned char* result) {
     if (num == 0) {
         result[0] = 0;
-        return;
+        return 1;
     }
     long long abs_num = llabs(num);
     size_t negative = num < 0 ? 1 : 0;
@@ -61,6 +61,7 @@ void encode_num(long long num, unsigned char* result) {
     } else if (negative) {
         result[result_len - 1] |= 0x80;
     }
+    return result_len;
 }
 
 long long decode_num(unsigned char* element, size_t element_len) {
@@ -320,6 +321,401 @@ size_t op_checksig(Op* op, S256Field* z) {
     return 1;
 }
 
+size_t op_if(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_notif(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_toaltstack(Op* op, Op* altstack) {
+    if (op->top < 0) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    pop(op, element);
+    push(altstack, element, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_fromaltstack(Op* op, Op* altstack) {
+    if (altstack->top < 0) {
+        return 0;
+    }
+    unsigned char element[altstack->element_length[altstack->top]];
+    pop(altstack, element);
+    push(op, element, altstack->element_length[altstack->top]);
+    return 1;
+}
+
+size_t op_2drop(Op* op) {
+    if (op->top < 1) {
+        return 0;
+    }
+    pop(op, NULL);
+    pop(op, NULL);
+    return 1;
+}
+
+size_t op_2dup(Op* op) {
+    if (op->top < 1) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    peek(op, element);
+    push(op, element, op->element_length[op->top]);
+    push(op, element, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_3dup(Op* op) {
+    if (op->top < 2) {
+        return 0;
+    }
+    unsigned char element1[op->element_length[op->top]];
+    unsigned char element2[op->element_length[op->top]];
+    peek(op, element1);
+    peek(op, element2);
+    push(op, element2, op->element_length[op->top]);
+    push(op, element1, op->element_length[op->top]);
+    push(op, element2, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_2over(Op* op) {
+    if (op->top < 3) {
+        return 0;
+    }
+    unsigned char element1[op->element_length[op->top]];
+    unsigned char element2[op->element_length[op->top]];
+    peek(op, element1);
+    peek(op, element2);
+    push(op, element2, op->element_length[op->top]);
+    push(op, element1, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_2rot(Op* op) {
+    if (op->top < 5) {
+        return 0;
+    }
+    unsigned char element1[op->element_length[op->top]];
+    unsigned char element2[op->element_length[op->top]];
+    peek(op, element1);
+    peek(op, element2);
+    push(op, element2, op->element_length[op->top]);
+    push(op, element1, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_2swap(Op* op) {
+    if (op->top < 3) {
+        return 0;
+    }
+    unsigned char element1[op->element_length[op->top]];
+    unsigned char element2[op->element_length[op->top]];
+    peek(op, element1);
+    peek(op, element2);
+    push(op, element2, op->element_length[op->top]);
+    push(op, element1, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_ifdup(Op* op) {
+    if (op->top < 0) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    peek(op, element);
+    if (decode_num(element, op->element_length[op->top]) != 0) {
+        push(op, element, op->element_length[op->top]);
+    }
+    return 1;
+}
+
+size_t op_nip(Op* op) {
+    if (op->top < 1) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    pop(op, element);
+    return 1;
+}
+
+size_t op_over(Op* op) {
+    if (op->top < 1) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    peek(op, element);
+    push(op, element, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_pick(Op* op) {
+    if (op->top < 0) {
+        return 0;
+    }
+    unsigned char n_element[op->element_length[op->top]];
+    pop(op, n_element);
+    long long n = decode_num(n_element, op->element_length[op->top]);
+    if (op->top < n) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    peek(op, element);
+    push(op, element, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_roll(Op* op) {
+    if (op->top < 0) {
+        return 0;
+    }
+    unsigned char n_element[op->element_length[op->top]];
+    pop(op, n_element);
+    long long n = decode_num(n_element, op->element_length[op->top]);
+    if (op->top < n) {
+        return 0;
+    }
+    if (n == 0) {
+        return 1;
+    }
+    unsigned char element[op->element_length[op->top]];
+    peek(op, element);
+    push(op, element, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_rot(Op* op) {
+    if (op->top < 2) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    peek(op, element);
+    push(op, element, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_swap(Op* op) {
+    if (op->top < 1) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    peek(op, element);
+    push(op, element, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_tuck(Op* op) {
+    if (op->top < 1) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    peek(op, element);
+    push(op, element, op->element_length[op->top]);
+    return 1;
+}
+
+size_t op_size(Op* op) {
+    if (op->top < 0) {
+        return 0;
+    }
+    unsigned char element[op->element_length[op->top]];
+    peek(op, element);
+    unsigned char size_element[STACK_SIZE];
+    size_t size_len = encode_num(op->element_length[op->top], size_element);
+    push(op, size_element, size_len);
+    return 1;
+}
+
+size_t op_equal(Op* op) {
+    if (op->top < 1) {
+        return 0;
+    }
+    unsigned char element_1[op->element_length[op->top]];
+    pop(op, element_1);
+    unsigned char element_2[op->element_length[op->top]];
+    pop(op, element_2);
+    if (memcmp(element_1, element_2, op->element_length[op->top])) {
+        unsigned char result[1];
+        encode_num(0, result);
+        push(op, result, 1);
+    } else {
+        unsigned char result[1];
+        encode_num(1, result);
+        push(op, result, 1);
+    }
+    return 1;
+}
+
+size_t op_mul(Op* op) {
+    if (op->top < 1) {
+        return 0;
+    }
+    unsigned char element_1[op->element_length[op->top]];
+    pop(op, element_1);
+    unsigned char element_2[op->element_length[op->top]];
+    pop(op, element_2);
+    long long num_1 = decode_num(element_1, op->element_length[op->top]);
+    long long num_2 = decode_num(element_2, op->element_length[op->top]);
+    long long result = num_1 * num_2;
+    unsigned char result_element[STACK_SIZE];
+    size_t result_len = encode_num(result, result_element);
+    push(op, result_element, result_len);
+    return 1;
+}
+
+size_t op_equalverify(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_1add(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_1sub(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_negate(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_abs(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_not(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_0notequal(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_add(Op* op) {
+    if (op->top < 1) {
+        return 0;
+    }
+    unsigned char element_1[op->element_length[op->top]];
+    pop(op, element_1);
+    unsigned char element_2[op->element_length[op->top]];
+    pop(op, element_2);
+    long long num_1 = decode_num(element_1, op->element_length[op->top]);
+    long long num_2 = decode_num(element_2, op->element_length[op->top]);
+    long long result = num_1 + num_2;
+    unsigned char result_element[STACK_SIZE];
+    size_t result_len = encode_num(result, result_element);
+    push(op, result_element, result_len);
+    return 1;
+}
+
+size_t op_sub(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_booland(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_boolor(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_numequal(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_numequalverify(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_numnotequal(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_lessthan(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_greaterthan(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_lessthanorequal(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_greaterthanorequal(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_min(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_max(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_within(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_sha1(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_checksigverify(Op* op, S256Field* z) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_checkmultisig(Op* op, S256Field* z) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_checkmultisigverify(Op* op, S256Field* z) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_checklocktimeverify(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
+size_t op_checksequenceverify(Op* op) {
+    printf("Not implemented\n");
+    return 0;
+}
+
 char* op_code_functions(int cmd_int) {
     switch (cmd_int) {
         case 0:
@@ -556,11 +952,38 @@ void op_perform_operation_basic(Op* op, int cmd_int) {
         case 97:
             op_nop(op);
             break;
+        case 99:
+            op_if(op);
+            break;
+        case 100:
+            op_notif(op);
+            break;
         case 105:
             op_verify(op);
             break;
         case 106:
             op_return(op);
+            break;
+        case 109:
+            op_2drop(op);
+            break;
+        case 110:
+            op_2dup(op);
+            break;
+        case 111:
+            op_3dup(op);
+            break;
+        case 112:
+            op_2over(op);
+            break;
+        case 113:
+            op_2rot(op);
+            break;
+        case 114:
+            op_2swap(op);
+            break;
+        case 115:
+            op_ifdup(op);
             break;
         case 116:
             op_depth(op);
@@ -571,11 +994,143 @@ void op_perform_operation_basic(Op* op, int cmd_int) {
         case 118:
             op_dup(op);
             break;
-        case 169:
-            op_hash160(op);
+        case 119:
+            op_nip(op);
+            break;
+        case 120:
+            op_over(op);
+            break;
+        case 121:
+            op_pick(op);
+            break;
+        case 122:
+            op_roll(op);
+            break;
+        case 123:
+            op_rot(op);
+            break;
+        case 124:
+            op_swap(op);
+            break;
+        case 125:
+            op_tuck(op);
+            break;
+        case 130:
+            op_size(op);
+            break;
+        case 135:
+            op_equal(op);
+            break;
+        case 136:
+            op_equalverify(op);
+            break;
+        case 139:
+            op_1add(op);
+            break;
+        case 140:
+            op_1sub(op);
+            break;
+        case 143:
+            op_negate(op);
+            break;
+        case 144:
+            op_abs(op);
+            break;
+        case 145:
+            op_not(op);
+            break;
+        case 146:
+            op_0notequal(op);
+            break;
+        case 147:
+            op_add(op);
+            break;
+        case 148:
+            op_sub(op);
+            break;
+        case 149:
+            op_mul(op);
+            break;
+        case 154:
+            op_booland(op);
+            break;
+        case 155:
+            op_boolor(op);
+            break;
+        case 156:
+            op_numequal(op);
+            break;
+        case 157:
+            op_numequalverify(op);
+            break;
+        case 158:
+            op_numnotequal(op);
+            break;
+        case 159:
+            op_lessthan(op);
+            break;
+        case 160:
+            op_greaterthan(op);
+            break;
+        case 161:
+            op_lessthanorequal(op);
+            break;
+        case 162:
+            op_greaterthanorequal(op);
+            break;
+        case 163:
+            op_min(op);
+            break;
+        case 164:
+            op_max(op);
+            break;
+        case 165:
+            op_within(op);
+            break;
+        case 166:
+            op_ripemd160(op);
+            break;
+        case 167:
+            op_sha1(op);
             break;
         case 168:
             op_sha256(op);
+            break;
+        case 169:
+            op_hash160(op);
+            break;
+        case 170:
+            op_hash256(op);
+            break;
+        case 176:
+            op_nop(op);
+            break;
+        case 177:
+            op_checklocktimeverify(op);
+            break;
+        case 178:
+            op_checksequenceverify(op);
+            break;
+        case 179:
+            op_nop(op);
+            break;
+        case 180:
+            op_nop(op);
+            break;
+        case 181:
+            op_nop(op);
+            break;
+        case 182:
+            op_nop(op);
+            break;
+        case 183:
+            op_nop(op);
+            break;
+        case 184:
+            op_nop(op);
+            break;
+        case 185:
+            op_nop(op);
             break;
         default:
             printf("Unknown op code\n");
@@ -587,6 +1142,29 @@ void op_perform_operation_z(Op* op, int cmd_int, S256Field* z) {
     switch (cmd_int) {
         case 172:
             op_checksig(op, z);
+            break;
+        case 173:
+            op_checksigverify(op, z);
+            break;
+        case 174:
+            op_checkmultisig(op, z);
+            break;
+        case 175:
+            op_checkmultisigverify(op, z);
+            break;
+        default:
+            printf("Unknown op code\n");
+            exit(1);
+    }
+}
+
+void op_perform_operation_alt(Op* op, int cmd_int, Op* altstack) {
+    switch (cmd_int) {
+        case 107:
+            op_toaltstack(op, altstack);
+            break;
+        case 108:
+            op_fromaltstack(op, altstack);
             break;
         default:
             printf("Unknown op code\n");

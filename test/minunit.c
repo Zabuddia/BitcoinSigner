@@ -1062,6 +1062,41 @@ static char* test_script_evaluate() {
     script_free(script_sig);
     script_free(script_pubkey);
     script_free(combined_script);
+
+    Command cmd_1;
+    cmd_1.data[0] = 0x76;
+    cmd_1.data_len = 1;
+    Command cmd_2;
+    cmd_2.data[0] = 0x76;
+    cmd_2.data_len = 1;
+    Command cmd_3;
+    cmd_3.data[0] = 0x95;
+    cmd_3.data_len = 1;
+    Command cmd_4;
+    cmd_4.data[0] = 0x93;
+    cmd_4.data_len = 1;
+    Command cmd_5;
+    cmd_5.data[0] = 0x56;
+    cmd_5.data_len = 1;
+    Command cmd_6;
+    cmd_6.data[0] = 0x87;
+    cmd_6.data_len = 1;
+    Command cmd_7;
+    cmd_7.data[0] = 0x52;
+    cmd_7.data_len = 1;
+
+    Command cmds_1[6] = {cmd_1, cmd_2, cmd_3, cmd_4, cmd_5, cmd_6};
+    Script* script_1 = script_init();
+    script_set_cmds(script_1, cmds_1, 6);
+    Command cmds_2[1] = {cmd_7};
+    Script* script_2 = script_init();
+    script_set_cmds(script_2, cmds_2, 1);
+    Script* combined_script_2 = script_add(script_2, script_1);
+    size_t worked_2 = script_evaluate(combined_script_2, test_z);
+    mu_assert("Error: script_evaluate doesn't work", worked_2);
+    script_free(script_1);
+    script_free(script_2);
+    script_free(combined_script_2);
     S256Field_free(test_z);
     return 0;
 }

@@ -160,9 +160,12 @@ size_t script_evaluate(Script* script, S256Field* z) {
         script_copy->cmds_len--;
         if (cmd.data_len == 1) {
             int cmd_int = little_endian_to_int(cmd.data, 1);
-            // char* cmd_str = op_code_functions(cmd_int);
+            char* cmd_str = op_code_functions(cmd_int);
+            printf("%s\n", cmd_str);
             if (cmd_int == 172) {
                 op_perform_operation_z(op_1, cmd_int, z);
+            } else if (cmd_int == 107 || cmd_int == 108) {
+                op_perform_operation_alt(op_1, cmd_int, op_2);
             } else {
                 op_perform_operation_basic(op_1, cmd_int);
             }
@@ -177,8 +180,18 @@ size_t script_evaluate(Script* script, S256Field* z) {
         script_free(script_copy);
         return 0;
     }
-    op_free(op_1);
-    op_free(op_2);
-    script_free(script_copy);
-    return 1;
+    unsigned char result[1] = {0};
+    pop(op_1, result);
+    if (result[0] == 1) {
+        op_free(op_1);
+        op_free(op_2);
+        script_free(script_copy);
+        return 1;
+    } else {
+        op_free(op_1);
+        op_free(op_2);
+        script_free(script_copy);
+        printf("Script evaluation failed\n");
+        return 0;
+    }
 }
