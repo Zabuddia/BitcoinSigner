@@ -14,7 +14,7 @@ void script_free(Script* script) {
     free(script);
 }
 
-void script_set_cmds(Script* script, Command* cmds, size_t cmds_len) {
+void script_set_cmds(Script* script, Command* cmds, int cmds_len) {
     for (int i = 0; i < cmds_len; i++) {
         memcpy(script->cmds[i].data, cmds[i].data, cmds[i].data_len);
         script->cmds[i].data_len = cmds[i].data_len;
@@ -88,7 +88,8 @@ void script_serialize(Script* script, unsigned char* result) {
     for (int i = 0; i < script->cmds_len; i++) {
         length += script->cmds[i].data_len;
     }
-    write_varint(length, result);
+    length += script->cmds_len;
+    encode_varint(result, length);
     if (length < 0xfd) {
         result++;
     } else if (length <= 0xffff) {
@@ -102,6 +103,8 @@ void script_serialize(Script* script, unsigned char* result) {
         result += 9;
     }
     for (int i = 0; i < script->cmds_len; i++) {
+        int_to_little_endian(script->cmds[i].data_len, result, 1);
+        result++;
         memcpy(result, script->cmds[i].data, script->cmds[i].data_len);
         result += script->cmds[i].data_len;
     }
