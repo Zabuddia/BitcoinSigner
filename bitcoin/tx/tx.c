@@ -29,7 +29,7 @@ void Tx_free(Tx* tx) {
 }
 
 void Tx_id(Tx* tx, unsigned char* result) {
-    unsigned long long serial_length = 9;
+    unsigned long long serial_length = 10;
     for (unsigned long long i = 0; i < tx->num_inputs; i++) {
         serial_length += 40;
         unsigned long long script_sig_length = 0;
@@ -59,6 +59,7 @@ void Tx_id(Tx* tx, unsigned char* result) {
 
     Tx_serialize(tx, serial);
     hash256(serial, serial_length, result);
+    little_endian_to_big_endian(result, 32);
 }
 
 Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
@@ -235,6 +236,7 @@ void TxIn_serialize(TxIn* tx_in, unsigned char* result) {
     memcpy(prev_tx_copy, tx_in->prev_tx, 32);
     little_endian_to_big_endian(prev_tx_copy, 32);
     memcpy(result, prev_tx_copy, 32);
+    // memcpy(result, tx_in->prev_tx, 32);
     int_to_little_endian(tx_in->prev_index, result + 32, 4);
     script_serialize(tx_in->script_sig, result + 36);
     int_to_little_endian(tx_in->sequence, result + 36 + script_sig_len, 4);
