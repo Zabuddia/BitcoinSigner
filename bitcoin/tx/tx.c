@@ -131,6 +131,7 @@ TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, i
         printf("Memory allocation failed\n");
         exit(1);
     }
+    tx_in->script_sig = script_init();
     memcpy(tx_in->prev_tx, prev_tx, 32);
     tx_in->prev_index = prev_index;
     script_deep_copy(tx_in->script_sig, script_sig);
@@ -209,6 +210,7 @@ TxOut* TxOut_init(unsigned long long amount, Script* script_pubkey) {
         printf("Memory allocation failed\n");
         exit(1);
     }
+    tx_out->script_pubkey = script_init();
     tx_out->amount = amount;
     script_deep_copy(tx_out->script_pubkey, script_pubkey);
     script_free(script_pubkey);
@@ -231,7 +233,6 @@ void TxOut_free(TxOut* tx_out) {
 }
 
 TxOut* TxOut_parse(unsigned char* s) {
-    unsigned long long script_pubkey_len = read_varint(s + 8);
     unsigned long long amount = little_endian_to_long(s, 8);
     Script* script_pubkey = script_parse(s + 8);
     return TxOut_init(amount, script_pubkey);

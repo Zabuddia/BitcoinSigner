@@ -87,8 +87,10 @@ void script_serialize(Script* script, unsigned char* result) {
     unsigned long long length = 0;
     for (int i = 0; i < script->cmds_len; i++) {
         length += script->cmds[i].data_len;
+        if (script->cmds[i].data_len > 1) {
+            length++;
+        }
     }
-    length += script->cmds_len;
     encode_varint(result, length);
     if (length < 0xfd) {
         result++;
@@ -103,7 +105,9 @@ void script_serialize(Script* script, unsigned char* result) {
         result += 9;
     }
     for (int i = 0; i < script->cmds_len; i++) {
-        if (script->cmds[i].data_len < 75) {
+        if (script->cmds[i].data_len == 1) {
+            
+        } else if (script->cmds[i].data_len < 75) {
             int_to_little_endian(script->cmds[i].data_len, result, 1);
             result++;
         } else if (script->cmds[i].data_len < 0x100) {

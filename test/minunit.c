@@ -716,25 +716,9 @@ static char* test_Tx_parse() {
 }
 
 static char* test_print_formatted_bytes() {
-    const unsigned char* hex_string = "255044462d312e330a25e2e3cfd30a0a0a312030206f626a0a3c3c2f576964746820\
-32203020522f4865696768742033203020522f547970652034203020522f537562747970652035\
-203020522f46696c7465722036203020522f436f6c6f7253706163652037203020522f4c656e67\
-74682038203020522f42697473506572436f6d706f6e656e7420383e3e0a73747265616d0affd8\
-fffe00245348412d3120697320646561642121212121852fec092339759c39b1a1c63c4c97e1ff\
-fe017f46dc93a6b67e013b029aaa1db2560b45ca67d688c7f84b8c4c791fe02b3df614f86db169\
-0901c56b45c1530afedfb76038e972722fe7ad728f0e4904e046c230570fe9d41398abe12ef5bc\
-942be33542a4802d98b5d70f2a332ec37fac3514e74ddc0f2cc1a874cd0c78305a215664613097\
-89606bd0bf3f98cda8044629a1";
+    const unsigned char* hex_string = (const unsigned char*)"99c39800000000001a1876a9141c4bc762dd5423e332066702cb75f40df79fea1288ac";
     print_formatted_bytes(hex_string);
-    const unsigned char* hex_string_2 = "255044462d312e330a25e2e3cfd30a0a0a312030206f626a0a3c3c2f576964746820\
-32203020522f4865696768742033203020522f547970652034203020522f537562747970652035\
-203020522f46696c7465722036203020522f436f6c6f7253706163652037203020522f4c656e67\
-74682038203020522f42697473506572436f6d706f6e656e7420383e3e0a73747265616d0affd8\
-fffe00245348412d3120697320646561642121212121852fec092339759c39b1a1c63c4c97e1ff\
-fe017346dc9166b67e118f029ab621b2560ff9ca67cca8c7f85ba84c79030c2b3de218f86db3a9\
-0901d5df45c14f26fedfb3dc38e96ac22fe7bd728f0e45bce046d23c570feb141398bb552ef5a0\
-a82be331fea48037b8b5d71f0e332edf93ac3500eb4ddc0decc1a864790c782c76215660dd3097\
-91d06bd0af3f98cda4bc4629b1";
+    const unsigned char* hex_string_2 = (const unsigned char*)"25";
     print_formatted_bytes(hex_string_2);
     return 0;
 }
@@ -808,23 +792,40 @@ static char* test_little_endian_to_big_endian() {
 }
 
 static char* test_TxOut_serialize() {
-    Script* script_pubkey = Script_init();
-    Command cmd;
-    cmd.data_len = 26;
-    //Working here
-    unsigned char script_pubkey_1[26] = {0x19, 0x76, 0xa9, 0x14, 0xbc, 0x3b, 0x65, 0x4d, 0xca, 0x7e, 0x56, 0xb0, 0x4d, 0xca, 0x18, 0xf2, 0x56, 0x6c, 0xda, 0xf0, 0x2e, 0x8d, 0x9a, 0xda, 0x88, 0xac};
+    unsigned char script_pubkey_1_raw[26] = {0x19, 0x76, 0xa9, 0x14, 0xbc, 0x3b, 0x65, 0x4d, 0xca, 0x7e, 0x56, 0xb0, 0x4d, 0xca, 0x18, 0xf2, 0x56, 0x6c, 0xda, 0xf0, 0x2e, 0x8d, 0x9a, 0xda, 0x88, 0xac};
+    Script* script_pubkey_1 = script_init();
+    Command cmd_1;
+    memcpy(cmd_1.data, script_pubkey_1_raw + 1, 24);
+    cmd_1.data_len = 24;
+    Command cmd_2;
+    cmd_2.data[0] = 0xac;
+    cmd_2.data_len = 1;
+    script_pubkey_1->cmds[0] = cmd_1;
+    script_pubkey_1->cmds[1] = cmd_2;
+    script_pubkey_1->cmds_len = 2;
     TxOut* tx_out_1 = TxOut_init(32454049, script_pubkey_1);
-    unsigned char result_1[34];
+    unsigned char result_1[35];
     TxOut_serialize(tx_out_1, result_1);
-    unsigned char expected_result_1[] = {0xa1, 0x35, 0xef, 0x01, 0x00, 0x00, 0x00, 0x00, 0x19, 0x76, 0xa9, 0x14, 0xbc, 0x3b, 0x65, 0x4d, 0xca, 0x7e, 0x56, 0xb0, 0x4d, 0xca, 0x18, 0xf2, 0x56, 0x6c, 0xda, 0xf0, 0x2e, 0x8d, 0x9a, 0xda, 0x88, 0xac};
-    mu_assert("Error: TxOut_serialize doesn't work", memcmp(result_1, expected_result_1, 34) == 0);
+    unsigned char expected_result_1[35] = {0xa1, 0x35, 0xef, 0x01, 0x00, 0x00, 0x00, 0x00, 0x1a, 0x18, 0x76, 0xa9, 0x14, 0xbc, 0x3b, 0x65, 0x4d, 0xca, 0x7e, 0x56, 0xb0, 0x4d, 0xca, 0x18, 0xf2, 0x56, 0x6c, 0xda, 0xf0, 0x2e, 0x8d, 0x9a, 0xda, 0x88, 0xac};
+    mu_assert("Error: TxOut_serialize doesn't work", memcmp(result_1, expected_result_1, 35) == 0);
     TxOut_free(tx_out_1);
-    unsigned char script_pubkey_2[26] = {0x19, 0x76, 0xa9, 0x14, 0x1c, 0x4b, 0xc7, 0x62, 0xdd, 0x54, 0x23, 0xe3, 0x32, 0x16, 0x67, 0x02, 0xcb, 0x75, 0xf4, 0x0d, 0xf7, 0x9f, 0xea, 0x12, 0x88, 0xac};
+
+    unsigned char script_pubkey_2_raw[26] = {0x19, 0x76, 0xa9, 0x14, 0x1c, 0x4b, 0xc7, 0x62, 0xdd, 0x54, 0x23, 0xe3, 0x32, 0x16, 0x67, 0x02, 0xcb, 0x75, 0xf4, 0x0d, 0xf7, 0x9f, 0xea, 0x12, 0x88, 0xac};
+    Script* script_pubkey_2 = script_init();
+    Command cmd_3;
+    memcpy(cmd_3.data, script_pubkey_2_raw + 1, 24);
+    cmd_3.data_len = 24;
+    Command cmd_4;
+    cmd_4.data[0] = 0xac;
+    cmd_4.data_len = 1;
+    script_pubkey_2->cmds[0] = cmd_3;
+    script_pubkey_2->cmds[1] = cmd_4;
+    script_pubkey_2->cmds_len = 2;
     TxOut* tx_out_2 = TxOut_init(10011545, script_pubkey_2);
-    unsigned char result_2[34];
+    unsigned char result_2[35];
     TxOut_serialize(tx_out_2, result_2);
-    unsigned char expected_result_2[] = {0x99, 0xc3, 0x98, 0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0x76, 0xa9, 0x14, 0x1c, 0x4b, 0xc7, 0x62, 0xdd, 0x54, 0x23, 0xe3, 0x32, 0x16, 0x67, 0x02, 0xcb, 0x75, 0xf4, 0x0d, 0xf7, 0x9f, 0xea, 0x12, 0x88, 0xac};
-    mu_assert("Error: TxOut_serialize doesn't work", memcmp(result_2, expected_result_2, 34) == 0);
+    unsigned char expected_result_2[] = {0x99, 0xc3, 0x98, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1a, 0x18, 0x76, 0xa9, 0x14, 0x1c, 0x4b, 0xc7, 0x62, 0xdd, 0x54, 0x23, 0xe3, 0x32, 0x16, 0x67, 0x02, 0xcb, 0x75, 0xf4, 0x0d, 0xf7, 0x9f, 0xea, 0x12, 0x88, 0xac};
+    mu_assert("Error: TxOut_serialize doesn't work", memcmp(result_2, expected_result_2, 35) == 0);
     TxOut_free(tx_out_2);
     return 0;
 }
@@ -1256,7 +1257,7 @@ static char* all_tests() {
     // mu_run_test(test_Tx_parse_outputs);
     // mu_run_test(test_Tx_parse_locktime);
     // mu_run_test(test_Tx_parse);
-    // mu_run_test(test_TxOut_serialize);
+    mu_run_test(test_TxOut_serialize);
     // mu_run_test(test_TxIn_serialize);
     // mu_run_test(test_Tx_serialize);
     // mu_run_test(test_fee);
