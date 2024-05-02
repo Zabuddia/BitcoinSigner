@@ -12,6 +12,11 @@
 
 #define MAX_URL_LENGTH 256
 
+struct memory_struct {
+    char *response;
+    unsigned long long size;
+};
+
 typedef struct {
     unsigned char prev_tx[32];
     int prev_index;
@@ -75,9 +80,9 @@ TxOut* TxOut_parse(unsigned char* s);
 void TxOut_serialize(TxOut* tx_out, unsigned char* result);
 
 //Txfetcher
-size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
+size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp);
 
-char *http_get(const char *url);
+unsigned long long http_get(const char *url, char* response);
 
 const char *get_url(int testnet);
 

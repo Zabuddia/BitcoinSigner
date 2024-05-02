@@ -314,3 +314,30 @@ void little_endian_to_big_endian(unsigned char* data, size_t data_len) {
     memcpy(data, temp, data_len);
     free(temp);
 }
+
+unsigned char hex_char_to_byte(char c) {
+    if (c >= '0' && c <= '9') {
+        return c - '0';
+    } else if (c >= 'a' && c <= 'f') {
+        return 10 + (c - 'a');
+    } else if (c >= 'A' && c <= 'F') {
+        return 10 + (c - 'A');
+    }
+    return 0; // Not a hex char
+}
+
+void hex_string_to_byte_array(const char* hexStr, unsigned char* byteArray) {
+    size_t len = strlen(hexStr);
+    if (len % 2 != 0) {
+        printf("Hex string must have even length\n");
+        exit(1);
+    }
+
+    size_t nBytes = len / 2;
+
+    for (size_t i = 0; i < nBytes; i++) {
+        unsigned char high = hex_char_to_byte(hexStr[2 * i]);
+        unsigned char low = hex_char_to_byte(hexStr[2 * i + 1]);
+        byteArray[i] = (high << 4) | low;
+    }
+}

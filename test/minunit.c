@@ -880,32 +880,13 @@ static char* test_Tx_serialize() {
     return 0;
 }
 
-static char* test_write_callback() {
-    char* data = "Sample data that simulates what might be received from a server.";
-    size_t data_length = strlen(data);
-    char* response = calloc(1, 1);
-
-    // Simulate calling the callback multiple times with parts of the data
-    size_t chunk_size = 10; // Assume each call gives us 10 bytes of data
-    for (size_t offset = 0; offset < data_length; offset += chunk_size) {
-        size_t size = chunk_size;
-        if (offset + size > data_length) size = data_length - offset;
-        size_t processed = write_callback(data + offset, 1, size, &response);
-        if (processed != size) {
-            fprintf(stderr, "write_callback processed an unexpected number of bytes: %zu expected, %zu actual\n", size, processed);
-            break;
-        }
-    }
-    mu_assert("Error: write_callback doesn't work", strcmp(data, response) == 0);
-    free(response);
-    return 0;
-}
-
 static char* test_http_get() {
-    char* url = "http://httpbin.org/get";
-    char* response = http_get(url);
-    mu_assert("Error: http_get doesn't work", response);
-    free(response);
+    // const char* url = "http://httpbin.org/get";
+    const char* url = "https://blockstream.info/api/tx/d1c789a9c60383bf715f3f6ad9d14b91fe55f3deb369fe5d9280cb1a01793f81/hex";
+    char response[10000] = {0};
+    char* expected_response = "0100000002137c53f0fb48f83666fcfd2fe9f12d13e94ee109c5aeabbfa32bb9e02538f4cb000000006a47304402207e6009ad86367fc4b166bc80bf10cf1e78832a01e9bb491c6d126ee8aa436cb502200e29e6dd7708ed419cd5ba798981c960f0cc811b24e894bff072fea8074a7c4c012103bc9e7397f739c70f424aa7dcce9d2e521eb228b0ccba619cd6a0b9691da796a1ffffffff517472e77bc29ae59a914f55211f05024556812a2dd7d8df293265acd8330159010000006b483045022100f4bfdb0b3185c778cf28acbaf115376352f091ad9e27225e6f3f350b847579c702200d69177773cd2bb993a816a5ae08e77a6270cf46b33f8f79d45b0cd1244d9c4c0121031c0b0b95b522805ea9d0225b1946ecaeb1727c0b36c7e34165769fd8ed860bf5ffffffff027a958802000000001976a914a802fc56c704ce87c42d7c92eb75e7896bdc41ae88aca5515e00000000001976a914e82bd75c9c662c3f5700b33fec8a676b6e9391d588ac00000000";
+    http_get(url, response);
+    mu_assert("Error: http_get doesn't work", memcmp((const char*)response, (const char*)expected_response, 746) == 0);
     return 0;
 }
 
@@ -1235,8 +1216,17 @@ static char* test_find_differences() {
     return 0;
 }
 
+static char* test_hex_string_to_byte_array() {
+    char* string = "0100000001d1c789a9c60383bf715f3f6ad9d14b91fe55f3deb369fe5d9280cb1a01793f81000000006b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c5031ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278afeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac19430600";
+    unsigned char expected_result[226] = {0x01, 0x00, 0x00, 0x00, 0x01, 0xd1, 0xc7, 0x89, 0xa9, 0xc6, 0x03, 0x83, 0xbf, 0x71, 0x5f, 0x3f, 0x6a, 0xd9, 0xd1, 0x4b, 0x91, 0xfe, 0x55, 0xf3, 0xde, 0xb3, 0x69, 0xfe, 0x5d, 0x92, 0x80, 0xcb, 0x1a, 0x01, 0x79, 0x3f, 0x81, 0x00, 0x00, 0x00, 0x00, 0x6b, 0x48, 0x30, 0x45, 0x02, 0x21, 0x00, 0xed, 0x81, 0xff, 0x19, 0x2e, 0x75, 0xa3, 0xfd, 0x23, 0x04, 0x00, 0x4d, 0xca, 0xdb, 0x74, 0x6f, 0xa5, 0xe2, 0x4c, 0x50, 0x31, 0xcc, 0xfc, 0xf2, 0x13, 0x20, 0xb0, 0x27, 0x74, 0x57, 0xc9, 0x8f, 0x02, 0x20, 0x7a, 0x98, 0x6d, 0x95, 0x5c, 0x6e, 0x0c, 0xb3, 0x5d, 0x44, 0x6a, 0x89, 0xd3, 0xf5, 0x61, 0x00, 0xf4, 0xd7, 0xf6, 0x78, 0x01, 0xc3, 0x19, 0x67, 0x74, 0x3a, 0x9c, 0x8e, 0x10, 0x61, 0x5b, 0xed, 0x01, 0x21, 0x03, 0x49, 0xfc, 0x4e, 0x63, 0x1e, 0x36, 0x24, 0xa5, 0x45, 0xde, 0x3f, 0x89, 0xf5, 0xd8, 0x68, 0x4c, 0x7b, 0x81, 0x38, 0xbd, 0x94, 0xbd, 0xd5, 0x31, 0xd2, 0xe2, 0x13, 0xbf, 0x01, 0x6b, 0x27, 0x8a, 0xfe, 0xff, 0xff, 0xff, 0x02, 0xa1, 0x35, 0xef, 0x01, 0x00, 0x00, 0x00, 0x00, 0x19, 0x76, 0xa9, 0x14, 0xbc, 0x3b, 0x65, 0x4d, 0xca, 0x7e, 0x56, 0xb0, 0x4d, 0xca, 0x18, 0xf2, 0x56, 0x6c, 0xda, 0xf0, 0x2e, 0x8d, 0x9a, 0xda, 0x88, 0xac, 0x99, 0xc3, 0x98, 0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0x76, 0xa9, 0x14, 0x1c, 0x4b, 0xc7, 0x62, 0xdd, 0x54, 0x23, 0xe3, 0x32, 0x16, 0x67, 0x02, 0xcb, 0x75, 0xf4, 0x0d, 0xf7, 0x9f, 0xea, 0x12, 0x88, 0xac, 0x19, 0x43, 0x06, 0x00};
+    unsigned char result[226] = {0};
+    hex_string_to_byte_array(string, result);
+    mu_assert("Error: hex_string_to_byte_array doesn't work", memcmp(result, expected_result, 226) == 0);
+    return 0;
+}
+
 static char* all_tests() {
-    // //S256Field tests
+    // // //S256Field tests
     // mu_run_test(test_S256Field_add);
     // mu_run_test(test_S256Field_sub);
     // mu_run_test(test_S256Field_mul);
@@ -1248,7 +1238,7 @@ static char* all_tests() {
     // mu_run_test(test_S256Field_div);
     // mu_run_test(test_S256Field_sqrt);
     
-    // //S256Point tests
+    // // //S256Point tests
     // mu_run_test(test_S256Point_add);
     // mu_run_test(test_S256Point_mul);
     // mu_run_test(test_S256Point_verify);
@@ -1257,35 +1247,34 @@ static char* all_tests() {
     // mu_run_test(test_S256Point_parse_sec);
     // mu_run_test(test_S256Point_address);
 
-    // //Private Key tests
+    // // //Private Key tests
     // mu_run_test(test_Deterministic_k);
     // mu_run_test(test_PrivateKey_sign);
     // mu_run_test(test_PrivateKey_wif);
 
-    // //Signature tests
+    // // //Signature tests
     // mu_run_test(test_Signature_der);
     // mu_run_test(test_Signature_parse);
 
-    // //Tx tests
+    // // //Tx tests
     // mu_run_test(test_Tx_parse_version);
     // mu_run_test(test_Tx_parse_inputs);
     // mu_run_test(test_Tx_parse_outputs);
     // mu_run_test(test_Tx_parse_locktime);
-    mu_run_test(test_Tx_parse);
+    // mu_run_test(test_Tx_parse);
     // mu_run_test(test_TxOut_serialize);
     // mu_run_test(test_TxIn_serialize);
     // mu_run_test(test_Tx_serialize);
-    // mu_run_test(test_fee);
-    // mu_run_test(test_write_callback);
+    mu_run_test(test_fee);
     // mu_run_test(test_http_get);
 
-    // //Op tests
+    // // //Op tests
     // mu_run_test(test_encode_num);
     // mu_run_test(test_decode_num);
     // mu_run_test(test_op_hash160);
     // mu_run_test(test_op_checksig);
 
-    // //Script tests
+    // // //Script tests
     // mu_run_test(test_script_parse);
     // mu_run_test(test_script_serialize);
     // mu_run_test(test_script_add);
@@ -1293,7 +1282,7 @@ static char* all_tests() {
     // mu_run_test(test_p2pk);
     // mu_run_test(test_p2pkh);
 
-    // //Helper tests
+    // // //Helper tests
     // mu_run_test(test_encode_base58);
     // mu_run_test(test_little_endian_to_int);
     // mu_run_test(test_int_to_little_endian);
@@ -1305,8 +1294,9 @@ static char* all_tests() {
     // mu_run_test(test_little_endian_to_big_endian);
     // mu_run_test(test_hash160);
     // mu_run_test(test_find_differences);
+    // mu_run_test(test_hex_string_to_byte_array);
 
-    // //Create addresses
+    // // //Create addresses
     // mu_run_test(generate_testnet_address);
 
     return 0;

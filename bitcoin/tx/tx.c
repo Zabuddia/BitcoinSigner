@@ -261,46 +261,53 @@ void TxOut_serialize(TxOut* tx_out, unsigned char* result) {
 }
 
 //Txfetcher
-size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
+size_t write_callback(void *contents, size_t size, size_t nmemb, void *userp) {
     size_t real_size = size * nmemb;
-    char **response_ptr = (char **)userdata;
-    char *old_response = *response_ptr;
-    size_t old_len = old_response ? strlen(old_response) : 0;
+    struct memory_struct *mem = (struct memory_struct *)userp;
 
-    char *new_response = realloc(old_response, old_len + real_size + 1);
-    if (new_response == NULL) {
-        fprintf(stderr, "Failed to allocate memory\n");
-        return 0;
+    char *ptr = realloc(mem->response, mem->size + real_size + 1);
+    if (ptr == NULL) {
+        printf("Not enough memory\n");
+        return 0;  // will cause the download to stop
     }
 
-    memcpy(new_response + old_len, ptr, real_size); // append new data
-    new_response[old_len + real_size] = '\0'; // null-terminate
-
-    *response_ptr = new_response;
+    mem->response = ptr;
+    memcpy(&(mem->response[mem->size]), contents, real_size);
+    mem->size += real_size;
+    mem->response[mem->size] = '\0';
     return real_size;
 }
 
-char *http_get(const char *url) {
+unsigned long long http_get(const char* url, char* response) {
     CURL *curl;
     CURLcode res;
-    char *response = calloc(10000 ,sizeof(char)); // Allocate response buffer
-    if (response == NULL) {
-        fprintf(stderr, "Failed to allocate memory\n");
-        return NULL;
-    }
-    memset(response, 0, 10000 * sizeof(char)); // Initialize response buffer
-    response[0] = '\0';
+
+    struct memory_struct data;
+    data.response = malloc(1);  // will be grown as needed by the realloc above
+    data.size = 0;    // no data at this point
+
+    curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
     if(curl) {
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)response);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&data);
+
+        // Perform the request, res will get the return code
         res = curl_easy_perform(curl);
-        if(res != CURLE_OK)
+        // Check for errors
+        if(res != CURLE_OK) {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        } else {
+            // printf("Output: %s\n", data.response);
+            memcpy(response, data.response, data.size);
+        }
+        // always cleanup
         curl_easy_cleanup(curl);
+        free(data.response);
     }
-    return response;
+    curl_global_cleanup();
+    return data.size;
 }
 
 const char *get_url(int testnet) {
@@ -319,8 +326,14 @@ Tx *fetch(unsigned char *tx_id, size_t testnet) {
     }
     snprintf(url + start + 64, 5, "%s", "/hex");
     printf("URL: %s\n", url);
-    char *response = http_get(url);
-    unsigned char* raw = (unsigned char*)response;
+    char response[10000] = {0};
+    http_get(url, response);
+    printf("Response: %s\n", response);
+    unsigned long long raw_length = strlen(response) / 2;
+    unsigned char raw[raw_length];
+    memset(raw, 0, raw_length);
+    hex_string_to_byte_array(response, raw);
+
     // Assuming not a segwit transaction
     Tx* tx = Tx_parse(raw, testnet);
 
@@ -330,9 +343,6 @@ Tx *fetch(unsigned char *tx_id, size_t testnet) {
         fprintf(stderr, "Tx ID mismatch\n");
         return NULL;
     }
-
-    free(response);
-    free(raw);
 
     return tx;
 }

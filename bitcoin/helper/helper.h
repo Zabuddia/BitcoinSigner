@@ -76,4 +76,8 @@ void encode_varint(unsigned char* output, unsigned long long num);
 
 void little_endian_to_big_endian(unsigned char* data, size_t data_len);
 
+unsigned char hex_char_to_byte(char c);
+
+void hex_string_to_byte_array(const char* hexStr, unsigned char* byteArray);
+
 #endif //HELPER_H
