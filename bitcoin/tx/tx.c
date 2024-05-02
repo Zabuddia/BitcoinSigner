@@ -175,9 +175,16 @@ void TxIn_serialize(TxIn* tx_in, unsigned char* result) {
     unsigned long long script_sig_len = 0;
     for (int i = 0; i < tx_in->script_sig->cmds_len; i++) {
         script_sig_len += tx_in->script_sig->cmds[i].data_len;
+        if (tx_in->script_sig->cmds[i].data_len > 1) {
+            script_sig_len++;
+        }
     }
-    script_sig_len += tx_in->script_sig->cmds_len;
-    memcpy(result, tx_in->prev_tx, 32);
+    //Not sure why I have to do this
+    script_sig_len++;
+    unsigned char prev_tx_copy[32] = {0};
+    memcpy(prev_tx_copy, tx_in->prev_tx, 32);
+    little_endian_to_big_endian(prev_tx_copy, 32);
+    memcpy(result, prev_tx_copy, 32);
     int_to_little_endian(tx_in->prev_index, result + 32, 4);
     script_serialize(tx_in->script_sig, result + 36);
     int_to_little_endian(tx_in->sequence, result + 36 + script_sig_len, 4);
