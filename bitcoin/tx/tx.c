@@ -31,7 +31,7 @@ void Tx_free(Tx* tx) {
 void Tx_id(Tx* tx, unsigned char* result) {
     unsigned long long serial_length = 10;
     for (unsigned long long i = 0; i < tx->num_inputs; i++) {
-        serial_length += 40;
+        unsigned long long tx_in_length = 40;
         unsigned long long script_sig_length = 0;
         for (unsigned long long j = 0; j < tx->tx_ins[i]->script_sig->cmds_len; j++) {
             script_sig_length += tx->tx_ins[i]->script_sig->cmds[j].data_len;
@@ -39,11 +39,20 @@ void Tx_id(Tx* tx, unsigned char* result) {
                 script_sig_length++;
             }
         }
-        script_sig_length++;
-        serial_length += script_sig_length;
+        tx_in_length += script_sig_length;
+        if (tx_in_length < 0xfd) {
+            tx_in_length++;
+        } else if (tx_in_length <= 0xffff) {
+            tx_in_length += 4;
+        } else if (tx_in_length <= 0xffffffff) {
+            tx_in_length += 6;
+        } else {
+            tx_in_length += 10;
+        }
+        serial_length += tx_in_length;
     }
     for (unsigned long long i = 0; i < tx->num_outputs; i++) {
-        serial_length += 8;
+        unsigned long long tx_out_length = 8;
         unsigned long long script_pubkey_length = 0;
         for (unsigned long long j = 0; j < tx->tx_outs[i]->script_pubkey->cmds_len; j++) {
             script_pubkey_length += tx->tx_outs[i]->script_pubkey->cmds[j].data_len;
@@ -51,8 +60,17 @@ void Tx_id(Tx* tx, unsigned char* result) {
                 script_pubkey_length++;
             }
         }
-        script_pubkey_length++;
-        serial_length += script_pubkey_length;
+        tx_out_length += script_pubkey_length;
+        if (tx_out_length < 0xfd) {
+            tx_out_length++;
+        } else if (tx_out_length <= 0xffff) {
+            tx_out_length += 4;
+        } else if (tx_out_length <= 0xffffffff) {
+            tx_out_length += 6;
+        } else {
+            tx_out_length += 10;
+        }
+        serial_length += tx_out_length;
     }
 
     unsigned char serial[serial_length];
@@ -78,10 +96,42 @@ Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
     TxIn** tx_ins = (TxIn**)malloc(num_inputs * sizeof(TxIn*));
     for (unsigned long long i = 0; i < num_inputs; i++) {
         TxIn* tx_in = TxIn_parse(s);
+
+        // printf("Prev_tx: ");
+        // for (int i = 0; i < 32; i++) {
+        //     printf("%02x", tx_in->prev_tx[i]);
+        // }
+        // printf("\n");
+        // printf("Prev_index: %d\n", tx_in->prev_index);
+        // printf("Script_sig: ");
+        // unsigned long long script_sig_length = 0;
+        // for (unsigned long long j = 0; j < tx_in->script_sig->cmds_len; j++) {
+        //     script_sig_length += tx_in->script_sig->cmds[j].data_len;
+        //     if (tx_in->script_sig->cmds[j].data_len > 1) {
+        //         script_sig_length++;
+        //     }
+        // }
+        // script_sig_length += 4;
+        // unsigned char script_sig_serialized[script_sig_length];
+        // script_serialize(tx_in->script_sig, script_sig_serialized);
+        // for (int i = 0; i < script_sig_length; i++) {
+        //     printf("%02x", script_sig_serialized[i]);
+        // }
+        // printf("\n");
+        // printf("Sequence: %d\n", tx_in->sequence);
+
         tx_ins[i] = tx_in;
         unsigned long long tx_in_len = read_varint(s + 36);
         //Not sure why I have to do this
-        tx_in_len++;
+        if (tx_in_len < 0xfd) {
+            tx_in_len++;
+        } else if (tx_in_len <= 0xffff) {
+            tx_in_len += 3;
+        } else if (tx_in_len <= 0xffffffff) {
+            tx_in_len += 5;
+        } else {
+            tx_in_len += 9;
+        }
         s += 40 + tx_in_len;
     }
     unsigned long long num_outputs = read_varint(s);
@@ -100,7 +150,15 @@ Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
         tx_outs[i] = tx_out;
         unsigned long long tx_out_len = read_varint(s + 8);
         //Not sure why I have to do this
-        tx_out_len++;
+        if (tx_out_len < 0xfd) {
+            tx_out_len++;
+        } else if (tx_out_len <= 0xffff) {
+            tx_out_len += 3;
+        } else if (tx_out_len <= 0xffffffff) {
+            tx_out_len += 5;
+        } else {
+            tx_out_len += 9;
+        }
         s += 8 + tx_out_len;
     }
     unsigned long long locktime = little_endian_to_long(s, 4);
@@ -128,7 +186,15 @@ void Tx_serialize(Tx* tx, unsigned char* result) {
                 script_sig_length++;
             }
         }
-        script_sig_length++;
+        if (script_sig_length < 0xfd) {
+            script_sig_length++;
+        } else if (script_sig_length <= 0xffff) {
+            script_sig_length += 4;
+        } else if (script_sig_length <= 0xffffffff) {
+            script_sig_length += 6;
+        } else {
+            script_sig_length += 10;
+        }
         unsigned long long tx_in_length = 40 + script_sig_length;
         TxIn_serialize(tx->tx_ins[i], result);
         result += tx_in_length;
@@ -137,11 +203,11 @@ void Tx_serialize(Tx* tx, unsigned char* result) {
     if (tx->num_outputs < 253) {
         result += 1;
     } else if (tx->num_outputs < 65535) {
-        result += 3;
+        result += 4;
     } else if (tx->num_outputs < 4294967295) {
-        result += 5;
+        result += 6;
     } else {
-        result += 9;
+        result += 10;
     }
     for (unsigned long long i = 0; i < tx->num_outputs; i++) {
         unsigned long long script_pubkey_length = 0;
@@ -151,7 +217,15 @@ void Tx_serialize(Tx* tx, unsigned char* result) {
                 script_pubkey_length++;
             }
         }
-        script_pubkey_length++;
+        if (script_pubkey_length < 0xfd) {
+            script_pubkey_length++;
+        } else if (script_pubkey_length <= 0xffff) {
+            script_pubkey_length += 4;
+        } else if (script_pubkey_length <= 0xffffffff) {
+            script_pubkey_length += 6;
+        } else {
+            script_pubkey_length += 10;
+        }
         unsigned long long tx_out_length = 8 + script_pubkey_length;
         TxOut_serialize(tx->tx_outs[i], result);
         result += tx_out_length;
@@ -209,15 +283,21 @@ TxIn* TxIn_parse(unsigned char* s) {
     Script* script_sig = script_parse(s + 36);
     unsigned long long script_sig_len = read_varint(s + 36);
     //Not sure why I have to do this
-    script_sig_len++;
+    if (script_sig_len < 0xfd) {
+        script_sig_len++;
+    } else if (script_sig_len <= 0xffff) {
+        script_sig_len += 3;
+    } else if (script_sig_len <= 0xffffffff) {
+        script_sig_len += 5;
+    } else {
+        script_sig_len += 9;
+    }
     unsigned char sequence_raw[4];
     memcpy(prev_tx, s, 32);
     little_endian_to_big_endian(prev_tx, 32);
     memcpy(prev_index_raw, s + 32, 4);
     memcpy(sequence_raw, s + 36 + script_sig_len, 4);
     int prev_index = little_endian_to_int(prev_index_raw, 4);
-    unsigned char script_sig_raw[script_sig_len];
-    script_serialize(script_sig, script_sig_raw);
     int sequence = little_endian_to_int(sequence_raw, 4);
     return TxIn_init(prev_tx, prev_index, script_sig, sequence);
 }
@@ -231,7 +311,15 @@ void TxIn_serialize(TxIn* tx_in, unsigned char* result) {
         }
     }
     //Not sure why I have to do this
-    script_sig_len++;
+    if (script_sig_len < 0xfd) {
+        script_sig_len++;
+    } else if (script_sig_len <= 0xffff) {
+        script_sig_len += 4;
+    } else if (script_sig_len <= 0xffffffff) {
+        script_sig_len += 6;
+    } else {
+        script_sig_len += 10;
+    }
     unsigned char prev_tx_copy[32] = {0};
     memcpy(prev_tx_copy, tx_in->prev_tx, 32);
     little_endian_to_big_endian(prev_tx_copy, 32);
@@ -293,7 +381,24 @@ void TxOut_free(TxOut* tx_out) {
 
 TxOut* TxOut_parse(unsigned char* s) {
     unsigned long long amount = little_endian_to_long(s, 8);
+    unsigned long long script_pubkey_len = read_varint(s + 8);
+    if (script_pubkey_len == 0xfd) {
+        script_pubkey_len += 3;
+    } else if (script_pubkey_len == 0xfe) {
+        script_pubkey_len += 5;
+    } else if (script_pubkey_len == 0xff) {
+        script_pubkey_len += 9;
+    } else {
+        script_pubkey_len++;
+    }
     Script* script_pubkey = script_parse(s + 8);
+    // unsigned char script_pubkey_serialized[script_pubkey_len];
+    // script_serialize(script_pubkey, script_pubkey_serialized);
+    // printf("Script_pubkey: ");
+    // for (int i = 0; i < script_pubkey_len; i++) {
+    //     printf("%02x", script_pubkey_serialized[i]);
+    // }
+    // printf("\n");
     return TxOut_init(amount, script_pubkey);
 }
 
@@ -381,6 +486,7 @@ Tx *fetch(unsigned char *tx_id, size_t testnet) {
 
     unsigned char tx_id_result[32];
     Tx_id(tx, tx_id_result);
+
     if (memcmp(tx_id_result, tx_id, 32) != 0) {
         fprintf(stderr, "Tx ID mismatch\n");
         return NULL;

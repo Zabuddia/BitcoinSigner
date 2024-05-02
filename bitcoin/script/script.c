@@ -91,6 +91,15 @@ void script_serialize(Script* script, unsigned char* result) {
             length++;
         }
     }
+    if (length < 0xfd) {
+
+    } else if (length <= 0xffff) {
+        length++;
+    } else if (length <= 0xffffffff) {
+        length += 3;
+    } else {
+        length += 7;
+    }
     encode_varint(result, length);
     if (length < 0xfd) {
         result++;
