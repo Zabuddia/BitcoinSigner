@@ -56,7 +56,10 @@ Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
     for (unsigned long long i = 0; i < num_inputs; i++) {
         TxIn* tx_in = TxIn_parse(s);
         tx_ins[i] = tx_in;
-        s += 40 + 108;
+        unsigned long long tx_in_len = read_varint(s + 36);
+        //Not sure why I have to do this
+        tx_in_len++;
+        s += 40 + tx_in_len;
     }
     unsigned long long num_outputs = read_varint(s);
     if (s[0] == 0xfd) {
@@ -72,7 +75,10 @@ Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
     for (unsigned long long i = 0; i < num_outputs; i++) {
         TxOut* tx_out = TxOut_parse(s);
         tx_outs[i] = tx_out;
-        s += 8 + 26;
+        unsigned long long tx_out_len = read_varint(s + 8);
+        //Not sure why I have to do this
+        tx_out_len++;
+        s += 8 + tx_out_len;
     }
     unsigned long long locktime = little_endian_to_long(s, 4);
     Tx* tx = Tx_init(version, num_inputs, tx_ins, num_outputs, tx_outs, locktime, testnet);
@@ -161,12 +167,16 @@ TxIn* TxIn_parse(unsigned char* s) {
     unsigned char prev_index_raw[4];
     Script* script_sig = script_parse(s + 36);
     unsigned long long script_sig_len = read_varint(s + 36);
+    //Not sure why I have to do this
+    script_sig_len++;
     unsigned char sequence_raw[4];
     memcpy(prev_tx, s, 32);
+    little_endian_to_big_endian(prev_tx, 32);
     memcpy(prev_index_raw, s + 32, 4);
     memcpy(sequence_raw, s + 36 + script_sig_len, 4);
-    little_endian_to_big_endian(prev_tx, 32);
     int prev_index = little_endian_to_int(prev_index_raw, 4);
+    unsigned char script_sig_raw[script_sig_len];
+    script_serialize(script_sig, script_sig_raw);
     int sequence = little_endian_to_int(sequence_raw, 4);
     return TxIn_init(prev_tx, prev_index, script_sig, sequence);
 }
