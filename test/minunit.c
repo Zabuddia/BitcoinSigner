@@ -1276,9 +1276,9 @@ static char* all_tests() {
     // mu_run_test(test_TxOut_serialize);
     // mu_run_test(test_TxIn_serialize);
     // mu_run_test(test_Tx_serialize);
-    // mu_run_test(test_fee);
+    mu_run_test(test_fee);
     // mu_run_test(test_http_get);
-    mu_run_test(test_tx_id);
+    // mu_run_test(test_tx_id);
 
     // // //Op tests
     // mu_run_test(test_encode_num);

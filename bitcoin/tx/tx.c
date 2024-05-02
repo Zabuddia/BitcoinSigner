@@ -250,7 +250,7 @@ Tx* fetch_tx(TxIn* txin, size_t testnet) {
 unsigned long long value(TxIn* txin, size_t testnet) {
     Tx* tx = fetch_tx(txin, testnet);
     unsigned long long value = tx->tx_outs[txin->prev_index]->amount;
-    free(tx);
+    Tx_free(tx);
     return value;
 }
 
