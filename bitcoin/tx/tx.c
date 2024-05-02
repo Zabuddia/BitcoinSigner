@@ -29,14 +29,36 @@ void Tx_free(Tx* tx) {
 }
 
 void Tx_id(Tx* tx, unsigned char* result) {
-    unsigned char* serial = (unsigned char*)malloc(10000);
-    if (serial == NULL) {
-        printf("Memory allocation failed\n");
-        exit(1);
+    unsigned long long serial_length = 9;
+    for (unsigned long long i = 0; i < tx->num_inputs; i++) {
+        serial_length += 40;
+        unsigned long long script_sig_length = 0;
+        for (unsigned long long j = 0; j < tx->tx_ins[i]->script_sig->cmds_len; j++) {
+            script_sig_length += tx->tx_ins[i]->script_sig->cmds[j].data_len;
+            if (tx->tx_ins[i]->script_sig->cmds[j].data_len > 1) {
+                script_sig_length++;
+            }
+        }
+        script_sig_length++;
+        serial_length += script_sig_length;
     }
+    for (unsigned long long i = 0; i < tx->num_outputs; i++) {
+        serial_length += 8;
+        unsigned long long script_pubkey_length = 0;
+        for (unsigned long long j = 0; j < tx->tx_outs[i]->script_pubkey->cmds_len; j++) {
+            script_pubkey_length += tx->tx_outs[i]->script_pubkey->cmds[j].data_len;
+            if (tx->tx_outs[i]->script_pubkey->cmds[j].data_len > 1) {
+                script_pubkey_length++;
+            }
+        }
+        script_pubkey_length++;
+        serial_length += script_pubkey_length;
+    }
+
+    unsigned char serial[serial_length];
+
     Tx_serialize(tx, serial);
-    hash256(serial, 148 * tx->num_inputs + 34 * tx->num_outputs + 10, result);
-    free(serial);
+    hash256(serial, serial_length, result);
 }
 
 Tx* Tx_parse(unsigned char* s, uint8_t testnet) {
@@ -98,9 +120,18 @@ void Tx_serialize(Tx* tx, unsigned char* result) {
         result += 17;
     }
     for (unsigned long long i = 0; i < tx->num_inputs; i++) {
-        TxIn_serialize(tx->tx_ins[i], result + i * 148);
+        unsigned long long script_sig_length = 0;
+        for (unsigned long long j = 0; j < tx->tx_ins[i]->script_sig->cmds_len; j++) {
+            script_sig_length += tx->tx_ins[i]->script_sig->cmds[j].data_len;
+            if (tx->tx_ins[i]->script_sig->cmds[j].data_len > 1) {
+                script_sig_length++;
+            }
+        }
+        script_sig_length++;
+        unsigned long long tx_in_length = 40 + script_sig_length;
+        TxIn_serialize(tx->tx_ins[i], result);
+        result += tx_in_length;
     }
-    result += tx->num_inputs * 148;
     encode_varint(result, tx->num_outputs);
     if (tx->num_outputs < 253) {
         result += 1;
@@ -112,9 +143,18 @@ void Tx_serialize(Tx* tx, unsigned char* result) {
         result += 9;
     }
     for (unsigned long long i = 0; i < tx->num_outputs; i++) {
-        TxOut_serialize(tx->tx_outs[i], result + i * 34);
+        unsigned long long script_pubkey_length = 0;
+        for (unsigned long long j = 0; j < tx->tx_outs[i]->script_pubkey->cmds_len; j++) {
+            script_pubkey_length += tx->tx_outs[i]->script_pubkey->cmds[j].data_len;
+            if (tx->tx_outs[i]->script_pubkey->cmds[j].data_len > 1) {
+                script_pubkey_length++;
+            }
+        }
+        script_pubkey_length++;
+        unsigned long long tx_out_length = 8 + script_pubkey_length;
+        TxOut_serialize(tx->tx_outs[i], result);
+        result += tx_out_length;
     }
-    result += tx->num_outputs * 34;
     long_to_little_endian(tx->locktime, result, 4);
 }
 
