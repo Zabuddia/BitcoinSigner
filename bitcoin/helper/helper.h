@@ -68,6 +68,8 @@ void long_to_little_endian(unsigned long long num, unsigned char *output, size_t
 
 void print_formatted_bytes(const unsigned char* hex);
 
+void find_differences(const char* data1, const char* data2);
+
 unsigned long long read_varint(unsigned char* data);
 
 void encode_varint(unsigned char* output, unsigned long long num);

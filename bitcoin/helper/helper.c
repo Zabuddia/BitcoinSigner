@@ -259,6 +259,21 @@ void print_formatted_bytes(const unsigned char* hex) {
     printf("Length: %d\n", i / 2);
 }
 
+void find_differences(const char* data1, const char* data2) {
+    int data_len = strlen(data1);
+    if (data_len != strlen(data2)) {
+        printf("Data lengths are different\n");
+        return;
+    }
+    for (int i = 0; i < data_len; i++) {
+        if (data1[i] != data2[i]) {
+            printf("Difference found at index %d\n", i);
+            printf("Data1: %d\n", data1[i]);
+            printf("Data2: %d\n", data2[i]);
+        }
+    }
+}
+
 unsigned long long read_varint(unsigned char* data) {
     unsigned char i = data[0];
     if (i == 0xfd) {
