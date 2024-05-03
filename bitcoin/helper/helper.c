@@ -341,3 +341,10 @@ void hex_string_to_byte_array(const char* hexStr, unsigned char* byteArray) {
         byteArray[i] = (high << 4) | low;
     }
 }
+
+void byte_array_to_hex_string(unsigned char* byte_array, size_t byte_array_len, char* hex_string) {
+    for (size_t i = 0; i < byte_array_len; i++) {
+        sprintf(hex_string + 2 * i, "%02x", byte_array[i]);
+    }
+    hex_string[2 * byte_array_len] = '\0';
+}

@@ -267,7 +267,7 @@ void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
     }
     for (unsigned long long i = 0; i < tx->num_inputs; i++) {
         if (i == input_index) {
-            Script* script_sig = script_pubkey(tx->tx_ins[i], tx->testnet);
+            Script* script_sig = TxIn_script_pubkey(tx->tx_ins[i], tx->testnet);
             script_deep_copy(tx->tx_ins[i]->script_sig, script_sig);
             script_free(script_sig);
             unsigned long long script_sig_length = 0;
@@ -355,6 +355,37 @@ void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
     s -= total_length;
     hash256(s, total_length, result);
     free(s);
+}
+
+size_t verify_input(Tx* tx, unsigned long long input_index) {
+    TxIn* tx_in = tx->tx_ins[input_index];
+    Script* script_pubkey = TxIn_script_pubkey(tx_in, tx->testnet);
+    unsigned char z_raw[32];
+    sig_hash(tx, input_index, z_raw);
+    char z_str[65] = {0};
+    byte_array_to_hex_string(z_raw, 32, z_str);
+    mpz_t z_mpz;
+    mpz_init_set_str(z_mpz, z_str, 16);
+    S256Field* z = S256Field_init(z_mpz);
+    Script* combined = script_add(tx_in->script_sig, script_pubkey);
+    size_t result = script_evaluate(combined, z);
+    script_free(script_pubkey);
+    script_free(combined);
+    S256Field_free(z);
+    return result;
+}
+
+size_t Tx_verify(Tx* tx) {
+    unsigned long long tx_fee = fee(tx, tx->testnet);
+    if (tx_fee < 0) {
+        return 0;
+    }
+    for (unsigned long long i = 0; i < tx->num_inputs; i++) {
+        if (!verify_input(tx, i)) {
+            return 0;
+        }
+    }
+    return 1;
 }
 
 //Txin
@@ -454,7 +485,7 @@ unsigned long long value(TxIn* txin, size_t testnet) {
     return value;
 }
 
-Script* script_pubkey(TxIn* txin, size_t testnet) {
+Script* TxIn_script_pubkey(TxIn* txin, size_t testnet) {
     Tx* tx = fetch_tx(txin, testnet);
     Script* result = script_init();
     script_deep_copy(result, tx->tx_outs[txin->prev_index]->script_pubkey);
@@ -584,10 +615,10 @@ Tx *fetch(unsigned char *tx_id, size_t testnet) {
         snprintf(url + start + 2 * i, 3, "%02x", tx_id[i]);
     }
     snprintf(url + start + 64, 5, "%s", "/hex");
-    printf("URL: %s\n", url);
+    // printf("URL: %s\n", url);
     char response[10000] = {0};
     http_get(url, response);
-    printf("Response: %s\n", response);
+    // printf("Response: %s\n", response);
     unsigned long long raw_length = strlen(response) / 2;
     unsigned char raw[raw_length];
     memset(raw, 0, raw_length);

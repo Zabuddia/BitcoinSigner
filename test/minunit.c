@@ -728,7 +728,7 @@ static char* test_Tx_parse() {
 static char* test_print_formatted_bytes() {
     const unsigned char* hex_string = (const unsigned char*)"452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03";
     print_formatted_bytes(hex_string);
-    const unsigned char* hex_string_2 = (const unsigned char*)"27e0c5994dec7824e56dec6b2fcb342eb7cdb0d0957c2fce9882f715e85d81a6";
+    const unsigned char* hex_string_2 = (const unsigned char*)"5418099cc755cb9dd3ebc6cf1a7888ad53a1a3beb5a025bce89eb1bf7f1650a2";
     print_formatted_bytes(hex_string_2);
     return 0;
 }
@@ -1284,6 +1284,29 @@ static char* test_sig_hash() {
     return 0;
 }
 
+static char* test_byte_array_to_hex_string() {
+    unsigned char byte_array[32] = {0x27, 0xe0, 0xc5, 0x99, 0x4d, 0xec, 0x78, 0x24, 0xe5, 0x6d, 0xec, 0x6b, 0x2f, 0xcb, 0x34, 0x2e, 0xb7, 0xcd, 0xb0, 0xd0, 0x95, 0x7c, 0x2f, 0xce, 0x98, 0x82, 0xf7, 0x15, 0xe8, 0x5d, 0x81, 0xa6};
+    char result[65];
+    byte_array_to_hex_string(byte_array, 32, result);
+    mu_assert("Error: byte_array_to_hex_string doesn't work", strcmp(result, "27e0c5994dec7824e56dec6b2fcb342eb7cdb0d0957c2fce9882f715e85d81a6") == 0);
+    return 0;
+}
+
+static char* test_verify_p2pkh() {
+    unsigned char raw_tx_1[32] = {0x45, 0x2c, 0x62, 0x9d, 0x67, 0xe4, 0x1b, 0xae, 0xc3, 0xac, 0x6f, 0x04, 0xfe, 0x74, 0x4b, 0x4b, 0x96, 0x17, 0xf8, 0xf8, 0x59, 0xc6, 0x3b, 0x30, 0x02, 0xf8, 0x68, 0x4e, 0x7a, 0x4f, 0xee, 0x03};
+    Tx* tx_1 = fetch(raw_tx_1, FALSE);
+    size_t result_1 = Tx_verify(tx_1);
+    mu_assert("Error: Tx_verify doesn't work", result_1 == 1);
+    Tx_free(tx_1);
+
+    unsigned char raw_tx_2[32] = {0x54, 0x18, 0x09, 0x9c, 0xc7, 0x55, 0xcb, 0x9d, 0xd3, 0xeb, 0xc6, 0xcf, 0x1a, 0x78, 0x88, 0xad, 0x53, 0xa1, 0xa3, 0xbe, 0xb5, 0xa0, 0x25, 0xbc, 0xe8, 0x9e, 0xb1, 0xbf, 0x7f, 0x16, 0x50, 0xa2};
+    Tx* tx_2 = fetch(raw_tx_2, TRUE);
+    size_t result_2 = Tx_verify(tx_2);
+    mu_assert("Error: Tx_verify doesn't work", result_2 == 1);
+    Tx_free(tx_2);
+    return 0;
+}
+
 static char* all_tests() {
     // // //S256Field tests
     // mu_run_test(test_S256Field_add);
@@ -1327,7 +1350,8 @@ static char* all_tests() {
     // mu_run_test(test_fee);
     // mu_run_test(test_http_get);
     // mu_run_test(test_tx_id);
-    mu_run_test(test_sig_hash);
+    // mu_run_test(test_sig_hash);
+    mu_run_test(test_verify_p2pkh);
 
     // // //Op tests
     // mu_run_test(test_encode_num);
@@ -1357,6 +1381,7 @@ static char* all_tests() {
     // mu_run_test(test_find_differences);
     // mu_run_test(test_hex_string_to_byte_array);
     // mu_run_test(test_hash256);
+    // mu_run_test(test_byte_array_to_hex_string);
 
     // // //Create addresses
     // mu_run_test(generate_testnet_address);

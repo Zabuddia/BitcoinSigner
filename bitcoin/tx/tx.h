@@ -53,6 +53,10 @@ unsigned long long fee(Tx* tx, size_t testnet);
 
 void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result);
 
+size_t verify_input(Tx* tx, unsigned long long input_index);
+
+size_t Tx_verify(Tx* tx);
+
 //Txin
 TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, int sequence);
 
@@ -68,7 +72,7 @@ Tx* fetch_tx(TxIn* txin, size_t testnet);
 
 unsigned long long value(TxIn* txin, size_t testnet);
 
-Script* script_pubkey(TxIn* txin, size_t testnet);
+Script* TxIn_script_pubkey(TxIn* txin, size_t testnet);
 
 //Txout
 TxOut* TxOut_init(unsigned long long amount, Script* script_pubkey);

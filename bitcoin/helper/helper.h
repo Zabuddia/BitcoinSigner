@@ -82,4 +82,6 @@ unsigned char hex_char_to_byte(char c);
 
 void hex_string_to_byte_array(const char* hexStr, unsigned char* byteArray);
 
+void byte_array_to_hex_string(unsigned char* byte_array, size_t byte_array_len, char* hex_string);
+
 #endif //HELPER_H
