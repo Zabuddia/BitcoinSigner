@@ -31,6 +31,7 @@ void pop(Op* op, unsigned char* result) {
     }
     size_t element_len = op->element_length[op->top];
     memcpy(result, op->stack[op->top], element_len);
+    memset(op->stack[op->top], 0, element_len);
     op->top--;
 }
 
@@ -541,11 +542,14 @@ size_t op_equal(Op* op) {
     if (op->top < 1) {
         return 0;
     }
+    size_t element_len = op->element_length[op->top];
     unsigned char element_1[op->element_length[op->top]];
+    memset(element_1, 0, op->element_length[op->top]);
     pop(op, element_1);
     unsigned char element_2[op->element_length[op->top]];
+    memset(element_2, 0, op->element_length[op->top]);
     pop(op, element_2);
-    if (memcmp(element_1, element_2, op->element_length[op->top])) {
+    if (memcmp(element_1, element_2, element_len)) {
         unsigned char result[1];
         encode_num(0, result);
         push(op, result, 1);

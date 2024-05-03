@@ -60,6 +60,8 @@ size_t Tx_verify(Tx* tx);
 //Txin
 TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, int sequence);
 
+unsigned long long TxIn_length(TxIn* tx_in);
+
 void TxIn_toString(TxIn* tx_in);
 
 void TxIn_free(TxIn* tx_in);

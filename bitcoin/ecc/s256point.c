@@ -345,6 +345,7 @@ S256Point* S256Point_parse_sec(unsigned char* sec_bin) {
             S256Point* result = S256Point_init(x, beta);
             mpz_clear(three);
             mpz_clear(beta_mod_two);
+            mpz_clear(temp_p);
             S256Field_free(x_cubed);
             S256Field_free(alpha);
             S256Field_free(temp_b);
@@ -380,6 +381,7 @@ S256Point* S256Point_parse_sec(unsigned char* sec_bin) {
             S256Point* result = S256Point_init(x, beta);
             mpz_clear(three);
             mpz_clear(beta_mod_two);
+            mpz_clear(temp_p);
             S256Field_free(x_cubed);
             S256Field_free(alpha);
             S256Field_free(temp_b);

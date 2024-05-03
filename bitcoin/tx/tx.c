@@ -360,6 +360,8 @@ void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
 size_t verify_input(Tx* tx, unsigned long long input_index) {
     TxIn* tx_in = tx->tx_ins[input_index];
     Script* script_pubkey = TxIn_script_pubkey(tx_in, tx->testnet);
+    Script* script_sig = script_init();
+    script_deep_copy(script_sig, tx_in->script_sig);
     unsigned char z_raw[32];
     sig_hash(tx, input_index, z_raw);
     char z_str[65] = {0};
@@ -367,8 +369,12 @@ size_t verify_input(Tx* tx, unsigned long long input_index) {
     mpz_t z_mpz;
     mpz_init_set_str(z_mpz, z_str, 16);
     S256Field* z = S256Field_init(z_mpz);
-    Script* combined = script_add(tx_in->script_sig, script_pubkey);
+    Script* combined = script_add(script_sig, script_pubkey);
+    unsigned long long combined_length = script_length(combined);
+    unsigned char combined_serialized[combined_length];
+    script_serialize(combined, combined_serialized);
     size_t result = script_evaluate(combined, z);
+    script_free(script_sig);
     script_free(script_pubkey);
     script_free(combined);
     S256Field_free(z);
@@ -402,6 +408,26 @@ TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, i
     tx_in->sequence = sequence;
     script_free(script_sig);
     return tx_in;
+}
+
+unsigned long long TxIn_length(TxIn* tx_in) {
+    unsigned long long script_sig_length = 0;
+    for (unsigned long long i = 0; i < tx_in->script_sig->cmds_len; i++) {
+        script_sig_length += tx_in->script_sig->cmds[i].data_len;
+        if (tx_in->script_sig->cmds[i].data_len > 1) {
+            script_sig_length++;
+        }
+    }
+    if (script_sig_length < 0xfd) {
+        script_sig_length++;
+    } else if (script_sig_length <= 0xffff) {
+        script_sig_length += 3;
+    } else if (script_sig_length <= 0xffffffff) {
+        script_sig_length += 5;
+    } else {
+        script_sig_length += 9;
+    }
+    return 40 + script_sig_length;
 }
 
 void TxIn_toString(TxIn* tx_in) {

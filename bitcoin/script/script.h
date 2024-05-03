@@ -20,6 +20,10 @@ Script* script_init();
 
 void script_free(Script* script);
 
+void script_toString(Script* script);
+
+unsigned long long script_length(Script* script);
+
 void script_set_cmds(Script* script, Command* cmds, int cmds_len);
 
 Script* script_parse(unsigned char* s);

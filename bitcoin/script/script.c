@@ -14,6 +14,36 @@ void script_free(Script* script) {
     free(script);
 }
 
+void script_toString(Script* script) {
+    for (int i = 0; i < script->cmds_len; i++) {
+        Command cmd = script->cmds[i];
+        printf("Command: ");
+        for (int j = 0; j < cmd.data_len; j++) {
+            printf("%02x", cmd.data[j]);
+        }
+        printf("\n");
+    }
+}
+
+unsigned long long script_length(Script* script) {
+    unsigned long long length = 0;
+    for (int i = 0; i < script->cmds_len; i++) {
+        length += script->cmds[i].data_len;
+        if (script->cmds[i].data_len > 1) {
+            length++;
+        }
+    }
+    if (length < 0xfd) {
+        return length + 1;
+    } else if (length <= 0xffff) {
+        return length + 3;
+    } else if (length <= 0xffffffff) {
+        return length + 5;
+    } else {
+        return length + 9;
+    }
+}
+
 void script_set_cmds(Script* script, Command* cmds, int cmds_len) {
     for (int i = 0; i < cmds_len; i++) {
         memcpy(script->cmds[i].data, cmds[i].data, cmds[i].data_len);
