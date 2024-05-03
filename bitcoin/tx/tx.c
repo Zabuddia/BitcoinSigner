@@ -245,6 +245,118 @@ unsigned long long fee(Tx* tx, size_t testnet) {
     return input_sum - output_sum;
 }
 
+void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
+    int total_length = 0;
+    unsigned char* s = (unsigned char*)malloc(10000);
+    int_to_little_endian(tx->version, s, 4);
+    s += 4;
+    total_length += 4;
+    encode_varint(s, tx->num_inputs);
+    if (tx->num_inputs < 253) {
+        s++;
+        total_length++;
+    } else if (tx->num_inputs < 65535) {
+        s += 3;
+        total_length += 3;
+    } else if (tx->num_inputs < 4294967295) {
+        s += 5;
+        total_length += 5;
+    } else {
+        s += 9;
+        total_length += 9;
+    }
+    for (unsigned long long i = 0; i < tx->num_inputs; i++) {
+        if (i == input_index) {
+            Script* script_sig = script_pubkey(tx->tx_ins[i], tx->testnet);
+            script_deep_copy(tx->tx_ins[i]->script_sig, script_sig);
+            script_free(script_sig);
+            unsigned long long script_sig_length = 0;
+            for (unsigned long long j = 0; j < tx->tx_ins[i]->script_sig->cmds_len; j++) {
+                script_sig_length += tx->tx_ins[i]->script_sig->cmds[j].data_len;
+                if (tx->tx_ins[i]->script_sig->cmds[j].data_len > 1) {
+                    script_sig_length++;
+                }
+            }
+            if (script_sig_length < 0xfd) {
+                script_sig_length++;
+            } else if (script_sig_length <= 0xffff) {
+                script_sig_length += 4;
+            } else if (script_sig_length <= 0xffffffff) {
+                script_sig_length += 6;
+            } else {
+                script_sig_length += 10;
+            }
+            unsigned long long tx_in_length = 40 + script_sig_length;
+            TxIn_serialize(tx->tx_ins[i], s);
+            s += tx_in_length;
+            total_length += tx_in_length;
+        } else {
+            unsigned char prev_tx[32] = {0};
+            memcpy(prev_tx, tx->tx_ins[i]->prev_tx, 32);
+            little_endian_to_big_endian(prev_tx, 32);
+            memcpy(s, prev_tx, 32);
+            s += 32;
+            total_length += 32;
+            int_to_little_endian(tx->tx_ins[i]->prev_index, s, 4);
+            s += 4;
+            total_length += 4;
+            int_to_little_endian(tx->tx_ins[i]->sequence, s, 4);
+            s += 4;
+            total_length += 4;
+        }
+    }
+    encode_varint(s, tx->num_outputs);
+    if (tx->num_outputs < 253) {
+        s++;
+        total_length++;
+    } else if (tx->num_outputs < 65535) {
+        s += 3;
+        total_length += 3;
+    } else if (tx->num_outputs < 4294967295) {
+        s += 5;
+        total_length += 5;
+    } else {
+        s += 9;
+        total_length += 9;
+    }
+    for (unsigned long long i = 0; i < tx->num_outputs; i++) {
+        unsigned long long script_pubkey_length = 0;
+        for (unsigned long long j = 0; j < tx->tx_outs[i]->script_pubkey->cmds_len; j++) {
+            script_pubkey_length += tx->tx_outs[i]->script_pubkey->cmds[j].data_len;
+            if (tx->tx_outs[i]->script_pubkey->cmds[j].data_len > 1) {
+                script_pubkey_length++;
+            }
+        }
+        if (script_pubkey_length < 0xfd) {
+            script_pubkey_length++;
+        } else if (script_pubkey_length <= 0xffff) {
+            script_pubkey_length += 4;
+        } else if (script_pubkey_length <= 0xffffffff) {
+            script_pubkey_length += 6;
+        } else {
+            script_pubkey_length += 10;
+        }
+        unsigned long long tx_out_length = 8 + script_pubkey_length;
+        TxOut_serialize(tx->tx_outs[i], s);
+        s += tx_out_length;
+        total_length += tx_out_length;
+    }
+    long_to_little_endian(tx->locktime, s, 4);
+    s += 4;
+    total_length += 4;
+    int sighash_all = SIGHASH_ALL;
+    int_to_little_endian(sighash_all, s, 4);
+    s += 4;
+    total_length += 4;
+    if (total_length > 10000) {
+        printf("Total length too long in sig_hash()\n");
+        exit(1);
+    }
+    s -= total_length;
+    hash256(s, total_length, result);
+    free(s);
+}
+
 //Txin
 TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, int sequence) {
     TxIn* tx_in = (TxIn*)malloc(sizeof(TxIn));
@@ -346,7 +458,7 @@ Script* script_pubkey(TxIn* txin, size_t testnet) {
     Tx* tx = fetch_tx(txin, testnet);
     Script* result = script_init();
     script_deep_copy(result, tx->tx_outs[txin->prev_index]->script_pubkey);
-    free(tx);
+    Tx_free(tx);
     return result;
 }
 

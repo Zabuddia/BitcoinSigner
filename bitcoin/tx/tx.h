@@ -51,6 +51,8 @@ void Tx_serialize(Tx* tx, unsigned char* result);
 
 unsigned long long fee(Tx* tx, size_t testnet);
 
+void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result);
+
 //Txin
 TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, int sequence);
 

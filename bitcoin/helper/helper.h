@@ -13,6 +13,8 @@
 #define TRUE 1
 #define FALSE 0
 
+#define SIGHASH_ALL 1
+
 #define P "fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f"
 #define N "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
 #define GX "79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"

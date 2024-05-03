@@ -25,6 +25,7 @@
 #define TEST_R "ac8d1c87e51d0d441be8b3dd5b05c8795b48875dffe00b7ffcfac23010d3a395"
 #define TEST_S "68342ceff8935ededd102dd876ffd6ba72d6a427a3edb13d26eb0781cb423c4"
 #define TEST_Z_2 "7c076ff316692a3d7eb3c3bb0f8b1488cf72e1afcd929e29307032997a838a3d"
+#define TEST_Z_3 "27e0c5994dec7824e56dec6b2fcb342eb7cdb0d0957c2fce9882f715e85d81a6"
 
 //For testing signature DER format
 #define TEST_DER_R "37206a0610995c58074999cb9767b87af4c4978db68c06e8e6e81d282047a7c6"
@@ -325,6 +326,19 @@ static char* test_S256Point_verify() {
     S256Field_free(test_z);
     Signature_free(test_sig);
     S256Point_free(test_p);
+
+    mpz_t test_Z2;
+    mpz_init_set_str(test_Z2, TEST_Z_3, 16);
+    S256Field* test_z2 = S256Field_init(test_Z2);
+    unsigned char sec[33] = {0x03, 0x49, 0xfc, 0x4e, 0x63, 0x1e, 0x36, 0x24, 0xa5, 0x45, 0xde, 0x3f, 0x89, 0xf5, 0xd8, 0x68, 0x4c, 0x7b, 0x81, 0x38, 0xbd, 0x94, 0xbd, 0xd5, 0x31, 0xd2, 0xe2, 0x13, 0xbf, 0x01, 0x6b, 0x27, 0x8a};
+    unsigned char der[71] = {0x30, 0x45, 0x02, 0x21, 0x00, 0xed, 0x81, 0xff, 0x19, 0x2e, 0x75, 0xa3, 0xfd, 0x23, 0x04, 0x00, 0x4d, 0xca, 0xdb, 0x74, 0x6f, 0xa5, 0xe2, 0x4c, 0x50, 0x31, 0xcc, 0xfc, 0xf2, 0x13, 0x20, 0xb0, 0x27, 0x74, 0x57, 0xc9, 0x8f, 0x02, 0x20, 0x7a, 0x98, 0x6d, 0x95, 0x5c, 0x6e, 0x0c, 0xb3, 0x5d, 0x44, 0x6a, 0x89, 0xd3, 0xf5, 0x61, 0x00, 0xf4, 0xd7, 0xf6, 0x78, 0x01, 0xc3, 0x19, 0x67, 0x74, 0x3a, 0x9c, 0x8e, 0x10, 0x61, 0x5b, 0xed};
+    S256Point* test_p2 = S256Point_parse_sec(sec);
+    Signature* test_sig2 = Signature_parse(der);
+    int result2 = S256Point_verify(test_p2, test_z2, test_sig2);
+    mu_assert("Error: S256Point_verify doesn't work", result2 == 1);
+    S256Field_free(test_z2);
+    S256Point_free(test_p2);
+    Signature_free(test_sig2);
     return 0;
 }
 
@@ -712,9 +726,9 @@ static char* test_Tx_parse() {
 }
 
 static char* test_print_formatted_bytes() {
-    const unsigned char* hex_string = (const unsigned char*)"9e067aedc661fca148e13953df75f8ca6eada9ce3b3d8d68631769ac60999156";
+    const unsigned char* hex_string = (const unsigned char*)"452c629d67e41baec3ac6f04fe744b4b9617f8f859c63b3002f8684e7a4fee03";
     print_formatted_bytes(hex_string);
-    const unsigned char* hex_string_2 = (const unsigned char*)"25";
+    const unsigned char* hex_string_2 = (const unsigned char*)"27e0c5994dec7824e56dec6b2fcb342eb7cdb0d0957c2fce9882f715e85d81a6";
     print_formatted_bytes(hex_string_2);
     return 0;
 }
@@ -1216,8 +1230,8 @@ static char* test_p2pkh() {
 }
 
 static char* test_find_differences() {
-    const char* s1 = "0100000001c228021e1fee6f158cc506edea6bad7ffa421dd14fb7fd7e01c50cc9693e8dbe02000000fdfe0000483045022100c679944ff8f20373685e1122b581f64752c1d22c67f6f3ae26333aa9c3f43d730220793233401f87f640f9c39207349ffef42d0e27046755263c0a69c436ab07febc01483045022100eadc1c6e72f241c3e076a7109b8053db53987f3fcc99e3f88fc4e52dbfd5f3a202201f02cbff194c41e6f8da762e024a7ab85c1b1616b74720f13283043e9e99dab8014c69522102b0c7be446b92624112f3c7d4ffc214921c74c1cb891bf945c49fbe5981ee026b21039021c9391e328e0cb3b61ba05dcc5e122ab234e55d1502e59b10d8f588aea4632102f3bd8f64363066f35968bd82ed9c6e8afecbd6136311bb51e91204f614144e9b53aeffffffff05a08601000000000017a914081fbb6ec9d83104367eb1a6a59e2a92417d79298700350c00000000001976a914677345c7376dfda2c52ad9b6a153b643b6409a3788acc7f341160000000017a914234c15756b9599314c9299340eaabab7f1810d8287c02709000000000017a91469be3ca6195efcab5194e1530164ec47637d44308740420f00000000001976a91487fadba66b9e48c0c8082f33107fdb01970eb80388ac00000000";
-    const char* s2 = "0100000001c228021e1fee6f158cc506edea6bad7ffa421dd14fb7fd7e01c50cc9693e8dbe02000000fdfe0000483045022100c679944ff8f20373685e1122b581f64752c1d22c67f6f3ae26333aa9c3f43d730220793233401f87f640f9c39207349ffef42d0e27046755263c0a69c436ab07febc01483045022100eadc1c6e72f241c3e076a7109b8053db53987f3fcc99e3f88fc4e52dbfd5f3a202201f02cbff194c41e6f8da762e024a7ab85c1b1616b74720f13283043e9e99dab8014c69522102b0c7be446b92624112f3c7d4ffc214921c74c1cb891bf945c49fbe5981ee026b21039021c9391e328e0cb3b61ba05dcc5e122ab234e55d1502e59b10d8f588aea4632102f3bd8f64363066f35968bd82ed9c6e8afecbd6136311bb51e91204f614144e9b53aeffffffff05a08601000000000017a914081fbb6ec9d83104367eb1a6a59e2a92417d79298700350c00000000001976a914677345c7376dfda2c52ad9b6a153b643b6409a3788acc7f341160000000017a914234c15756b9599314c9299340eaabab7f1810d8287c02709000000000017a91469be3ca6195efcab5194e1530164ec47637d44308740420f00000000001976a91487fadba66b9e48c0c8082f33107fdb01970eb80388ac000000";
+    const char* s1 = "0100000001813f79011acb80925dfe69b3def355fe914bd1d96a3f5f71bf8303c6a989c7d1000000001976a914a802fc56c704ce87c42d7c92eb75e7896bdc41ae88acfeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac1943060001000000";
+    const char* s2 = "0100000001813f79011acb80925dfe69b3def355fe914bd1d96a3f5f71bf8303c6a989c7d1000000006b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c5031ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278afeffffff02a135ef01000000001976a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac99c39800000000001976a9141c4bc762dd5423e332166702cb75f40df79fea1288ac1943060001000000";
     find_differences(s1, s2);
     return 0;
 }
@@ -1247,6 +1261,26 @@ static char* test_tx_id() {
     Tx_id(tx_2, result_2);
     mu_assert("Error: Tx_id doesn't work", memcmp(result_2, expected_result_2, 32) == 0);
     Tx_free(tx_2);
+    return 0;
+}
+
+static char* test_hash256() {
+    unsigned char modified_tx[148] = {0x01, 0x00, 0x00, 0x00, 0x01, 0x81, 0x3f, 0x79, 0x01, 0x1a, 0xcb, 0x80, 0x92, 0x5d, 0xfe, 0x69, 0xb3, 0xde, 0xf3, 0x55, 0xfe, 0x91, 0x4b, 0xd1, 0xd9, 0x6a, 0x3f, 0x5f, 0x71, 0xbf, 0x83, 0x03, 0xc6, 0xa9, 0x89, 0xc7, 0xd1, 0x00, 0x00, 0x00, 0x00, 0x19, 0x76, 0xa9, 0x14, 0xa8, 0x02, 0xfc, 0x56, 0xc7, 0x04, 0xce, 0x87, 0xc4, 0x2d, 0x7c, 0x92, 0xeb, 0x75, 0xe7, 0x89, 0x6b, 0xdc, 0x41, 0xae, 0x88, 0xac, 0xfe, 0xff, 0xff, 0xff, 0x02, 0xa1, 0x35, 0xef, 0x01, 0x00, 0x00, 0x00, 0x00, 0x19, 0x76, 0xa9, 0x14, 0xbc, 0x3b, 0x65, 0x4d, 0xca, 0x7e, 0x56, 0xb0, 0x4d, 0xca, 0x18, 0xf2, 0x56, 0x6c, 0xda, 0xf0, 0x2e, 0x8d, 0x9a, 0xda, 0x88, 0xac, 0x99, 0xc3, 0x98, 0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0x76, 0xa9, 0x14, 0x1c, 0x4b, 0xc7, 0x62, 0xdd, 0x54, 0x23, 0xe3, 0x32, 0x16, 0x67, 0x02, 0xcb, 0x75, 0xf4, 0x0d, 0xf7, 0x9f, 0xea, 0x12, 0x88, 0xac, 0x19, 0x43, 0x06, 0x00, 0x01, 0x00, 0x00, 0x00};
+    unsigned char result[32] = {0};
+    unsigned char expected_result[32] = {0x27, 0xe0, 0xc5, 0x99, 0x4d, 0xec, 0x78, 0x24, 0xe5, 0x6d, 0xec, 0x6b, 0x2f, 0xcb, 0x34, 0x2e, 0xb7, 0xcd, 0xb0, 0xd0, 0x95, 0x7c, 0x2f, 0xce, 0x98, 0x82, 0xf7, 0x15, 0xe8, 0x5d, 0x81, 0xa6};
+    hash256(modified_tx, 148, result);
+    mu_assert("Error: z_from_modified_tx doesn't work", memcmp(result, expected_result, 32) == 0);
+    return 0;
+}
+
+static char* test_sig_hash() {
+    unsigned char raw_tx[32] = {0x45, 0x2c, 0x62, 0x9d, 0x67, 0xe4, 0x1b, 0xae, 0xc3, 0xac, 0x6f, 0x04, 0xfe, 0x74, 0x4b, 0x4b, 0x96, 0x17, 0xf8, 0xf8, 0x59, 0xc6, 0x3b, 0x30, 0x02, 0xf8, 0x68, 0x4e, 0x7a, 0x4f, 0xee, 0x03};
+    unsigned char want[32] = {0x27, 0xe0, 0xc5, 0x99, 0x4d, 0xec, 0x78, 0x24, 0xe5, 0x6d, 0xec, 0x6b, 0x2f, 0xcb, 0x34, 0x2e, 0xb7, 0xcd, 0xb0, 0xd0, 0x95, 0x7c, 0x2f, 0xce, 0x98, 0x82, 0xf7, 0x15, 0xe8, 0x5d, 0x81, 0xa6};
+    unsigned char result[32] = {0};
+    Tx* tx = fetch(raw_tx, FALSE);
+    sig_hash(tx, 0, result);
+    mu_assert("Error: sig_hash doesn't work", memcmp(result, want, 32) == 0);
+    Tx_free(tx);
     return 0;
 }
 
@@ -1293,6 +1327,7 @@ static char* all_tests() {
     // mu_run_test(test_fee);
     // mu_run_test(test_http_get);
     // mu_run_test(test_tx_id);
+    mu_run_test(test_sig_hash);
 
     // // //Op tests
     // mu_run_test(test_encode_num);
@@ -1321,6 +1356,7 @@ static char* all_tests() {
     // mu_run_test(test_hash160);
     // mu_run_test(test_find_differences);
     // mu_run_test(test_hex_string_to_byte_array);
+    // mu_run_test(test_hash256);
 
     // // //Create addresses
     // mu_run_test(generate_testnet_address);
