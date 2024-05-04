@@ -4,7 +4,7 @@
 
 #include "privatekey.h"
 
-PrivateKey* PrivateKey_init(const char* secret) {
+PrivateKey* PrivateKey_init(mpz_t secret) {
     mpz_t gx;
     mpz_t gy;
     mpz_init_set_str(gx, GX, 16);
@@ -15,19 +15,16 @@ PrivateKey* PrivateKey_init(const char* secret) {
 
     S256Point* G = S256Point_init(x, y);
 
-    mpz_t E;
-    hash_to_mpz_t((const unsigned char*)secret, strlen(secret), E);
-
-    S256Field* e = S256Field_init(E);
+    S256Field* e = S256Field_init(secret);
 
     PrivateKey* key = malloc(sizeof(PrivateKey));
-    key->secret = secret;
     key->e = e;
     key->point = S256Point_mul(G, e->num);
+    S256Point_free(G);
     return key;
 }
 
-// PrivateKey* PrivateKey_init(mpz_t secret) {
+// PrivateKey* PrivateKey_init(const char* secret) {
 //     mpz_t gx;
 //     mpz_t gy;
 //     mpz_init_set_str(gx, GX, 16);
@@ -38,12 +35,13 @@ PrivateKey* PrivateKey_init(const char* secret) {
 
 //     S256Point* G = S256Point_init(x, y);
 
-//     // mpz_t E;
-//     // hash_to_mpz_t((const unsigned char*)secret, strlen(secret), E);
+//     mpz_t E;
+//     hash_to_mpz_t((const unsigned char*)secret, strlen(secret), E);
 
-//     S256Field* e = S256Field_init(secret);
+//     S256Field* e = S256Field_init(E);
+
 //     PrivateKey* key = malloc(sizeof(PrivateKey));
-//     mpz_set(key->secret, secret);
+//     key->secret = secret;
 //     key->e = e;
 //     key->point = S256Point_mul(G, e->num);
 //     return key;
@@ -59,10 +57,10 @@ void PrivateKey_free(PrivateKey* key) {
 
 S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
     unsigned char k[32] = {0};
-    size_t k_len = 32;
+    int k_len = 32;
     unsigned char v[32];
     memset(v, 0x01, 32);
-    size_t v_len = 32;
+    int v_len = 32;
 
     S256Field* zee = z;
 
@@ -73,36 +71,41 @@ S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
         mpz_sub(zee->num, zee->num, n);
     }
 
-    unsigned char z_bytes[32];
-    unsigned char secret_bytes[32];
+    unsigned char z_bytes[32] = {0};
+    unsigned char secret_bytes[32] = {0};
     mpz_to_bytes(zee->num, z_bytes, 32);
     mpz_to_bytes(key->e->num, secret_bytes, 32);
 
     //k = hmac.new(k, v + b'\x00' + secret_bytes + z_bytes, s256).digest()
-    unsigned char data[sizeof(v) + 1 + sizeof(secret_bytes) + sizeof(z_bytes)];
+    unsigned char data_1[sizeof(v) + 1 + sizeof(secret_bytes) + sizeof(z_bytes)];
 
-    int offset = 0;
-    memcpy(data + offset, v, sizeof(v));
-    offset += sizeof(v);
-    data[offset++] = 0x00;
-    memcpy(data + offset, secret_bytes, sizeof(secret_bytes));
-    offset += sizeof(secret_bytes);
-    memcpy(data + offset, z_bytes, sizeof(z_bytes));
+    memcpy(data_1, v, sizeof(v));
+    data_1[sizeof(v)] = 0x00;
+    memcpy(data_1 + sizeof(v) + 1, secret_bytes, sizeof(secret_bytes));
+    memcpy(data_1 + sizeof(v) + sizeof(secret_bytes) + 1, z_bytes, sizeof(z_bytes));
 
-    compute_hmac_sha256(k, k_len - 1, data, sizeof(data) - 1, k, &k_len);
+    unsigned int output_len = 32;
+    compute_hmac_sha256(k, k_len, data_1, sizeof(data_1), k, &output_len);
 
     //v = hmac.new(k, v, s256).digest()
     unsigned char data_v[sizeof(v)];
 
     memcpy(data_v, v, sizeof(v));
 
-    compute_hmac_sha256(k, k_len - 1, data_v, sizeof(data_v) - 1, v, &v_len);
+    compute_hmac_sha256(k, k_len, data_v, sizeof(data_v), v, &output_len);
 
     //k = hmac.new(k, v + b'\x00' + secret_bytes + z_bytes, s256).digest()
-    compute_hmac_sha256(k, k_len - 1, data, sizeof(data) - 1, k, &k_len);
+    unsigned char data_2[sizeof(v) + 1 + sizeof(secret_bytes) + sizeof(z_bytes)];
+
+    memcpy(data_2, v, sizeof(v));
+    data_2[sizeof(v)] = 0x01;
+    memcpy(data_2 + sizeof(v) + 1, secret_bytes, sizeof(secret_bytes));
+    memcpy(data_2 + sizeof(v) + sizeof(secret_bytes) + 1, z_bytes, sizeof(z_bytes));
+    compute_hmac_sha256(k, k_len, data_2, sizeof(data_2), k, &output_len);
 
     //v = hmac.new(k, v, s256).digest()
-    compute_hmac_sha256(k, k_len - 1, data_v, sizeof(data_v) - 1, v, &v_len);
+    memcpy(data_v, v, sizeof(v));
+    compute_hmac_sha256(k, k_len, data_v, sizeof(data_v), v, &output_len);
 
     // while True:
     // v = hmac.new(k, v, s256).digest()
@@ -116,16 +119,21 @@ S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
     mpz_init(candidate);
     while (1) {
         //v = hmac.new(k, v, s256).digest()
-        compute_hmac_sha256(k, k_len - 1, data_v, sizeof(data_v) - 1, v, &v_len);
+        memcpy(data_v, v, sizeof(v));
+        compute_hmac_sha256(k, k_len, data_v, sizeof(data_v), v, &output_len);
         mpz_import(candidate, v_len, 1, sizeof(v[0]), 0, 0, v);
         if (mpz_cmp_ui(candidate, 1) >= 0 && mpz_cmp(candidate, n) < 0) {
             S256Field* K = S256Field_init(candidate);
+            mpz_clear(n);
             return K;
         }
         //k = hmac.new(k, v + b'\x00' + secret_bytes + z_bytes, s256).digest()
-        compute_hmac_sha256(k, k_len - 1, data, sizeof(data) - 1, k, &k_len);
+        unsigned char data_3[sizeof(v) + 1];
+        memcpy(data_3, v, sizeof(v));
+        data_3[sizeof(v)] = 0x00;
+        compute_hmac_sha256(k, k_len, data_3, sizeof(data_3), k, &output_len);
         //v = hmac.new(k, v, s256).digest()
-        compute_hmac_sha256(k, k_len - 1, data_v, sizeof(data_v) - 1, v, &v_len);
+        compute_hmac_sha256(k, k_len, data_v, sizeof(data_v), v, &output_len);
     }
 
     //Will never get here
@@ -134,6 +142,8 @@ S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
     mpz_import(result, k_len, 1, sizeof(k[0]), 1, 0, k);
 
     S256Field* K = S256Field_init(result);
+
+    mpz_clear(n);
 
     return K;
 }

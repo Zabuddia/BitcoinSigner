@@ -24,6 +24,8 @@ void script_toString(Script* script);
 
 unsigned long long script_length(Script* script);
 
+Script* p2pkh_script(unsigned char* h160);
+
 void script_set_cmds(Script* script, Command* cmds, int cmds_len);
 
 Script* script_parse(unsigned char* s);

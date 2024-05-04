@@ -138,17 +138,44 @@ void mpz_to_32bytes(mpz_t num, unsigned char *output) {
 }
 
 void compute_hmac_sha256(unsigned char *key, int key_len,
-                         unsigned char *data, int data_len,
-                         unsigned char *output, size_t *output_len) {
-    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
-    EVP_PKEY *pkey = EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, NULL, key, key_len);
+                  unsigned char *data, int data_len,
+                  unsigned char *output, unsigned int *output_len) {
+    if (!key || !data || !output || !output_len) {
+        fprintf(stderr, "Invalid input to HMAC computation.\n");
+        return;
+    }
 
-    EVP_DigestSignInit(ctx, NULL, EVP_sha256(), NULL, pkey);
-    EVP_DigestSignUpdate(ctx, data, data_len);
-    EVP_DigestSignFinal(ctx, output, output_len);
+    HMAC_CTX *ctx;
 
-    EVP_MD_CTX_free(ctx);
-    EVP_PKEY_free(pkey);
+    // Create and initialize HMAC context
+    ctx = HMAC_CTX_new();
+    if (!ctx) {
+        fprintf(stderr, "Failed to create HMAC context\n");
+        return;
+    }
+
+    if (HMAC_Init_ex(ctx, key, key_len, EVP_sha256(), NULL) != 1) {
+        fprintf(stderr, "Failed to initialize HMAC\n");
+        HMAC_CTX_free(ctx);
+        return;
+    }
+
+    // Provide input data
+    if (HMAC_Update(ctx, data, data_len) != 1) {
+        fprintf(stderr, "Failed to update HMAC\n");
+        HMAC_CTX_free(ctx);
+        return;
+    }
+
+    // Finalize the HMAC computation and fetch the result
+    if (HMAC_Final(ctx, output, output_len) != 1) {
+        fprintf(stderr, "Failed to finalize HMAC\n");
+        HMAC_CTX_free(ctx);
+        return;
+    }
+
+    // Clean up HMAC context
+    HMAC_CTX_free(ctx);
 }
 
 void memzero(void *const pnt, const size_t len) {
@@ -189,6 +216,44 @@ void encode_base58(unsigned char *b58, size_t *b58sz, const void *data, size_t b
     }
     b58[i] = '\0';
     *b58sz = i + 1;
+}
+
+void decode_base58(unsigned char* b58, size_t b58sz, unsigned char* out) {
+    size_t size = 0;
+
+    for (size_t i = 0; i < b58sz; i++) {
+        unsigned char c = b58[i];
+        int val = -1;
+        if (c >= '1' && c <= '9') val = c - '1';
+        else if (c >= 'A' && c <= 'H') val = c - 'A' + 9;
+        else if (c >= 'J' && c <= 'N') val = c - 'J' + 17;
+        else if (c >= 'P' && c <= 'Z') val = c - 'P' + 22;
+        else if (c >= 'a' && c <= 'k') val = c - 'a' + 33;
+        else if (c >= 'm' && c <= 'z') val = c - 'm' + 44;
+        else {
+            printf("Invalid character in base58 string\n");
+            exit(1);
+        }
+
+        int carry = val;
+        for (size_t j = 0; j <= size; j++) {
+            carry += out[j] * 58;
+            out[j] = carry % 256;
+            carry /= 256;
+        }
+
+        while (carry) {
+            out[++size] = carry % 256;
+            carry /= 256;
+        }
+    }
+
+    // Reverse the result
+    for (size_t i = 0; i < size / 2; i++) {
+        unsigned char temp = out[i];
+        out[i] = out[size - i - 1];
+        out[size - i - 1] = temp;
+    }
 }
 
 void encode_base58_checksum_address(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {

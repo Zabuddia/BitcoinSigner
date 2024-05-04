@@ -8,6 +8,7 @@
 #include <gmp.h>
 #include <openssl/evp.h>
 #include <openssl/ripemd.h>
+#include <openssl/hmac.h>
 #include <sys/types.h>
 
 #define TRUE 1
@@ -43,12 +44,14 @@ void mpz_to_bytes(const mpz_t op, unsigned char *out, size_t out_len);
 void mpz_to_32bytes(mpz_t num, unsigned char *output);
 
 void compute_hmac_sha256(unsigned char *key, int key_len,
-                         unsigned char *data, int data_len,
-                         unsigned char *output, size_t *output_len);
+                  unsigned char *data, int data_len,
+                  unsigned char *output, unsigned int *output_len);
 
 void memzero(void* const pnt, const size_t len);
 
 void encode_base58(unsigned char *b58, size_t *b58sz, const void *data, size_t binsz);
+
+void decode_base58(unsigned char* b58, size_t b58sz, unsigned char* out);
 
 void encode_base58_checksum_address(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz);
 

@@ -44,6 +44,23 @@ unsigned long long script_length(Script* script) {
     }
 }
 
+Script* p2pkh_script(unsigned char* h160) {
+    Script* script = script_init();
+    Command cmds[5];
+    cmds[0].data_len = 1;
+    cmds[0].data[0] = 0x76;
+    cmds[1].data_len = 1;
+    cmds[1].data[0] = 0xa9;
+    cmds[2].data_len = 20;
+    memcpy(cmds[2].data, h160, 20);
+    cmds[3].data_len = 1;
+    cmds[3].data[0] = 0x88;
+    cmds[4].data_len = 1;
+    cmds[4].data[0] = 0xac;
+    script_set_cmds(script, cmds, 5);
+    return script;
+}
+
 void script_set_cmds(Script* script, Command* cmds, int cmds_len) {
     for (int i = 0; i < cmds_len; i++) {
         memcpy(script->cmds[i].data, cmds[i].data, cmds[i].data_len);

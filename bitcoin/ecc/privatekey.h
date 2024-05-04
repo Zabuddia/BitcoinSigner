@@ -11,20 +11,19 @@
 #include "../helper/helper.h"
 
 typedef struct {
-    const char* secret;
     S256Field* e;
     S256Point* point;
 } PrivateKey;
 
 // typedef struct {
-//     mpz_t secret;
+//     const char* secret;
 //     S256Field* e;
 //     S256Point* point;
 // } PrivateKey;
 
-PrivateKey* PrivateKey_init(const char* secret);
+PrivateKey* PrivateKey_init(mpz_t secret);
 
-// PrivateKey* PrivateKey_init(mpz_t secret);
+// PrivateKey* PrivateKey_init(const char* secret);
 
 void PrivateKey_free(PrivateKey* key);
 
