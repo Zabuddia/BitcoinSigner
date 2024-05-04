@@ -16,6 +16,28 @@ Tx* Tx_init(int version, unsigned long long num_inputs, TxIn** tx_ins, unsigned 
     return tx;
 }
 
+Tx* Tx_deep_copy(Tx* src) {
+    Tx* new_tx = (Tx*)malloc(sizeof(Tx));
+    if (!new_tx) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    new_tx->version = src->version;
+    new_tx->num_inputs = src->num_inputs;
+    new_tx->tx_ins = (TxIn**)malloc(src->num_inputs * sizeof(TxIn*));
+    for (unsigned long long i = 0; i < src->num_inputs; i++) {
+        new_tx->tx_ins[i] = TxIn_deep_copy(src->tx_ins[i]);
+    }
+    new_tx->num_outputs = src->num_outputs;
+    new_tx->tx_outs = (TxOut**)malloc(src->num_outputs * sizeof(TxOut*));
+    for (unsigned long long i = 0; i < src->num_outputs; i++) {
+        new_tx->tx_outs[i] = TxOut_deep_copy(src->tx_outs[i]);
+    }
+    new_tx->locktime = src->locktime;
+    new_tx->testnet = src->testnet;
+    return new_tx;
+}
+
 void Tx_free(Tx* tx) {
     for (unsigned long long i = 0; i < tx->num_inputs; i++) {
         TxIn_free(tx->tx_ins[i]);
@@ -358,12 +380,13 @@ void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
 }
 
 size_t verify_input(Tx* tx, unsigned long long input_index) {
-    TxIn* tx_in = tx->tx_ins[input_index];
-    Script* script_pubkey = TxIn_script_pubkey(tx_in, tx->testnet);
+    Tx* tx_copy = Tx_deep_copy(tx);
+    TxIn* tx_in = tx_copy->tx_ins[input_index];
+    Script* script_pubkey = TxIn_script_pubkey(tx_in, tx_copy->testnet);
     Script* script_sig = script_init();
     script_deep_copy(script_sig, tx_in->script_sig);
     unsigned char z_raw[32];
-    sig_hash(tx, input_index, z_raw);
+    sig_hash(tx_copy, input_index, z_raw);
     char z_str[65] = {0};
     byte_array_to_hex_string(z_raw, 32, z_str);
     mpz_t z_mpz;
@@ -378,6 +401,7 @@ size_t verify_input(Tx* tx, unsigned long long input_index) {
     script_free(script_pubkey);
     script_free(combined);
     S256Field_free(z);
+    Tx_free(tx_copy);
     return result;
 }
 
@@ -394,6 +418,55 @@ size_t Tx_verify(Tx* tx) {
     return 1;
 }
 
+size_t sign_input(Tx* tx, unsigned long long input_index, PrivateKey* private_key) {
+    unsigned char z_raw[32] = {0};
+    sig_hash(tx, input_index, z_raw);
+    char z_str[65] = {0};
+    byte_array_to_hex_string(z_raw, 32, z_str);
+    mpz_t z_mpz;
+    mpz_init_set_str(z_mpz, z_str, 16);
+    S256Field* z = S256Field_init(z_mpz);
+    Signature* sig = PrivateKey_sign(private_key, z);
+    unsigned char* der_1 = (unsigned char*)calloc(1000, sizeof(unsigned char));
+    Signature_der(sig, der_1);
+    int der_length = little_endian_to_int(der_1 + 1, 1) + 2;
+    unsigned char der[der_length + 1];
+    memcpy(der, der_1, der_length);
+    free(der_1);
+    unsigned char sighash_all[1] = {0};
+    int_to_little_endian(SIGHASH_ALL, sighash_all, 1);
+    der[der_length] = sighash_all[0];
+    Command sig_cmd;
+    memcpy(sig_cmd.data, der, der_length + 1);
+    sig_cmd.data_len = der_length + 1;
+    unsigned char sec[33] = {0};
+    S256Point_sec_compressed(private_key->point, sec);
+    Command sec_cmd;
+    memcpy(sec_cmd.data, sec, 33);
+    sec_cmd.data_len = 33;
+    Command cmds[2] = {sig_cmd, sec_cmd};
+    Script* script_sig = script_init();
+    script_set_cmds(script_sig, cmds, 2);
+    script_deep_copy(tx->tx_ins[input_index]->script_sig, script_sig);
+    script_free(script_sig);
+    S256Field_free(z);
+    Signature_free(sig);
+    unsigned char tx_serialized1[226] = {0};
+    Tx_serialize(tx, tx_serialized1);
+    for (int i = 0; i < 226; i++) {
+        printf("%02x", tx_serialized1[i]);
+    }
+    printf("\n");
+    size_t result = verify_input(tx, input_index);
+    unsigned char tx_serialized[226] = {0};
+    Tx_serialize(tx, tx_serialized);
+    for (int i = 0; i < 226; i++) {
+        printf("%02x", tx_serialized[i]);
+    }
+    printf("\n");
+    return result;
+}
+
 //Txin
 TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, int sequence) {
     TxIn* tx_in = (TxIn*)malloc(sizeof(TxIn));
@@ -408,6 +481,20 @@ TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, i
     tx_in->sequence = sequence;
     script_free(script_sig);
     return tx_in;
+}
+
+TxIn* TxIn_deep_copy(TxIn* src) {
+    TxIn* new_tx_in = (TxIn*)malloc(sizeof(TxIn));
+    if (!new_tx_in) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    memcpy(new_tx_in->prev_tx, src->prev_tx, 32);
+    new_tx_in->prev_index = src->prev_index;
+    new_tx_in->script_sig = script_init();
+    script_deep_copy(new_tx_in->script_sig, src->script_sig);
+    new_tx_in->sequence = src->sequence;
+    return new_tx_in;
 }
 
 unsigned long long TxIn_length(TxIn* tx_in) {
@@ -531,6 +618,18 @@ TxOut* TxOut_init(unsigned long long amount, Script* script_pubkey) {
     script_deep_copy(tx_out->script_pubkey, script_pubkey);
     script_free(script_pubkey);
     return tx_out;
+}
+
+TxOut* TxOut_deep_copy(TxOut* src) {
+    TxOut* new_tx_out = (TxOut*)malloc(sizeof(TxOut));
+    if (!new_tx_out) {
+        printf("Memory allocation failed\n");
+        exit(1);
+    }
+    new_tx_out->amount = src->amount;
+    new_tx_out->script_pubkey = script_init();
+    script_deep_copy(new_tx_out->script_pubkey, src->script_pubkey);
+    return new_tx_out;
 }
 
 void TxOut_toString(TxOut* tx_out) {

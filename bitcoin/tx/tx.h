@@ -9,6 +9,7 @@
 
 #include "../helper/helper.h"
 #include "../script/script.h"
+#include "../ecc/privatekey.h"
 
 #define MAX_URL_LENGTH 256
 
@@ -41,6 +42,8 @@ typedef struct {
 
 Tx* Tx_init(int version, unsigned long long num_inputs, TxIn** tx_ins, unsigned long long num_outputs, TxOut** tx_outs, unsigned long long locktime, __uint8_t testnet);
 
+Tx* Tx_deep_copy(Tx* src);
+
 void Tx_free(Tx* tx);
 
 void Tx_id(Tx* tx, unsigned char* result);
@@ -57,8 +60,12 @@ size_t verify_input(Tx* tx, unsigned long long input_index);
 
 size_t Tx_verify(Tx* tx);
 
+size_t sign_input(Tx* tx, unsigned long long input_index, PrivateKey* private_key);
+
 //Txin
 TxIn* TxIn_init(unsigned char prev_tx[32], int prev_index, Script* script_sig, int sequence);
+
+TxIn* TxIn_deep_copy(TxIn* src);
 
 unsigned long long TxIn_length(TxIn* tx_in);
 
@@ -78,6 +85,8 @@ Script* TxIn_script_pubkey(TxIn* txin, size_t testnet);
 
 //Txout
 TxOut* TxOut_init(unsigned long long amount, Script* script_pubkey);
+
+TxOut* TxOut_deep_copy(TxOut* src);
 
 void TxOut_toString(TxOut* tx_out);
 
