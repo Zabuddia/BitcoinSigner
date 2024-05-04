@@ -167,10 +167,19 @@ Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
     S256Field* r = S256Point_mul(G, k->num)->x;
 
     S256Field* k_inv = S256Field_s_inv(k);
+    
+    mpz_t r_times_e;
+    mpz_init(r_times_e);
+    mpz_mul(r_times_e, r->num, key->e->num);
 
-    S256Field* r_times_e = S256Field_s_mul(r, key->e);
-    S256Field* z_plus_r_times_e = S256Field_add(z, r_times_e);
-    S256Field* s = S256Field_s_mul(z_plus_r_times_e, k_inv);
+    mpz_t z_plus_r_times_e;
+    mpz_init(z_plus_r_times_e);
+    mpz_add(z_plus_r_times_e, z->num, r_times_e);
+
+    S256Field* s = S256Field_s_mul_scalar(k_inv, z_plus_r_times_e);
+
+    mpz_clear(r_times_e);
+    mpz_clear(z_plus_r_times_e);
 
     mpz_t n_dividedby_two;
     mpz_init(n_dividedby_two);
@@ -179,9 +188,20 @@ Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
         S256Field* en = S256Field_init(n);
         S256Field* n_minus_s = S256Field_sub(en, s);
         Signature* sig = Signature_init(r, n_minus_s);
+        S256Field_free(k);
+        S256Field_free(k_inv);
+        S256Field_free(en);
+        S256Point_free(G);
+        mpz_clear(n);
+        mpz_clear(n_dividedby_two);
         return sig;
     } else {
         Signature* sig = Signature_init(r, s);
+        S256Field_free(k);
+        S256Field_free(k_inv);
+        S256Point_free(G);
+        mpz_clear(n);
+        mpz_clear(n_dividedby_two);
         return sig;
     }
 }

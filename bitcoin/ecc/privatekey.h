@@ -27,7 +27,6 @@ PrivateKey* PrivateKey_init(mpz_t secret);
 
 void PrivateKey_free(PrivateKey* key);
 
-//Not sure if this does the right thing
 S256Field* Deterministic_k(PrivateKey* key, S256Field* z);
 
 Signature* PrivateKey_sign(PrivateKey* key, S256Field* z);

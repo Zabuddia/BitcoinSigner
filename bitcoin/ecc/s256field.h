@@ -35,6 +35,8 @@ S256Field* S256Field_mul(S256Field* e1, S256Field* e2);
 
 S256Field* S256Field_s_mul(S256Field* e1, S256Field* e2);
 
+S256Field* S256Field_s_mul_scalar(S256Field* e, mpz_t s);
+
 S256Field* S256Field_mul_scalar(S256Field* e, mpz_t s);
 
 S256Field* S256Field_mod_inv(S256Field* e);

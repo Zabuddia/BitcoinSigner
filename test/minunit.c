@@ -1506,16 +1506,16 @@ static char* all_tests() {
     // mu_run_test(test_S256Point_parse_sec);
     // mu_run_test(test_S256Point_address);
 
-    // // //Private Key tests
-    mu_run_test(test_Deterministic_k);
-    // mu_run_test(test_PrivateKey_sign);
+    // // // //Private Key tests
+    // mu_run_test(test_Deterministic_k);
+    mu_run_test(test_PrivateKey_sign);
     // mu_run_test(test_PrivateKey_wif);
 
-    // // //Signature tests
+    // // // //Signature tests
     // mu_run_test(test_Signature_der);
     // mu_run_test(test_Signature_parse);
 
-    // // //Tx tests
+    // // // //Tx tests
     // mu_run_test(test_Tx_parse_version);
     // mu_run_test(test_Tx_parse_inputs);
     // mu_run_test(test_Tx_parse_outputs);

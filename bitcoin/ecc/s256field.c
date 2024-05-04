@@ -109,6 +109,17 @@ S256Field* S256Field_s_mul(S256Field* e1, S256Field* e2) {
     return S256Field_init(num);
 }
 
+S256Field* S256Field_s_mul_scalar(S256Field* e, mpz_t s) {
+    mpz_t num;
+    mpz_t n;
+    mpz_init(num);
+    mpz_init_set_str(n, N, 16);
+    mpz_mul(num, e->num, s);
+    mpz_mod(num, num, n);
+    mpz_clear(n);
+    return S256Field_init(num);
+}
+
 S256Field* S256Field_mul_scalar(S256Field* e, mpz_t s) {
     mpz_t num;
     mpz_t prime;
