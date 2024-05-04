@@ -192,6 +192,7 @@ Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
         S256Field_free(k_inv);
         S256Field_free(en);
         S256Point_free(G);
+        S256Field_free(s);
         mpz_clear(n_dividedby_two);
         return sig;
     } else {
@@ -199,6 +200,7 @@ Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
         S256Field_free(k);
         S256Field_free(k_inv);
         S256Point_free(G);
+        S256Field_free(s);
         mpz_clear(n);
         mpz_clear(n_dividedby_two);
         return sig;

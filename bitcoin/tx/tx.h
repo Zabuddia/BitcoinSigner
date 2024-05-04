@@ -88,6 +88,8 @@ TxOut* TxOut_init(unsigned long long amount, Script* script_pubkey);
 
 TxOut* TxOut_deep_copy(TxOut* src);
 
+unsigned long long TxOut_length(TxOut* tx_out);
+
 void TxOut_toString(TxOut* tx_out);
 
 void TxOut_free(TxOut* tx_out);

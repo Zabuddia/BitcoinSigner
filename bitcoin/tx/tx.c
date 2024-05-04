@@ -451,19 +451,7 @@ size_t sign_input(Tx* tx, unsigned long long input_index, PrivateKey* private_ke
     script_free(script_sig);
     S256Field_free(z);
     Signature_free(sig);
-    unsigned char tx_serialized1[226] = {0};
-    Tx_serialize(tx, tx_serialized1);
-    for (int i = 0; i < 226; i++) {
-        printf("%02x", tx_serialized1[i]);
-    }
-    printf("\n");
     size_t result = verify_input(tx, input_index);
-    unsigned char tx_serialized[226] = {0};
-    Tx_serialize(tx, tx_serialized);
-    for (int i = 0; i < 226; i++) {
-        printf("%02x", tx_serialized[i]);
-    }
-    printf("\n");
     return result;
 }
 
@@ -630,6 +618,26 @@ TxOut* TxOut_deep_copy(TxOut* src) {
     new_tx_out->script_pubkey = script_init();
     script_deep_copy(new_tx_out->script_pubkey, src->script_pubkey);
     return new_tx_out;
+}
+
+unsigned long long TxOut_length(TxOut* tx_out) {
+    unsigned long long script_pubkey_length = 0;
+    for (unsigned long long i = 0; i < tx_out->script_pubkey->cmds_len; i++) {
+        script_pubkey_length += tx_out->script_pubkey->cmds[i].data_len;
+        if (tx_out->script_pubkey->cmds[i].data_len > 1) {
+            script_pubkey_length++;
+        }
+    }
+    if (script_pubkey_length < 0xfd) {
+        script_pubkey_length++;
+    } else if (script_pubkey_length <= 0xffff) {
+        script_pubkey_length += 3;
+    } else if (script_pubkey_length <= 0xffffffff) {
+        script_pubkey_length += 5;
+    } else {
+        script_pubkey_length += 9;
+    }
+    return 8 + script_pubkey_length;
 }
 
 void TxOut_toString(TxOut* tx_out) {

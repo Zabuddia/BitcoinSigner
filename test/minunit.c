@@ -760,7 +760,7 @@ static char* test_Tx_parse() {
 }
 
 static char* test_print_formatted_bytes() {
-    const unsigned char* hex_string = (const unsigned char*)"010000000199a24308080ab26e6fb65c4eccfadf76749bb5bfa8cb08f291320b3c21e56f0d0d00000000ffffffff02408af701000000001976a914d52ad7ca9b3d096a38e752c2018e6fbc40cdf26f88ac80969800000000001976a914507b27411ccf7f16f10297de6cef3f291623eddf88ac00000000";
+    const unsigned char* hex_string = (const unsigned char*)"75a1c4bc671f55f626dda1074c7725991e6f68b8fcefcfca7b64405ca3b45f1c";
     print_formatted_bytes(hex_string);
     const unsigned char* hex_string_2 = (const unsigned char*)"010000000199a24308080ab26e6fb65c4eccfadf76749bb5bfa8cb08f291320b3c21e56f0d0d0000006b4830450221008ed46aa2cf12d6d81065bfabe903670165b538f65ee9a3385e6327d80c66d3b502203124f804410527497329ec4715e18558082d489b218677bd029e7fa306a72236012103935581e52c354cd2f484fe8ed83af7a3097005b2f9c60bff71d35bd795f54b67ffffffff02408af701000000001976a914d52ad7ca9b3d096a38e752c2018e6fbc40cdf26f88ac80969800000000001976a914507b27411ccf7f16f10297de6cef3f291623eddf88ac00000000";
     print_formatted_bytes(hex_string_2);
@@ -1277,8 +1277,8 @@ static char* test_p2pkh() {
 }
 
 static char* test_find_differences() {
-    const char* s1 = "010000000199a24308080ab26e6fb65c4eccfadf76749bb5bfa8cb08f291320b3c21e56f0d0d0000006b4830450221008ed46aa2cf12d6d81065bfabe903670165b538f65ee9a3385e6327d80c66d3b502203124f804410527497329ec4715e18558082d489b218677bd029e7fa306a72236012103935581e52c354cd2f484fe8ed83af7a3097005b2f9c60bff71d35bd795f54b67ffffffff02408af701000000001976a914d52ad7ca9b3d096a38e752c2018e6fbc40cdf26f88ac80969800000000001976a914507b27411ccf7f16f10297de6cef3f291623eddf88ac00000000";
-    const char* s2 = "010000000199a24308080ab26e6fb65c4eccfadf76749bb5bfa8cb08f291320b3c21e56f0d0d0000001976a914d52ad7ca9b3d096a38e752c2018e6fbc40cdf26f88acffffffff02408af701000000001976a914d52ad7ca9b3d096a38e752c2018e6fbc40cdf26f88ac80969800000000001976a914507b27411ccf7f16f10297de6cef3f291623eddf88ac0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    const char* s1 = "01000000011c5fb4a35c40647bcacfeffcb8686f1e9925774c07a1dd26f6551f67bcc4a175010000006a4730440220454df0a2269e28a72b3bcac24e9b6a32749e7a5400e60397a9511f72594e42e4022008fe8487eeb05a180a66617ccc49b2d0fa122d9bd193b96f06bddfee81bbe047012103935581e52c354cd2f484fe8ed83af7a3097005b2f9c60bff71d35bd795f54b67ffffffff0240420f00000000001976a9141ec51b3654c1f1d0f4929d11a1f702937eaf50c888aca0bb0d00000000001976a914d52ad7ca9b3d096a38e752c2018e6fbc40cdf26f88ac0000000000";
+    const char* s2 = "01000000011c5fb4a35c40647bcacfeffcb8686f1e9925774c07a1dd26f6551f67bcc4a175010000006b483045022100a08ebb92422b3599a2d2fcdaa11f8f807a66ccf33e7f4a9ff0a3c51f1b1ec5dd02205ed21dfede5925362b8d9833e908646c54be7ac6664e31650159e8f69b6ca539012103935581e52c354cd2f484fe8ed83af7a3097005b2f9c60bff71d35bd795f54b67ffffffff0240420f00000000001976a9141ec51b3654c1f1d0f4929d11a1f702937eaf50c888ac9fbb0d00000000001976a914d52ad7ca9b3d096a38e752c2018e6fbc40cdf26f88ac00000000";
     find_differences(s1, s2);
     return 0;
 }
@@ -1466,6 +1466,43 @@ static char* test_sign_input() {
     return 0;
 }
 
+static char* test_create_transaction() {
+    unsigned char* target_address = (unsigned char*)"miKegze5FQNCnGw6PKyqUbYUeBa4x2hFeM";
+    unsigned char prev_tx[32] = {0x75, 0xa1, 0xc4, 0xbc, 0x67, 0x1f, 0x55, 0xf6, 0x26, 0xdd, 0xa1, 0x07, 0x4c, 0x77, 0x25, 0x99, 0x1e, 0x6f, 0x68, 0xb8, 0xfc, 0xef, 0xcf, 0xca, 0x7b, 0x64, 0x40, 0x5c, 0xa3, 0xb4, 0x5f, 0x1c};
+    int prev_index = 1;
+    unsigned long long target_amount = 1000000;
+    unsigned long long change_amount = 899999;
+    unsigned char* change_address = (unsigned char*)"mzx5YhAH9kNHtcN481u6WkjeHjYtVeKVh2";
+    mpz_t secret;
+    mpz_init_set_ui(secret, 8675309);
+    PrivateKey* private_key = PrivateKey_init(secret);
+    Script* script_sig = script_init();
+    TxIn* tx_in = TxIn_init(prev_tx, prev_index, script_sig, 0xffffffff);
+    unsigned char target_h160[20] = {0};
+    decode_base58(target_address, 34, target_h160);
+    Script* target_script = p2pkh_script(target_h160);
+    TxOut* target_tx_out = TxOut_init(target_amount, target_script);
+    unsigned char change_h160[20] = {0};
+    decode_base58(change_address, 34, change_h160);
+    Script* change_script = p2pkh_script(change_h160);
+    TxOut* change_tx_out = TxOut_init(change_amount, change_script);
+    TxIn* inputs[1] = {tx_in};
+    TxOut* outputs[2] = {target_tx_out, change_tx_out};
+    Tx* tx = Tx_init(1, 1, inputs, 2, outputs, 0, TRUE);
+    size_t result = sign_input(tx, 0, private_key);
+    mu_assert("Error: create_transaction doesn't work", result == 1);
+    unsigned char tx_serialized[226] = {0};
+    Tx_serialize(tx, tx_serialized);
+    unsigned char expected_result[226] = {0x01, 0x00, 0x00, 0x00, 0x01, 0x1c, 0x5f, 0xb4, 0xa3, 0x5c, 0x40, 0x64, 0x7b, 0xca, 0xcf, 0xef, 0xfc, 0xb8, 0x68, 0x6f, 0x1e, 0x99, 0x25, 0x77, 0x4c, 0x07, 0xa1, 0xdd, 0x26, 0xf6, 0x55, 0x1f, 0x67, 0xbc, 0xc4, 0xa1, 0x75, 0x01, 0x00, 0x00, 0x00, 0x6b, 0x48, 0x30, 0x45, 0x02, 0x21, 0x00, 0xa0, 0x8e, 0xbb, 0x92, 0x42, 0x2b, 0x35, 0x99, 0xa2, 0xd2, 0xfc, 0xda, 0xa1, 0x1f, 0x8f, 0x80, 0x7a, 0x66, 0xcc, 0xf3, 0x3e, 0x7f, 0x4a, 0x9f, 0xf0, 0xa3, 0xc5, 0x1f, 0x1b, 0x1e, 0xc5, 0xdd, 0x02, 0x20, 0x5e, 0xd2, 0x1d, 0xfe, 0xde, 0x59, 0x25, 0x36, 0x2b, 0x8d, 0x98, 0x33, 0xe9, 0x08, 0x64, 0x6c, 0x54, 0xbe, 0x7a, 0xc6, 0x66, 0x4e, 0x31, 0x65, 0x01, 0x59, 0xe8, 0xf6, 0x9b, 0x6c, 0xa5, 0x39, 0x01, 0x21, 0x03, 0x93, 0x55, 0x81, 0xe5, 0x2c, 0x35, 0x4c, 0xd2, 0xf4, 0x84, 0xfe, 0x8e, 0xd8, 0x3a, 0xf7, 0xa3, 0x09, 0x70, 0x05, 0xb2, 0xf9, 0xc6, 0x0b, 0xff, 0x71, 0xd3, 0x5b, 0xd7, 0x95, 0xf5, 0x4b, 0x67, 0xff, 0xff, 0xff, 0xff, 0x02, 0x40, 0x42, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0x76, 0xa9, 0x14, 0x1e, 0xc5, 0x1b, 0x36, 0x54, 0xc1, 0xf1, 0xd0, 0xf4, 0x92, 0x9d, 0x11, 0xa1, 0xf7, 0x02, 0x93, 0x7e, 0xaf, 0x50, 0xc8, 0x88, 0xac, 0x9f, 0xbb, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0x76, 0xa9, 0x14, 0xd5, 0x2a, 0xd7, 0xca, 0x9b, 0x3d, 0x09, 0x6a, 0x38, 0xe7, 0x52, 0xc2, 0x01, 0x8e, 0x6f, 0xbc, 0x40, 0xcd, 0xf2, 0x6f, 0x88, 0xac, 0x00, 0x00, 0x00, 0x00};
+    mu_assert("Error: create_transaction doesn't work", memcmp(tx_serialized, expected_result, 226) == 0);
+    PrivateKey_free(private_key);
+    TxIn_free(tx_in);
+    TxOut_free(target_tx_out);
+    TxOut_free(change_tx_out);
+    free(tx);
+    return 0;
+}
+
 static char* all_tests() {
     // //S256Field tests
     // mu_run_test(test_S256Field_add);
@@ -1513,7 +1550,8 @@ static char* all_tests() {
     // mu_run_test(test_verify_p2pkh);
     // mu_run_test(test_verify_p2sh);
     // mu_run_test(test_signing_transaction);
-    mu_run_test(test_sign_input);
+    // mu_run_test(test_sign_input);
+    mu_run_test(test_create_transaction);
 
     // // //Op tests
     // mu_run_test(test_encode_num);
