@@ -268,6 +268,7 @@ unsigned long long fee(Tx* tx, size_t testnet) {
 }
 
 void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
+    printf("Sighash input index: %llu\n", input_index);
     int total_length = 0;
     unsigned char* s = (unsigned char*)malloc(10000);
     int_to_little_endian(tx->version, s, 4);
@@ -292,22 +293,7 @@ void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
             Script* script_sig = TxIn_script_pubkey(tx->tx_ins[i], tx->testnet);
             script_deep_copy(tx->tx_ins[i]->script_sig, script_sig);
             script_free(script_sig);
-            unsigned long long script_sig_length = 0;
-            for (unsigned long long j = 0; j < tx->tx_ins[i]->script_sig->cmds_len; j++) {
-                script_sig_length += tx->tx_ins[i]->script_sig->cmds[j].data_len;
-                if (tx->tx_ins[i]->script_sig->cmds[j].data_len > 1) {
-                    script_sig_length++;
-                }
-            }
-            if (script_sig_length < 0xfd) {
-                script_sig_length++;
-            } else if (script_sig_length <= 0xffff) {
-                script_sig_length += 4;
-            } else if (script_sig_length <= 0xffffffff) {
-                script_sig_length += 6;
-            } else {
-                script_sig_length += 10;
-            }
+            unsigned long long script_sig_length = script_length(tx->tx_ins[i]->script_sig);
             unsigned long long tx_in_length = 40 + script_sig_length;
             TxIn_serialize(tx->tx_ins[i], s);
             s += tx_in_length;
@@ -322,11 +308,24 @@ void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
             int_to_little_endian(tx->tx_ins[i]->prev_index, s, 4);
             s += 4;
             total_length += 4;
+            //Replaces the script_sig with a 0
+            s[0] = 0x00;
+            s++;
+            total_length++;
+            printf("Prev_index: %d\n", tx->tx_ins[i]->prev_index);
+            printf("Sequence: %d\n", tx->tx_ins[i]->sequence);
             int_to_little_endian(tx->tx_ins[i]->sequence, s, 4);
             s += 4;
             total_length += 4;
         }
     }
+    s -= total_length;
+    printf("S after inputs: ");
+    for (int i = 0; i < total_length; i++) {
+        printf("%02x", s[i]);
+    }
+    printf("\n");
+    s += total_length;
     encode_varint(s, tx->num_outputs);
     if (tx->num_outputs < 253) {
         s++;
@@ -342,22 +341,7 @@ void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
         total_length += 9;
     }
     for (unsigned long long i = 0; i < tx->num_outputs; i++) {
-        unsigned long long script_pubkey_length = 0;
-        for (unsigned long long j = 0; j < tx->tx_outs[i]->script_pubkey->cmds_len; j++) {
-            script_pubkey_length += tx->tx_outs[i]->script_pubkey->cmds[j].data_len;
-            if (tx->tx_outs[i]->script_pubkey->cmds[j].data_len > 1) {
-                script_pubkey_length++;
-            }
-        }
-        if (script_pubkey_length < 0xfd) {
-            script_pubkey_length++;
-        } else if (script_pubkey_length <= 0xffff) {
-            script_pubkey_length += 4;
-        } else if (script_pubkey_length <= 0xffffffff) {
-            script_pubkey_length += 6;
-        } else {
-            script_pubkey_length += 10;
-        }
+        unsigned long long script_pubkey_length = script_length(tx->tx_outs[i]->script_pubkey);
         unsigned long long tx_out_length = 8 + script_pubkey_length;
         TxOut_serialize(tx->tx_outs[i], s);
         s += tx_out_length;
@@ -426,27 +410,47 @@ size_t sign_input(Tx* tx, unsigned long long input_index, PrivateKey* private_ke
     mpz_t z_mpz;
     mpz_init_set_str(z_mpz, z_str, 16);
     S256Field* z = S256Field_init(z_mpz);
+    gmp_printf("Z: %Zd\n", z->num);
     Signature* sig = PrivateKey_sign(private_key, z);
-    unsigned char* der_1 = (unsigned char*)calloc(1000, sizeof(unsigned char));
-    Signature_der(sig, der_1);
-    int der_length = little_endian_to_int(der_1 + 1, 1) + 2;
+    int der_length = Signature_der_length(sig);
     unsigned char der[der_length + 1];
-    memcpy(der, der_1, der_length);
-    free(der_1);
+    Signature_der(sig, der);
+    printf("DER: ");
+    for (int i = 0; i < der_length; i++) {
+        printf("%02x", der[i]);
+    }
+    printf("\n");
     unsigned char sighash_all[1] = {0};
     int_to_little_endian(SIGHASH_ALL, sighash_all, 1);
     der[der_length] = sighash_all[0];
+    printf("SIG: ");
+    for (int i = 0; i < der_length + 1; i++) {
+        printf("%02x", der[i]);
+    }
+    printf("\n");
     Command sig_cmd;
     memcpy(sig_cmd.data, der, der_length + 1);
     sig_cmd.data_len = der_length + 1;
     unsigned char sec[33] = {0};
     S256Point_sec_compressed(private_key->point, sec);
+    printf("SEC: ");
+    for (int i = 0; i < 33; i++) {
+        printf("%02x", sec[i]);
+    }
+    printf("\n");
     Command sec_cmd;
     memcpy(sec_cmd.data, sec, 33);
     sec_cmd.data_len = 33;
     Command cmds[2] = {sig_cmd, sec_cmd};
     Script* script_sig = script_init();
     script_set_cmds(script_sig, cmds, 2);
+    unsigned char script_sig_serialized[script_length(script_sig)];
+    script_serialize(script_sig, script_sig_serialized);
+    printf("Script: ");
+    for (int i = 0; i < script_length(script_sig); i++) {
+        printf("%02x", script_sig_serialized[i]);
+    }
+    printf("\n");
     script_deep_copy(tx->tx_ins[input_index]->script_sig, script_sig);
     script_free(script_sig);
     S256Field_free(z);

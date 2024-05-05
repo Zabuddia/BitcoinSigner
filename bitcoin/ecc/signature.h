@@ -17,7 +17,11 @@ void Signature_free(Signature* sig);
 
 void Signature_toString(Signature* sig);
 
+int Signature_der_length(Signature* sig);
+
 void Signature_der(Signature* sig, unsigned char* output);
+
+// void Signature_der(Signature* sig, unsigned char* output);
 
 Signature* Signature_parse(unsigned char* s);
 

@@ -24,71 +24,53 @@ void Signature_toString(Signature* sig) {
     gmp_printf("Signature(%Zx, %Zx)\n", sig->r->num, sig->s->num);
 }
 
+int Signature_der_length(Signature* sig) {
+    size_t r_size = mpz_sizeinbase(sig->r->num, 256) + (mpz_sgn(sig->r->num) > 0 && mpz_tstbit(sig->r->num, mpz_size(sig->r->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
+    size_t s_size = mpz_sizeinbase(sig->s->num, 256) + (mpz_sgn(sig->s->num) > 0 && mpz_tstbit(sig->s->num, mpz_size(sig->s->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
+    return r_size + s_size + 6;
+}
+
 void Signature_der(Signature* sig, unsigned char* output) {
-    output[0] = 0x30;
-
-    size_t total_bytes;
-
-    size_t place;
-    
-    void *ptr = malloc(100);
-    size_t count_r;
-    mpz_export(ptr, &count_r, 1, sizeof(mp_limb_t), 0, 0, sig->r->num);
-    size_t num_bytes_r = count_r * sizeof(mp_limb_t);
-
-    size_t count_s;
-    mpz_export(ptr, &count_s, 1, sizeof(mp_limb_t), 0, 0, sig->s->num);
-    size_t num_bytes_s = count_s * sizeof(mp_limb_t);
-
-    total_bytes = 4 + num_bytes_r + num_bytes_s;
-
-    output[2] = 0x02;
-
-    unsigned char* r_bin = malloc(num_bytes_r);
-    if (r_bin == NULL) {
-        printf("Memory allocation failed\n");
-        exit(1);
+    if (!sig || !output) {
+        printf("Invalid input\n");
+        return;
     }
 
-    mpz_export(r_bin, NULL, 1, 1, 0, 0, sig->r->num);
+    int r_size = mpz_sizeinbase(sig->r->num, 256) + (mpz_sgn(sig->r->num) > 0 && mpz_tstbit(sig->r->num, mpz_size(sig->r->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
+    int s_size = mpz_sizeinbase(sig->s->num, 256) + (mpz_sgn(sig->s->num) > 0 && mpz_tstbit(sig->s->num, mpz_size(sig->s->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
 
-    if (r_bin[0] >= 0x80) {
-        total_bytes += 1;
-        output[3] = num_bytes_r + 1;
-        output[4] = 0x00;
-        mpz_to_bytes(sig->r->num, output + 5, num_bytes_r);
-        place = 5 + num_bytes_r;
-    } else {
-        output[3] = num_bytes_r;
-        mpz_to_bytes(sig->r->num, output + 4, num_bytes_r);
-        place = 4 + num_bytes_r;
+    int total_bytes = 2 /* header and length */ + 2 * (2 /* integer marker and size */) + r_size + s_size;
+
+    size_t index = 0;
+    output[index++] = 0x30; // DER sequence
+    int_to_little_endian(total_bytes - 2, output + index, 1);
+    index++;
+
+    output[index++] = 0x02; // DER integer
+    int_to_little_endian(r_size, output + index, 1);
+    index++;
+
+    unsigned char r_bin[r_size];
+    memset(r_bin, 0, r_size);
+    mpz_to_bytes(sig->r->num, r_bin, r_size);
+    if (r_bin[0] & 0x80) {
+        output[index++] = 0x00; // Add padding byte
     }
+    memcpy(output + index, r_bin, r_size);
+    index += r_size;
 
-    output[place] = 0x02;
+    output[index++] = 0x02; // DER integer
+    int_to_little_endian(s_size, output + index, 1);
+    index++;
 
-    unsigned char* s_bin = malloc(num_bytes_s);
-    if (s_bin == NULL) {
-        printf("Memory allocation failed\n");
-        exit(1);
+    unsigned char s_bin[s_size];
+    memset(s_bin, 0, s_size);
+    mpz_to_bytes(sig->s->num, s_bin, s_size);
+    if (s_bin[0] & 0x80) {
+        output[index++] = 0x00; // Add padding byte
     }
-
-    mpz_export(s_bin, NULL, 1, 1, 0, 0, sig->s->num);
-
-    if (s_bin[0] >= 0x80) {
-        total_bytes += 1;
-        output[place + 1] = num_bytes_s + 1;
-        output[place + 2] = 0x00;
-        mpz_to_bytes(sig->s->num, output + place + 3, num_bytes_s);
-    } else {
-        output[place + 1] = num_bytes_s;
-        mpz_to_bytes(sig->s->num, output + place + 2, num_bytes_s);
-    }
-
-    output[1] = total_bytes;
-
-    free(r_bin);
-    free(s_bin);
-    free(ptr);
+    memcpy(output + index, s_bin, s_size);
+    index += s_size;
 }
 
 Signature* Signature_parse(unsigned char* s) {
