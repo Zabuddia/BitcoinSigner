@@ -268,7 +268,6 @@ unsigned long long fee(Tx* tx, size_t testnet) {
 }
 
 void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
-    printf("Sighash input index: %llu\n", input_index);
     int total_length = 0;
     unsigned char* s = (unsigned char*)malloc(10000);
     int_to_little_endian(tx->version, s, 4);
@@ -312,20 +311,11 @@ void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
             s[0] = 0x00;
             s++;
             total_length++;
-            printf("Prev_index: %d\n", tx->tx_ins[i]->prev_index);
-            printf("Sequence: %d\n", tx->tx_ins[i]->sequence);
             int_to_little_endian(tx->tx_ins[i]->sequence, s, 4);
             s += 4;
             total_length += 4;
         }
     }
-    s -= total_length;
-    printf("S after inputs: ");
-    for (int i = 0; i < total_length; i++) {
-        printf("%02x", s[i]);
-    }
-    printf("\n");
-    s += total_length;
     encode_varint(s, tx->num_outputs);
     if (tx->num_outputs < 253) {
         s++;
@@ -410,47 +400,24 @@ size_t sign_input(Tx* tx, unsigned long long input_index, PrivateKey* private_ke
     mpz_t z_mpz;
     mpz_init_set_str(z_mpz, z_str, 16);
     S256Field* z = S256Field_init(z_mpz);
-    gmp_printf("Z: %Zd\n", z->num);
     Signature* sig = PrivateKey_sign(private_key, z);
     int der_length = Signature_der_length(sig);
     unsigned char der[der_length + 1];
     Signature_der(sig, der);
-    printf("DER: ");
-    for (int i = 0; i < der_length; i++) {
-        printf("%02x", der[i]);
-    }
-    printf("\n");
     unsigned char sighash_all[1] = {0};
     int_to_little_endian(SIGHASH_ALL, sighash_all, 1);
     der[der_length] = sighash_all[0];
-    printf("SIG: ");
-    for (int i = 0; i < der_length + 1; i++) {
-        printf("%02x", der[i]);
-    }
-    printf("\n");
     Command sig_cmd;
     memcpy(sig_cmd.data, der, der_length + 1);
     sig_cmd.data_len = der_length + 1;
     unsigned char sec[33] = {0};
     S256Point_sec_compressed(private_key->point, sec);
-    printf("SEC: ");
-    for (int i = 0; i < 33; i++) {
-        printf("%02x", sec[i]);
-    }
-    printf("\n");
     Command sec_cmd;
     memcpy(sec_cmd.data, sec, 33);
     sec_cmd.data_len = 33;
     Command cmds[2] = {sig_cmd, sec_cmd};
     Script* script_sig = script_init();
     script_set_cmds(script_sig, cmds, 2);
-    unsigned char script_sig_serialized[script_length(script_sig)];
-    script_serialize(script_sig, script_sig_serialized);
-    printf("Script: ");
-    for (int i = 0; i < script_length(script_sig); i++) {
-        printf("%02x", script_sig_serialized[i]);
-    }
-    printf("\n");
     script_deep_copy(tx->tx_ins[input_index]->script_sig, script_sig);
     script_free(script_sig);
     S256Field_free(z);
