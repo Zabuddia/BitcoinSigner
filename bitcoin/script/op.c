@@ -725,8 +725,75 @@ size_t op_checksigverify(Op* op, S256Field* z) {
 }
 
 size_t op_checkmultisig(Op* op, S256Field* z) {
-    printf("Not implemented\n");
-    return 0;
+    if (op->top < 0) {
+        return 0;
+    }
+    size_t n_element_length = op->element_length[op->top];
+    unsigned char n_element[n_element_length];
+    pop(op, n_element);
+    long long n = decode_num(n_element, n_element_length);
+    if (op->top < n) {
+        return 0;
+    }
+    unsigned char* sec_pubkeys[n];
+    for (int i = 0; i < n; i++) {
+        sec_pubkeys[i] = malloc(op->element_length[op->top]);
+        pop(op, sec_pubkeys[i]);
+    }
+    size_t m_element_length = op->element_length[op->top];
+    unsigned char m_element[m_element_length];
+    pop(op, m_element);
+    long long m = decode_num(m_element, m_element_length);
+    if (op->top < m) {
+        return 0;
+    }
+    unsigned char* der_signatures[m];
+    for (int i = 0; i < m; i++) {
+        der_signatures[i] = malloc(op->element_length[op->top]);
+        pop(op, der_signatures[i]);
+    }
+    S256Point* points[n];
+    for (int i = 0; i < n; i++) {
+        points[i] = S256Point_parse_sec(sec_pubkeys[i]);
+    }
+    Signature* sigs[m];
+    for (int i = 0; i < m; i++) {
+        sigs[i] = Signature_parse(der_signatures[i]);
+    }
+    unsigned char element[1];
+    pop(op, element);
+    for (int i = 0; i < m; i++) {
+        int found = 0;
+        for (int j = 0; j < n; j++) {
+            if (S256Point_verify(points[j], z, sigs[i])) {
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            for (int j = 0; j < n; j++) {
+                S256Point_free(points[j]);
+                free(sec_pubkeys[j]);
+            }
+            for (int j = 0; j < m; j++) {
+                Signature_free(sigs[j]);
+                free(der_signatures[j]);
+            }
+            return 0;
+        }
+    }
+    unsigned char result_element[1];
+    encode_num(1, result_element);
+    push(op, result_element, 1);
+    for (int i = 0; i < n; i++) {
+        S256Point_free(points[i]);
+        free(sec_pubkeys[i]);
+    }
+    for (int i = 0; i < m; i++) {
+        Signature_free(sigs[i]);
+        free(der_signatures[i]);
+    }
+    return 1;
 }
 
 size_t op_checkmultisigverify(Op* op, S256Field* z) {
