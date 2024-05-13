@@ -87,4 +87,8 @@ void hex_string_to_byte_array(const char* hexStr, unsigned char* byteArray);
 
 void byte_array_to_hex_string(unsigned char* byte_array, size_t byte_array_len, char* hex_string);
 
+void h160_to_p2pkh_address(unsigned char* h160, unsigned char* address, size_t* address_size, __uint8_t testnet);
+
+void h160_to_p2sh_address(unsigned char* h160, unsigned char* address, size_t* address_size, __uint8_t testnet);
+
 #endif //HELPER_H

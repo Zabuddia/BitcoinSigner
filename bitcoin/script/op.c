@@ -257,6 +257,9 @@ size_t op_dup(Op* op) {
 }
 
 size_t op_hash160(Op* op) {
+    if (op->top < 0) {
+        return 0;
+    }
     unsigned char element[op->element_length[op->top]];
     size_t element_len = op->element_length[op->top];
     pop(op, element);

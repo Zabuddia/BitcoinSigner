@@ -762,7 +762,7 @@ static char* test_Tx_parse() {
 }
 
 static char* test_print_formatted_bytes() {
-    const unsigned char* hex_string = (const unsigned char*)"3045022100dc92655fe37036f47756db8102e0d7d5e28b3beb83a8fef4f5dc0559bddfb94e02205a36d4e4e6c7fcd16658c50783e00c341609977aed3ad00937bf4ee942a8993701";
+    const unsigned char* hex_string = (const unsigned char*)"74d691da1574e6b3c192ecfb52cc8984ee7b6c56";
     print_formatted_bytes(hex_string);
     const unsigned char* hex_string_2 = (const unsigned char*)"3045022100da6bee3c93766232079a01639d07fa869598749729ae323eab8eef53577d611b02207bef15429dcadce2121ea07f233115c6f09034c0be68db99980b9a6c5e75402201";
     print_formatted_bytes(hex_string_2);
@@ -1569,6 +1569,36 @@ static char* test_op_checkmultisig() {
     return 0;
 }
 
+static char* test_h160_to_p2pkh_address() {
+    size_t address1_size = 34;
+    size_t address2_size = 34;
+    unsigned char h160[20] = {0x74, 0xd6, 0x91, 0xda, 0x15, 0x74, 0xe6, 0xb3, 0xc1, 0x92, 0xec, 0xfb, 0x52, 0xcc, 0x89, 0x84, 0xee, 0x7b, 0x6c, 0x56};
+    unsigned char address1[34] = {0};
+    h160_to_p2pkh_address(h160, address1, &address1_size, FALSE);
+    unsigned char address2[34] = {0};
+    h160_to_p2pkh_address(h160, address2, &address2_size, TRUE);
+    unsigned char expected_result1[34] = "1BenRpVUFK65JFWcQSuHnJKzc4M8ZP8Eqa";
+    unsigned char expected_result2[34] = "mrAjisaT4LXL5MzE81sfcDYKU3wqWSvf9q";
+    mu_assert("Error: h160_to_p2pkh_address doesn't work", memcmp(address1, expected_result1, 34) == 0);
+    mu_assert("Error: h160_to_p2pkh_address doesn't work", memcmp(address2, expected_result2, 34) == 0);
+    return 0;
+}
+
+static char* test_h160_to_p2sh_address() {
+    size_t address1_size = 34;
+    size_t address2_size = 34;
+    unsigned char h160[20] = {0x74, 0xd6, 0x91, 0xda, 0x15, 0x74, 0xe6, 0xb3, 0xc1, 0x92, 0xec, 0xfb, 0x52, 0xcc, 0x89, 0x84, 0xee, 0x7b, 0x6c, 0x56};
+    unsigned char address1[34] = {0};
+    h160_to_p2sh_address(h160, address1, &address1_size, FALSE);
+    unsigned char address2[34] = {0};
+    h160_to_p2sh_address(h160, address2, &address2_size, TRUE);
+    unsigned char expected_result1[34] = "3CLoMMyuoDQTPRD3XYZtCvgvkadrAdvdXh";
+    unsigned char expected_result2[34] = "2N3u1R6uwQfuobCqbCgBkpsgBxvr1tZpe7B";
+    mu_assert("Error: h160_to_p2sh_address doesn't work", memcmp(address1, expected_result1, 34) == 0);
+    mu_assert("Error: h160_to_p2sh_address doesn't work", memcmp(address2, expected_result2, 34) == 0);
+    return 0;
+}
+
 static char* all_tests() {
     //S256Field tests
     // mu_run_test(test_S256Field_add);
@@ -1624,7 +1654,7 @@ static char* all_tests() {
     // mu_run_test(test_decode_num);
     // mu_run_test(test_op_hash160);
     // mu_run_test(test_op_checksig);
-    mu_run_test(test_op_checkmultisig);
+    // mu_run_test(test_op_checkmultisig);
 
     // // //Script tests
     // mu_run_test(test_script_parse);
@@ -1651,6 +1681,8 @@ static char* all_tests() {
     // mu_run_test(test_hash256);
     // mu_run_test(test_byte_array_to_hex_string);
     // mu_run_test(test_decode_base58);
+    // mu_run_test(test_h160_to_p2pkh_address);
+    // mu_run_test(test_h160_to_p2sh_address);
 
     // // //Create addresses
     // mu_run_test(generate_testnet_address);

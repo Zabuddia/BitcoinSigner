@@ -214,6 +214,8 @@ size_t script_evaluate(Script* script, S256Field* z) {
     Op* op_1 = op_init();
     Op* op_2 = op_init();
     int j = 0;
+    //For p2sh
+    int original_cmds_len = script_copy->cmds_len;
     while (script_copy->cmds_len > 0) {
         Command cmd = script_copy->cmds[j];
         j++;
@@ -237,6 +239,53 @@ size_t script_evaluate(Script* script, S256Field* z) {
             }
         } else {
             push(op_1, cmd.data, cmd.data_len);
+            //Added code for p2sh
+            if ((script_copy->cmds_len == 3) && (script_copy->cmds[0].data == 0xa9) && (script_copy->cmds[1].data_len == 20) && (script_copy->cmds[2].data == 0x87)) {
+                script_copy->cmds_len -= 3;
+                original_cmds_len -= 2;
+                Command h160 = script_copy->cmds[original_cmds_len];
+                original_cmds_len--;
+                if (!op_hash160(op_1)) {
+                    return 0;
+                }
+                push(op_1, h160.data, h160.data_len);
+                if (!op_equal(op_1)) {
+                    return 0;
+                }
+                if (!op_verify(op_1)) {
+                    printf("Bad p2sh h160\n");
+                    return 0;
+                }
+                int redeem_script_len = 0;
+                if (cmd.data_len < 0xfd) {
+
+                } else if (cmd.data_len <= 0xffff) {
+                    redeem_script_len++;
+                } else if (cmd.data_len <= 0xffffffff) {
+                    redeem_script_len += 3;
+                } else {
+                    redeem_script_len += 7;
+                }
+                redeem_script_len += cmd.data_len;
+                unsigned char redeem_script[redeem_script_len];
+                encode_varint(redeem_script, cmd.data_len);
+                int offset = 0;
+                if (redeem_script[0] == 0xfd) {
+                    offset += 3;
+                } else if (redeem_script[0] == 0xfe) {
+                    offset += 5;
+                } else if (redeem_script[0] == 0xff) {
+                    offset += 9;
+                } else {
+                    offset++;
+                }
+                memcpy(redeem_script + offset, cmd.data, cmd.data_len);
+                Script* redeem_script_parsed = script_parse(redeem_script);
+                script_copy->cmds_len += redeem_script_parsed->cmds_len;
+                for (int i = 0; i < redeem_script_parsed->cmds_len; i++) {
+                    script_copy->cmds[original_cmds_len + i] = redeem_script_parsed->cmds[i];
+                }
+            }
         }
         // printf("Stack: ");
         // for (int i = 0; i < op_1->top + 1; i++) {

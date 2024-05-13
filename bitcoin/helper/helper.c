@@ -413,3 +413,25 @@ void byte_array_to_hex_string(unsigned char* byte_array, size_t byte_array_len, 
     }
     hex_string[2 * byte_array_len] = '\0';
 }
+
+void h160_to_p2pkh_address(unsigned char* h160, unsigned char* address, size_t* address_size, __uint8_t testnet) {
+    unsigned char prefix_plus_h160[21] = {0};
+    if (testnet) {
+        prefix_plus_h160[0] = 0x6f;
+    } else {
+        prefix_plus_h160[0] = 0x00;
+    }
+    memcpy(prefix_plus_h160 + 1, h160, 20);
+    encode_base58_checksum_address(address, address_size, prefix_plus_h160, 21);
+}
+
+void h160_to_p2sh_address(unsigned char* h160, unsigned char* address, size_t* address_size, __uint8_t testnet) {
+    unsigned char prefix_plus_h160[21] = {0};
+    if (testnet) {
+        prefix_plus_h160[0] = 0xc4;
+    } else {
+        prefix_plus_h160[0] = 0x05;
+    }
+    memcpy(prefix_plus_h160 + 1, h160, 20);
+    encode_base58_checksum_address(address, address_size, prefix_plus_h160, 21);
+}
