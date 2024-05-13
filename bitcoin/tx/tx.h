@@ -54,7 +54,7 @@ void Tx_serialize(Tx* tx, unsigned char* result);
 
 unsigned long long fee(Tx* tx, size_t testnet);
 
-void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result);
+void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result, Script* redeem_script);
 
 size_t verify_input(Tx* tx, unsigned long long input_index);
 

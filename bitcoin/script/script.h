@@ -42,4 +42,8 @@ void script_deep_copy(Script* dest, Script* src);
 
 size_t script_evaluate(Script* script, S256Field* z);
 
+size_t is_p2pkh_script_pubkey(Script* script);
+
+size_t is_p2sh_script_pubkey(Script* script);
+
 #endif // SCRIPT_H

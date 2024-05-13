@@ -267,7 +267,7 @@ unsigned long long fee(Tx* tx, size_t testnet) {
     return input_sum - output_sum;
 }
 
-void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
+void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result, Script* redeem_script) {
     int total_length = 0;
     unsigned char* s = (unsigned char*)malloc(10000);
     int_to_little_endian(tx->version, s, 4);
@@ -289,9 +289,13 @@ void sig_hash(Tx* tx, unsigned long long input_index, unsigned char* result) {
     }
     for (unsigned long long i = 0; i < tx->num_inputs; i++) {
         if (i == input_index) {
-            Script* script_sig = TxIn_script_pubkey(tx->tx_ins[i], tx->testnet);
-            script_deep_copy(tx->tx_ins[i]->script_sig, script_sig);
-            script_free(script_sig);
+            if (redeem_script != NULL) {
+                script_deep_copy(tx->tx_ins[i]->script_sig, redeem_script);
+            } else {
+                Script* script_sig = TxIn_script_pubkey(tx->tx_ins[i], tx->testnet);
+                script_deep_copy(tx->tx_ins[i]->script_sig, script_sig);
+                script_free(script_sig);
+            }
             unsigned long long script_sig_length = script_length(tx->tx_ins[i]->script_sig);
             unsigned long long tx_in_length = 40 + script_sig_length;
             TxIn_serialize(tx->tx_ins[i], s);
@@ -359,8 +363,19 @@ size_t verify_input(Tx* tx, unsigned long long input_index) {
     Script* script_pubkey = TxIn_script_pubkey(tx_in, tx_copy->testnet);
     Script* script_sig = script_init();
     script_deep_copy(script_sig, tx_in->script_sig);
-    unsigned char z_raw[32];
-    sig_hash(tx_copy, input_index, z_raw);
+    unsigned char z_raw[32] = {0};
+    if (is_p2sh_script_pubkey(script_pubkey)) {
+        Command cmd = script_sig->cmds[script_sig->cmds_len - 1];
+        int cmd_length = cmd.data_len;
+        //Working here
+        Script* redeem_script = script_init();
+        cmds_deep_copy(redeem_script->cmds, cmds, cmds_len);
+        redeem_script->cmds_len = cmds_len;
+        sig_hash(tx_copy, input_index, z_raw, redeem_script);
+        script_free(redeem_script);
+    } else {
+        sig_hash(tx_copy, input_index, z_raw, NULL);
+    }
     char z_str[65] = {0};
     byte_array_to_hex_string(z_raw, 32, z_str);
     mpz_t z_mpz;
@@ -394,7 +409,7 @@ size_t Tx_verify(Tx* tx) {
 
 size_t sign_input(Tx* tx, unsigned long long input_index, PrivateKey* private_key) {
     unsigned char z_raw[32] = {0};
-    sig_hash(tx, input_index, z_raw);
+    sig_hash(tx, input_index, z_raw, NULL);
     char z_str[65] = {0};
     byte_array_to_hex_string(z_raw, 32, z_str);
     mpz_t z_mpz;

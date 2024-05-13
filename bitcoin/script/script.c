@@ -318,3 +318,59 @@ size_t script_evaluate(Script* script, S256Field* z) {
         return 0;
     }
 }
+
+size_t is_p2pkh_script_pubkey(Script* script) {
+    if (script->cmds_len != 5) {
+        return 0;
+    }
+    if (script->cmds[0].data_len != 1) {
+        return 0;
+    }
+    if (script->cmds[0].data[0] != 0x76) {
+        return 0;
+    }
+    if (script->cmds[1].data_len != 1) {
+        return 0;
+    }
+    if (script->cmds[1].data[0] != 0xa9) {
+        return 0;
+    }
+    if (script->cmds[2].data_len != 20) {
+        return 0;
+    }
+    if (script->cmds[3].data_len != 1) {
+        return 0;
+    }
+    if (script->cmds[3].data[0] != 0x88) {
+        return 0;
+    }
+    if (script->cmds[4].data_len != 1) {
+        return 0;
+    }
+    if (script->cmds[4].data[0] != 0xac) {
+        return 0;
+    }
+    return 1;
+}
+
+size_t is_p2sh_script_pubkey(Script* script) {
+    if (script->cmds_len != 3) {
+        return 0;
+    }
+    if (script->cmds[0].data_len != 1) {
+        return 0;
+    }
+    if (script->cmds[0].data[0] != 0xa9) {
+        return 0;
+    }
+    if (script->cmds[1].data_len != 20) {
+        return 0;
+    }
+    if (script->cmds[2].data_len != 1) {
+        return 0;
+    }
+    if (script->cmds[2].data[0] != 0x87) {
+        return 0;
+    }
+    return 1;
+}
