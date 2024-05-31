@@ -53,51 +53,55 @@ void Tx_free(Tx* tx) {
 void Tx_id(Tx* tx, unsigned char* result) {
     unsigned long long serial_length = 10;
     for (unsigned long long i = 0; i < tx->num_inputs; i++) {
-        unsigned long long tx_in_length = 40;
-        unsigned long long script_sig_length = 0;
-        for (unsigned long long j = 0; j < tx->tx_ins[i]->script_sig->cmds_len; j++) {
-            script_sig_length += tx->tx_ins[i]->script_sig->cmds[j].data_len;
-            if (tx->tx_ins[i]->script_sig->cmds[j].data_len > 1) {
-                script_sig_length++;
-            }
-        }
-        tx_in_length += script_sig_length;
-        if (tx_in_length < 0xfd) {
-            tx_in_length++;
-        } else if (tx_in_length <= 0xffff) {
-            tx_in_length += 4;
-        } else if (tx_in_length <= 0xffffffff) {
-            tx_in_length += 6;
-        } else {
-            tx_in_length += 10;
-        }
+        unsigned long long tx_in_length = TxIn_length(tx->tx_ins[i]);
+        // unsigned long long tx_in_length = 40;
+        // unsigned long long script_sig_length = 0;
+        // for (unsigned long long j = 0; j < tx->tx_ins[i]->script_sig->cmds_len; j++) {
+        //     script_sig_length += tx->tx_ins[i]->script_sig->cmds[j].data_len;
+        //     if (tx->tx_ins[i]->script_sig->cmds[j].data_len > 1) {
+        //         script_sig_length++;
+        //     }
+        // }
+        // tx_in_length += script_sig_length;
+        // // Not sure why I have to do this
+        // if (tx_in_length < 0xfd) {
+        //     tx_in_length++;
+        // } else if (tx_in_length <= 0xffff) {
+        //     tx_in_length += 4;
+        // } else if (tx_in_length <= 0xffffffff) {
+        //     tx_in_length += 6;
+        // } else {
+        //     tx_in_length += 10;
+        // }
         serial_length += tx_in_length;
     }
     for (unsigned long long i = 0; i < tx->num_outputs; i++) {
-        unsigned long long tx_out_length = 8;
-        unsigned long long script_pubkey_length = 0;
-        for (unsigned long long j = 0; j < tx->tx_outs[i]->script_pubkey->cmds_len; j++) {
-            script_pubkey_length += tx->tx_outs[i]->script_pubkey->cmds[j].data_len;
-            if (tx->tx_outs[i]->script_pubkey->cmds[j].data_len > 1) {
-                script_pubkey_length++;
-            }
-        }
-        tx_out_length += script_pubkey_length;
-        if (tx_out_length < 0xfd) {
-            tx_out_length++;
-        } else if (tx_out_length <= 0xffff) {
-            tx_out_length += 4;
-        } else if (tx_out_length <= 0xffffffff) {
-            tx_out_length += 6;
-        } else {
-            tx_out_length += 10;
-        }
+        unsigned long long tx_out_length = TxOut_length(tx->tx_outs[i]);
+        // unsigned long long tx_out_length = 8;
+        // unsigned long long script_pubkey_length = 0;
+        // for (unsigned long long j = 0; j < tx->tx_outs[i]->script_pubkey->cmds_len; j++) {
+        //     script_pubkey_length += tx->tx_outs[i]->script_pubkey->cmds[j].data_len;
+        //     if (tx->tx_outs[i]->script_pubkey->cmds[j].data_len > 1) {
+        //         script_pubkey_length++;
+        //     }
+        // }
+        // tx_out_length += script_pubkey_length;
+        // if (tx_out_length < 0xfd) {
+        //     tx_out_length++;
+        // } else if (tx_out_length <= 0xffff) {
+        //     tx_out_length += 4;
+        // } else if (tx_out_length <= 0xffffffff) {
+        //     tx_out_length += 6;
+        // } else {
+        //     tx_out_length += 10;
+        // }
         serial_length += tx_out_length;
     }
 
     unsigned char serial[serial_length];
 
     Tx_serialize(tx, serial);
+
     hash256(serial, serial_length, result);
     little_endian_to_big_endian(result, 32);
 }
@@ -367,10 +371,15 @@ size_t verify_input(Tx* tx, unsigned long long input_index) {
     if (is_p2sh_script_pubkey(script_pubkey)) {
         Command cmd = script_sig->cmds[script_sig->cmds_len - 1];
         int cmd_length = cmd.data_len;
+        // Not accounting for if the varint is bigger than 1 byte
+        unsigned char raw_redeem[cmd_length + 1];
+        encode_varint(raw_redeem, cmd_length);
+        memcpy(raw_redeem + 1, cmd.data, cmd_length);
+        Script* redeem_script = script_parse(raw_redeem);
         //Working here
-        Script* redeem_script = script_init();
-        cmds_deep_copy(redeem_script->cmds, cmds, cmds_len);
-        redeem_script->cmds_len = cmds_len;
+        // Script* redeem_script = script_init();
+        // cmds_deep_copy(redeem_script->cmds, cmds, cmds_len);
+        // redeem_script->cmds_len = cmds_len;
         sig_hash(tx_copy, input_index, z_raw, redeem_script);
         script_free(redeem_script);
     } else {
@@ -472,22 +481,23 @@ TxIn* TxIn_deep_copy(TxIn* src) {
 }
 
 unsigned long long TxIn_length(TxIn* tx_in) {
-    unsigned long long script_sig_length = 0;
-    for (unsigned long long i = 0; i < tx_in->script_sig->cmds_len; i++) {
-        script_sig_length += tx_in->script_sig->cmds[i].data_len;
-        if (tx_in->script_sig->cmds[i].data_len > 1) {
-            script_sig_length++;
-        }
-    }
-    if (script_sig_length < 0xfd) {
-        script_sig_length++;
-    } else if (script_sig_length <= 0xffff) {
-        script_sig_length += 3;
-    } else if (script_sig_length <= 0xffffffff) {
-        script_sig_length += 5;
-    } else {
-        script_sig_length += 9;
-    }
+    unsigned long long script_sig_length = script_length(tx_in->script_sig);
+    // unsigned long long script_sig_length = 0;
+    // for (unsigned long long i = 0; i < tx_in->script_sig->cmds_len; i++) {
+    //     script_sig_length += tx_in->script_sig->cmds[i].data_len;
+    //     if (tx_in->script_sig->cmds[i].data_len > 1) {
+    //         script_sig_length++;
+    //     }
+    // }
+    // if (script_sig_length < 0xfd) {
+    //     script_sig_length++;
+    // } else if (script_sig_length <= 0xffff) {
+    //     script_sig_length += 3;
+    // } else if (script_sig_length <= 0xffffffff) {
+    //     script_sig_length += 5;
+    // } else {
+    //     script_sig_length += 9;
+    // }
     return 40 + script_sig_length;
 }
 
@@ -607,22 +617,23 @@ TxOut* TxOut_deep_copy(TxOut* src) {
 }
 
 unsigned long long TxOut_length(TxOut* tx_out) {
-    unsigned long long script_pubkey_length = 0;
-    for (unsigned long long i = 0; i < tx_out->script_pubkey->cmds_len; i++) {
-        script_pubkey_length += tx_out->script_pubkey->cmds[i].data_len;
-        if (tx_out->script_pubkey->cmds[i].data_len > 1) {
-            script_pubkey_length++;
-        }
-    }
-    if (script_pubkey_length < 0xfd) {
-        script_pubkey_length++;
-    } else if (script_pubkey_length <= 0xffff) {
-        script_pubkey_length += 3;
-    } else if (script_pubkey_length <= 0xffffffff) {
-        script_pubkey_length += 5;
-    } else {
-        script_pubkey_length += 9;
-    }
+    unsigned long long script_pubkey_length = script_length(tx_out->script_pubkey);
+    // unsigned long long script_pubkey_length = 0;
+    // for (unsigned long long i = 0; i < tx_out->script_pubkey->cmds_len; i++) {
+    //     script_pubkey_length += tx_out->script_pubkey->cmds[i].data_len;
+    //     if (tx_out->script_pubkey->cmds[i].data_len > 1) {
+    //         script_pubkey_length++;
+    //     }
+    // }
+    // if (script_pubkey_length < 0xfd) {
+    //     script_pubkey_length++;
+    // } else if (script_pubkey_length <= 0xffff) {
+    //     script_pubkey_length += 3;
+    // } else if (script_pubkey_length <= 0xffffffff) {
+    //     script_pubkey_length += 5;
+    // } else {
+    //     script_pubkey_length += 9;
+    // }
     return 8 + script_pubkey_length;
 }
 
@@ -735,7 +746,7 @@ Tx *fetch(unsigned char *tx_id, size_t testnet) {
     }
     snprintf(url + start + 64, 5, "%s", "/hex");
     // printf("URL: %s\n", url);
-    char response[10000] = {0};
+    char response[100000] = {0};
     http_get(url, response);
     // printf("Response: %s\n", response);
     unsigned long long raw_length = strlen(response) / 2;

@@ -29,8 +29,14 @@ unsigned long long script_length(Script* script) {
     unsigned long long length = 0;
     for (int i = 0; i < script->cmds_len; i++) {
         length += script->cmds[i].data_len;
-        if (script->cmds[i].data_len > 1) {
+        if (script->cmds[i].data_len > 1 && script->cmds[i].data_len <= 75) {
             length++;
+        } else if (script->cmds[i].data_len >= 76 && script->cmds[i].data_len <= 255) {
+            length += 2;
+        } else if (script->cmds[i].data_len >= 256 && script->cmds[i].data_len <= 520) {
+            length += 3;
+        } else if (script->cmds[i].data_len > 520) {
+            printf("script_length: Command length too long\n");
         }
     }
     if (length < 0xfd) {
@@ -240,7 +246,7 @@ size_t script_evaluate(Script* script, S256Field* z) {
         } else {
             push(op_1, cmd.data, cmd.data_len);
             //Added code for p2sh
-            if ((script_copy->cmds_len == 3) && (script_copy->cmds[0].data == 0xa9) && (script_copy->cmds[1].data_len == 20) && (script_copy->cmds[2].data == 0x87)) {
+            if ((script_copy->cmds_len == 3) && (script_copy->cmds[0].data[0] == 0xa9) && (script_copy->cmds[1].data_len == 20) && (script_copy->cmds[2].data[0] == 0x87)) {
                 script_copy->cmds_len -= 3;
                 original_cmds_len -= 2;
                 Command h160 = script_copy->cmds[original_cmds_len];

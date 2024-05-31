@@ -344,7 +344,7 @@ unsigned long long read_varint(unsigned char* data) {
     if (i == 0xfd) {
         return (unsigned long long)little_endian_to_int(data + 1, 2);
     } else if (i == 0xfe) {
-        return (unsigned long long)little_endian_to_int(data + 1, 4);
+        return (unsigned long long)little_endian_to_long(data + 1, 4);
     } else if (i == 0xff) {
         return little_endian_to_long(data + 1, 8);
     } else {
@@ -360,7 +360,7 @@ void encode_varint(unsigned char* output, unsigned long long num) {
         int_to_little_endian(num, output + 1, 2);
     } else if (num <= 0xffffffff) {
         output[0] = 0xfe;
-        int_to_little_endian(num, output + 1, 4);
+        long_to_little_endian(num, output + 1, 4);
     } else {
         output[0] = 0xff;
         long_to_little_endian(num, output + 1, 8);

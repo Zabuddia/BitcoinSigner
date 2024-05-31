@@ -1283,8 +1283,8 @@ static char* test_p2pkh() {
 }
 
 static char* test_find_differences() {
-    const char* s1 = "01000000022f2afe57bde0822c793604baae834f2cd26155bf1c0d37480212c107e75cd011010000006a47304402204cc5fe11b2b025f8fc9f6073b5e3942883bbba266b71751068badeb8f11f0364022070178363f5dea4149581a4b9b9dbad91ec1fd990e3fa14f9de3ccb421fa5b269012103935581e52c354cd2f484fe8ed83af7a3097005b2f9c60bff71d35bd795f54b67ffffffff153db0202de27e7944c7fd651ec1d0fab1f1aaed4b0da60d9a1b06bd771ff651010000006b483045022100b7a938d4679aa7271f0d32d83b61a85eb0180cf1261d44feaad23dfd9799dafb02205ff2f366ddd9555f7146861a8298b7636be8b292090a224c5dc84268480d8be1012103935581e52c354cd2f484fe8ed83af7a3097005b2f9c60bff71d35bd795f54b67ffffffff01d0754100000000001976a914ad346f8eb57dee9a37981716e498120ae80e44f788ac00000000";
-    const char* s2 = "01000000022f2afe57bde0822c793604baae834f2cd26155bf1c0d37480212c107e75cd011010000006a47304402204cc5fe11b2b025f8fc9f6073b5e3942883bbba266b71751068badeb8f11f0364022070178363f5dea4149581a4b9b9dbad91ec1fd990e3fa14f9de3ccb421fa5b269012103935581e52c354cd2f484fe8ed83af7a3097005b2f9c60bff71d35bd795f54b67ffffffff153db0202de27e7944c7fd651ec1d0fab1f1aaed4b0da60d9a1b06bd771ff651010000006b483045022100b7a938d4679aa7271f0d32d83b61a85eb0180cf1261d44feaad23dfd9799dafb02205ff2f366ddd9555f7146861a8298b7636be8b292090a224c5dc84268480d8be1012103935581e52c354cd2f484fe8ed83af7a3097005b2f9c60bff71d35bd795f54b67ffffffff01d0754100000000001976a914ad346f8eb57dee9a37981716e498120ae80e44f788ac00000000";
+    const char* s1 = "0100000001868278ed6ddfb6c1ed3ad5f8181eb0c7a385aa0836f01d5e4789e6bd304d87221a000000db00483045022100dc92655fe37036f47756db8102e0d7d5e28b3beb83a8fef4f5dc0559bddfb94e02205a36d4e4e6c7fcd16658c50783e00c341609977aed3ad00937bf4ee942a8993701483045022100da6bee3c93766232079a01639d07fa869598749729ae323eab8eef53577d611b02207bef15429dcadce2121ea07f233115c6f09034c0be68db99980b9a6c5e75402201475221022626e955ea6ea6d98850c994f9107b036b1334f18ca8830bfff1295d21cfdb702103b287eaf122eea69030a0e9feed096bed8045c8b98bec453e1ffac7fbdbd4bb7152aeffffffff04d3b11400000000001976a914904a49878c0adfc3aa05de7afad2cc15f483a56a88ac7f400900000000001976a914418327e3f3dda4cf5b9089325a4b95abdfa0334088ac722c0c00000000001976a914ba35042cfe9fc66fd35ac2224eebdafd1028ad2788acdc4ace020000000017a91474d691da1574e6b3c192ecfb52cc8984ee7b6c568700000000";
+    const char* s2 = "0100000001868278ed6ddfb6c1ed3ad5f8181eb0c7a385aa0836f01d5e4789e6bd304d87221a000000db00483045022100dc92655fe37036f47756db8102e0d7d5e28b3beb83a8fef4f5dc0559bddfb94e02205a36d4e4e6c7fcd16658c50783e00c341609977aed3ad00937bf4ee942a8993701483045022100da6bee3c93766232079a01639d07fa869598749729ae323eab8eef53577d611b02207bef15429dcadce2121ea07f233115c6f09034c0be68db99980b9a6c5e75402201475221022626e955ea6ea6d98850c994f9107b036b1334f18ca8830bfff1295d21cfdb702103b287eaf122eea69030a0e9feed096bed8045c8b98bec453e1ffac7fbdbd4bb7152aeffffffff04d3b11400000000001976a914904a49878c0adfc3aa05de7afad2cc15f483a56a88ac7f400900000000001976a914418327e3f3dda4cf5b9089325a4b95abdfa0334088ac722c0c00000000001976a914ba35042cfe9fc66fd35ac2224eebdafd1028ad2788acdc4ace020000000017a91474d691da1574e6b3c192ecfb52cc8984ee7b6c568700000000000000";
     find_differences(s1, s2);
     return 0;
 }
@@ -1586,16 +1586,16 @@ static char* test_h160_to_p2pkh_address() {
 
 static char* test_h160_to_p2sh_address() {
     size_t address1_size = 34;
-    size_t address2_size = 34;
+    size_t address2_size = 35;
     unsigned char h160[20] = {0x74, 0xd6, 0x91, 0xda, 0x15, 0x74, 0xe6, 0xb3, 0xc1, 0x92, 0xec, 0xfb, 0x52, 0xcc, 0x89, 0x84, 0xee, 0x7b, 0x6c, 0x56};
     unsigned char address1[34] = {0};
     h160_to_p2sh_address(h160, address1, &address1_size, FALSE);
-    unsigned char address2[34] = {0};
+    unsigned char address2[35] = {0};
     h160_to_p2sh_address(h160, address2, &address2_size, TRUE);
     unsigned char expected_result1[34] = "3CLoMMyuoDQTPRD3XYZtCvgvkadrAdvdXh";
-    unsigned char expected_result2[34] = "2N3u1R6uwQfuobCqbCgBkpsgBxvr1tZpe7B";
+    unsigned char expected_result2[35] = "2N3u1R6uwQfuobCqbCgBkpsgBxvr1tZpe7B";
     mu_assert("Error: h160_to_p2sh_address doesn't work", memcmp(address1, expected_result1, 34) == 0);
-    mu_assert("Error: h160_to_p2sh_address doesn't work", memcmp(address2, expected_result2, 34) == 0);
+    mu_assert("Error: h160_to_p2sh_address doesn't work", memcmp(address2, expected_result2, 35) == 0);
     return 0;
 }
 
@@ -1672,92 +1672,92 @@ static char* test_verify_signature_from_transaction() {
 }
 
 static char* all_tests() {
-    //S256Field tests
-    // mu_run_test(test_S256Field_add);
-    // mu_run_test(test_S256Field_sub);
-    // mu_run_test(test_S256Field_mul);
-    // mu_run_test(test_S256Field_s_mul);
-    // mu_run_test(test_S256Field_mul_scalar);
-    // mu_run_test(test_S256Field_mod_inv);
-    // mu_run_test(test_S256Field_s_inv);
-    // mu_run_test(test_S256Field_pow);
-    // mu_run_test(test_S256Field_div);
-    // mu_run_test(test_S256Field_sqrt);
+    // //S256Field tests
+    mu_run_test(test_S256Field_add);
+    mu_run_test(test_S256Field_sub);
+    mu_run_test(test_S256Field_mul);
+    mu_run_test(test_S256Field_s_mul);
+    mu_run_test(test_S256Field_mul_scalar);
+    mu_run_test(test_S256Field_mod_inv);
+    mu_run_test(test_S256Field_s_inv);
+    mu_run_test(test_S256Field_pow);
+    mu_run_test(test_S256Field_div);
+    mu_run_test(test_S256Field_sqrt);
     
     // // //S256Point tests
-    // mu_run_test(test_S256Point_add);
-    // mu_run_test(test_S256Point_mul);
-    // mu_run_test(test_S256Point_verify);
-    // mu_run_test(test_S256Point_sec_uncompressed);
-    // mu_run_test(test_S256Point_sec_compressed);
-    // mu_run_test(test_S256Point_parse_sec);
-    // mu_run_test(test_S256Point_address);
+    mu_run_test(test_S256Point_add);
+    mu_run_test(test_S256Point_mul);
+    mu_run_test(test_S256Point_verify);
+    mu_run_test(test_S256Point_sec_uncompressed);
+    mu_run_test(test_S256Point_sec_compressed);
+    mu_run_test(test_S256Point_parse_sec);
+    mu_run_test(test_S256Point_address);
 
     // // // //Private Key tests
-    // mu_run_test(test_Deterministic_k);
-    // mu_run_test(test_PrivateKey_sign);
-    // mu_run_test(test_PrivateKey_wif);
+    mu_run_test(test_Deterministic_k);
+    mu_run_test(test_PrivateKey_sign);
+    mu_run_test(test_PrivateKey_wif);
 
     // // // //Signature tests
-    // mu_run_test(test_Signature_der);
-    // mu_run_test(test_Signature_parse);
+    mu_run_test(test_Signature_der);
+    mu_run_test(test_Signature_parse);
 
     // // // //Tx tests
-    // mu_run_test(test_Tx_parse_version);
-    // mu_run_test(test_Tx_parse_inputs);
-    // mu_run_test(test_Tx_parse_outputs);
-    // mu_run_test(test_Tx_parse_locktime);
-    // mu_run_test(test_Tx_parse);
-    // mu_run_test(test_TxOut_serialize);
-    // mu_run_test(test_TxIn_serialize);
-    // mu_run_test(test_Tx_serialize);
-    // mu_run_test(test_fee);
-    // mu_run_test(test_http_get);
-    // mu_run_test(test_tx_id);
-    // mu_run_test(test_sig_hash);
-    // mu_run_test(test_verify_p2pkh);
-    // // mu_run_test(test_verify_p2sh);
-    // mu_run_test(test_signing_transaction);
-    // mu_run_test(test_sign_input);
-    // mu_run_test(test_create_transaction);
+    mu_run_test(test_Tx_parse_version);
+    mu_run_test(test_Tx_parse_inputs);
+    mu_run_test(test_Tx_parse_outputs);
+    mu_run_test(test_Tx_parse_locktime);
+    mu_run_test(test_Tx_parse);
+    mu_run_test(test_TxOut_serialize);
+    mu_run_test(test_TxIn_serialize);
+    mu_run_test(test_Tx_serialize);
+    mu_run_test(test_fee);
+    mu_run_test(test_http_get);
+    mu_run_test(test_tx_id);
+    mu_run_test(test_sig_hash);
+    mu_run_test(test_verify_p2pkh);
+    mu_run_test(test_verify_p2sh);
+    mu_run_test(test_signing_transaction);
+    mu_run_test(test_sign_input);
+    mu_run_test(test_create_transaction);
 
     // // //Op tests
-    // mu_run_test(test_encode_num);
-    // mu_run_test(test_decode_num);
-    // mu_run_test(test_op_hash160);
-    // mu_run_test(test_op_checksig);
-    // mu_run_test(test_op_checkmultisig);
+    mu_run_test(test_encode_num);
+    mu_run_test(test_decode_num);
+    mu_run_test(test_op_hash160);
+    mu_run_test(test_op_checksig);
+    mu_run_test(test_op_checkmultisig);
 
     // // //Script tests
-    // mu_run_test(test_script_parse);
-    // mu_run_test(test_script_serialize);
-    // mu_run_test(test_script_add);
-    // mu_run_test(test_script_evaluate);
-    // mu_run_test(test_p2pk);
-    // mu_run_test(test_p2pkh);
-    // mu_run_test(test_p2pkh_script);
+    mu_run_test(test_script_parse);
+    mu_run_test(test_script_serialize);
+    mu_run_test(test_script_add);
+    mu_run_test(test_script_evaluate);
+    mu_run_test(test_p2pk);
+    mu_run_test(test_p2pkh);
+    mu_run_test(test_p2pkh_script);
 
     // // //Helper tests
-    // mu_run_test(test_encode_base58);
-    // mu_run_test(test_little_endian_to_int);
-    // mu_run_test(test_int_to_little_endian);
-    // mu_run_test(test_little_endian_to_long);
-    // mu_run_test(test_long_to_little_endian);
-    // mu_run_test(test_print_formatted_bytes);
-    // mu_run_test(test_read_varint);
-    // mu_run_test(test_encode_varint);
-    // mu_run_test(test_little_endian_to_big_endian);
-    // mu_run_test(test_hash160);
-    // mu_run_test(test_find_differences);
-    // mu_run_test(test_hex_string_to_byte_array);
-    // mu_run_test(test_hash256);
-    // mu_run_test(test_byte_array_to_hex_string);
-    // mu_run_test(test_decode_base58);
-    // mu_run_test(test_h160_to_p2pkh_address);
-    // mu_run_test(test_h160_to_p2sh_address);
+    mu_run_test(test_encode_base58);
+    mu_run_test(test_little_endian_to_int);
+    mu_run_test(test_int_to_little_endian);
+    mu_run_test(test_little_endian_to_long);
+    mu_run_test(test_long_to_little_endian);
+    mu_run_test(test_print_formatted_bytes);
+    mu_run_test(test_read_varint);
+    mu_run_test(test_encode_varint);
+    mu_run_test(test_little_endian_to_big_endian);
+    mu_run_test(test_hash160);
+    mu_run_test(test_find_differences);
+    mu_run_test(test_hex_string_to_byte_array);
+    mu_run_test(test_hash256);
+    mu_run_test(test_byte_array_to_hex_string);
+    mu_run_test(test_decode_base58);
+    mu_run_test(test_h160_to_p2pkh_address);
+    mu_run_test(test_h160_to_p2sh_address);
 
     // // //Create addresses
-    // mu_run_test(generate_testnet_address);
+    mu_run_test(generate_testnet_address);
 
     // // //Other tests
     mu_run_test(test_verify_signature_from_transaction);
