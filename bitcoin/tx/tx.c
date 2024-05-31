@@ -376,10 +376,6 @@ size_t verify_input(Tx* tx, unsigned long long input_index) {
         encode_varint(raw_redeem, cmd_length);
         memcpy(raw_redeem + 1, cmd.data, cmd_length);
         Script* redeem_script = script_parse(raw_redeem);
-        //Working here
-        // Script* redeem_script = script_init();
-        // cmds_deep_copy(redeem_script->cmds, cmds, cmds_len);
-        // redeem_script->cmds_len = cmds_len;
         sig_hash(tx_copy, input_index, z_raw, redeem_script);
         script_free(redeem_script);
     } else {
