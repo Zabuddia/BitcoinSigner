@@ -2029,7 +2029,7 @@ static char* test_Op_checkmultisig() {
     push(op, two, 1);
     size_t checkmultisig = Op_checkmultisig(op, test_z);
     mu_assert("Error: Op_checkmultisig doesn't work", checkmultisig);
-    long long num = decode_num(op->stack[0], 1);
+    int64_t num = decode_num(op->stack[0], 1);
     mu_assert("Error: Op_checkmultisig doesn't work", num == 1);
     Op_free(op);
     S256Field_free(test_z);
@@ -2049,7 +2049,7 @@ static char* test_verify_signature_from_transaction() {
     uint8_t der[71] = {0x30, 0x45, 0x02, 0x21, 0x00, 0xdc, 0x92, 0x65, 0x5f, 0xe3, 0x70, 0x36, 0xf4, 0x77, 0x56, 0xdb, 0x81, 0x02, 0xe0, 0xd7, 0xd5, 0xe2, 0x8b, 0x3b, 0xeb, 0x83, 0xa8, 0xfe, 0xf4, 0xf5, 0xdc, 0x05, 0x59, 0xbd, 0xdf, 0xb9, 0x4e, 0x02, 0x20, 0x5a, 0x36, 0xd4, 0xe4, 0xe6, 0xc7, 0xfc, 0xd1, 0x66, 0x58, 0xc5, 0x07, 0x83, 0xe0, 0x0c, 0x34, 0x16, 0x09, 0x97, 0x7a, 0xed, 0x3a, 0xd0, 0x09, 0x37, 0xbf, 0x4e, 0xe9, 0x42, 0xa8, 0x99, 0x37};
     S256Point* point = S256Point_parse_sec(sec);
     Signature* sig = Signature_parse(der);
-    int verified = S256Point_verify(point, z, sig);
+    bool verified = S256Point_verify(point, z, sig);
     mu_assert("Error: verify_signature_from_transaction doesn't work", verified);
     S256Field_free(z);
     S256Point_free(point);
@@ -2062,7 +2062,7 @@ static char* test_verify_signature_from_transaction() {
     Script* redeem_script = Script_parse(hex_redeem_script);
     Tx* tx_obj = Tx_parse(hex_tx, false);
     uint8_t s[260] = {0};
-    int offset = 0;
+    int32_t offset = 0;
     int_to_little_endian(tx_obj->version, s, 4);
     offset += 4;
     encode_varint(s + offset, tx_obj->num_inputs);
@@ -2097,7 +2097,7 @@ static char* test_verify_signature_from_transaction() {
     S256Field* z1 = S256Field_init(Z1);
     S256Point* point1 = S256Point_parse_sec(hex_sec);
     Signature* sig1 = Signature_parse(hex_der);
-    int verified1 = S256Point_verify(point1, z1, sig1);
+    bool verified1 = S256Point_verify(point1, z1, sig1);
     mu_assert("Error: verify_signature_from_transaction doesn't work", verified1);
     Script_free(redeem_script);
     TxIn_free(i);
