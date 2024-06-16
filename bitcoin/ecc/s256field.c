@@ -1,14 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <gmp.h>
-
 #include "s256field.h"
 
 mpz_t PRIME;
 
 void Initialize_prime() {
-    mpz_init_set_str(PRIME, P, 16);
+    mpz_init_set_str(PRIME, P, HEX);
 }
 
 void Free_prime() {
@@ -44,23 +39,33 @@ void S256Field_toString(S256Field* element) {
     }
 }
 
-int S256Field_eq(S256Field* e1, S256Field* e2) {
+bool S256Field_eq(S256Field* e1, S256Field* e2) {
     if (e2 == NULL) {
-        return 0;
+        return false;
     }
 
+    #if DEBUG
+    gmp_printf("e1: %Zx\n", e1->num);
+    gmp_printf("e2: %Zx\n", e2->num);
+    #endif
+    
     if (mpz_cmp(e1->num, e2->num) == 0) {
-        return 1;
+        return true;
     } else {
-        return 0;
+        return false;
     }
 }
 
-int S256Field_ne(S256Field* e1, S256Field* e2) {
+bool S256Field_ne(S256Field* e1, S256Field* e2) {
+    #if DEBUG
+    gmp_printf("e1: %Zx\n", e1->num);
+    gmp_printf("e2: %Zx\n", e2->num);
+    #endif
+
     if (mpz_cmp(e1->num, e2->num) != 0) {
-        return 1;
+        return true;
     } else {
-        return 0;
+        return false;
     }
 }
 
@@ -102,7 +107,7 @@ S256Field* S256Field_s_mul(S256Field* e1, S256Field* e2) {
     mpz_t num;
     mpz_t n;
     mpz_init(num);
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, N, HEX);
     mpz_mul(num, e1->num, e2->num);
     mpz_mod(num, num, n);
     mpz_clear(n);
@@ -113,7 +118,7 @@ S256Field* S256Field_s_mul_scalar(S256Field* e, mpz_t s) {
     mpz_t num;
     mpz_t n;
     mpz_init(num);
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, N, HEX);
     mpz_mul(num, e->num, s);
     mpz_mod(num, num, n);
     mpz_clear(n);
@@ -168,7 +173,7 @@ S256Field* S256Field_s_inv(S256Field* e) {
     mpz_t exponent;
     mpz_t result;
     mpz_init_set(base, e->num);
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, N, HEX);
     mpz_init(exponent);
     mpz_sub_ui(exponent, n, 2); //Fermat's Little Theorem
     mpz_init_set_ui(result, 1);

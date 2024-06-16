@@ -1,7 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "signature.h"
+
+#define BASE_256 256
 
 Signature* Signature_init(S256Field* r, S256Field* s) {
     Signature* sig = (Signature*)malloc(sizeof(Signature));
@@ -24,24 +23,24 @@ void Signature_toString(Signature* sig) {
     gmp_printf("Signature(%Zx, %Zx)\n", sig->r->num, sig->s->num);
 }
 
-int Signature_der_length(Signature* sig) {
-    size_t r_size = mpz_sizeinbase(sig->r->num, 256) + (mpz_sgn(sig->r->num) > 0 && mpz_tstbit(sig->r->num, mpz_size(sig->r->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
-    size_t s_size = mpz_sizeinbase(sig->s->num, 256) + (mpz_sgn(sig->s->num) > 0 && mpz_tstbit(sig->s->num, mpz_size(sig->s->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
+uint8_t Signature_der_length(Signature* sig) {
+    uint8_t r_size = mpz_sizeinbase(sig->r->num, BASE_256) + (mpz_sgn(sig->r->num) > 0 && mpz_tstbit(sig->r->num, mpz_size(sig->r->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
+    uint8_t s_size = mpz_sizeinbase(sig->s->num, BASE_256) + (mpz_sgn(sig->s->num) > 0 && mpz_tstbit(sig->s->num, mpz_size(sig->s->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
     return r_size + s_size + 6;
 }
 
-void Signature_der(Signature* sig, unsigned char* output) {
+void Signature_der(Signature* sig, uint8_t* output) {
     if (!sig || !output) {
         printf("Invalid input\n");
         return;
     }
 
-    int r_size = mpz_sizeinbase(sig->r->num, 256) + (mpz_sgn(sig->r->num) > 0 && mpz_tstbit(sig->r->num, mpz_size(sig->r->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
-    int s_size = mpz_sizeinbase(sig->s->num, 256) + (mpz_sgn(sig->s->num) > 0 && mpz_tstbit(sig->s->num, mpz_size(sig->s->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
+    uint8_t r_size = mpz_sizeinbase(sig->r->num, BASE_256) + (mpz_sgn(sig->r->num) > 0 && mpz_tstbit(sig->r->num, mpz_size(sig->r->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
+    uint8_t s_size = mpz_sizeinbase(sig->s->num, BASE_256) + (mpz_sgn(sig->s->num) > 0 && mpz_tstbit(sig->s->num, mpz_size(sig->s->num) * GMP_NUMB_BITS - 1) ? 1 : 0);
 
-    int total_bytes = 2 /* header and length */ + 2 * (2 /* integer marker and size */) + r_size + s_size;
+    uint8_t total_bytes = 2 /* header and length */ + 2 * (2 /* integer marker and size */) + r_size + s_size;
 
-    size_t index = 0;
+    uint8_t index = 0;
     output[index++] = 0x30; // DER sequence
     int_to_little_endian(total_bytes - 2, output + index, 1);
     index++;
@@ -73,20 +72,20 @@ void Signature_der(Signature* sig, unsigned char* output) {
     index += s_size;
 }
 
-Signature* Signature_parse(unsigned char* s) {
-    unsigned char compound = s[0];
+Signature* Signature_parse(uint8_t* s) {
+    uint8_t compound = s[0];
     if (compound != 0x30) {
         printf("Bad Signature\n");
         exit(1);
     }
-    unsigned char length = s[1];
-    unsigned char marker = s[2];
+    uint8_t length = s[1];
+    uint8_t marker = s[2];
     if (marker != 0x02) {
         printf("Bad Signature\n");
         exit(1);
     }
-    unsigned char r_length = s[3];
-    unsigned char r_bin[r_length];
+    uint8_t r_length = s[3];
+    uint8_t r_bin[r_length];
     memset(r_bin, 0, r_length);
     memcpy(r_bin, s + 4, r_length);
     marker = s[4 + r_length];
@@ -94,8 +93,8 @@ Signature* Signature_parse(unsigned char* s) {
         printf("Bad Signature\n");
         exit(1);
     }
-    unsigned char s_length = s[5 + r_length];
-    unsigned char s_bin[s_length];
+    uint8_t s_length = s[5 + r_length];
+    uint8_t s_bin[s_length];
     memset(s_bin, 0, s_length);
     memcpy(s_bin, s + 6 + r_length, s_length);
     if (length != r_length + s_length + 4) {

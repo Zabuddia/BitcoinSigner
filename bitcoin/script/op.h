@@ -7,185 +7,185 @@
 #define STACK_SIZE 1000
 
 typedef struct {
-    unsigned char stack[STACK_SIZE][STACK_SIZE];
-    size_t element_length[STACK_SIZE];
-    int top;
+    uint8_t stack[STACK_SIZE][STACK_SIZE];
+    uint32_t element_length[STACK_SIZE];
+    int32_t top;
 } Op;
 
-Op* op_init();
+Op* Op_init();
 
-void op_free(Op* op);
+void Op_free(Op* op);
 
-void push(Op* op, unsigned char* element, size_t element_len);
+void push(Op* op, uint8_t* element, uint32_t element_len);
 
-void pop(Op* op, unsigned char* result);
+void pop(Op* op, uint8_t* result);
 
-void peek(Op* op, unsigned char* result);
+void peek(Op* op, uint8_t* result);
 
-size_t encode_num(long long num, unsigned char* result);
+uint32_t encode_num(int64_t num, uint8_t* result);
 
-long long decode_num(unsigned char* element, size_t element_len);
+int64_t decode_num(uint8_t* element, uint32_t element_len);
 
-size_t op_0(Op* op);
+bool Op_0(Op* op);
 
-size_t op_1negate(Op* op);
+bool Op_1negate(Op* op);
 
-size_t op_1(Op* op);
+bool Op_1(Op* op);
 
-size_t op_2(Op* op);
+bool Op_2(Op* op);
 
-size_t op_3(Op* op);
+bool Op_3(Op* op);
 
-size_t op_4(Op* op);
+bool Op_4(Op* op);
 
-size_t op_5(Op* op);
+bool Op_5(Op* op);
 
-size_t op_6(Op* op);
+bool Op_6(Op* op);
 
-size_t op_7(Op* op);
+bool Op_7(Op* op);
 
-size_t op_8(Op* op);
+bool Op_8(Op* op);
 
-size_t op_9(Op* op);
+bool Op_9(Op* op);
 
-size_t op_10(Op* op);
+bool Op_10(Op* op);
 
-size_t op_11(Op* op);
+bool Op_11(Op* op);
 
-size_t op_12(Op* op);
+bool Op_12(Op* op);
 
-size_t op_13(Op* op);
+bool Op_13(Op* op);
 
-size_t op_14(Op* op);
+bool Op_14(Op* op);
 
-size_t op_15(Op* op);
+bool Op_15(Op* op);
 
-size_t op_16(Op* op);
+bool Op_16(Op* op);
 
-size_t op_nop(Op* op);
+bool Op_nop(Op* op);
 
-size_t op_verify(Op* op);
+bool Op_verify(Op* op);
 
-size_t op_return(Op* op);
+bool Op_return(Op* op);
 
-size_t op_depth(Op* op);
+bool Op_depth(Op* op);
 
-size_t op_drop(Op* op);
+bool Op_drop(Op* op);
 
-size_t op_dup(Op* op);
+bool Op_dup(Op* op);
 
-size_t op_hash160(Op* op);
+bool Op_hash160(Op* op);
 
-size_t op_ripemd160(Op* op);
+bool Op_ripemd160(Op* op);
 
-size_t op_sha256(Op* op);
+bool Op_sha256(Op* op);
 
-size_t op_hash256(Op* op);
+bool Op_hash256(Op* op);
 
-size_t op_checksig(Op* op, S256Field* z);
+bool Op_checksig(Op* op, S256Field* z);
 
-size_t op_if(Op* op);
+bool Op_if(Op* op);
 
-size_t op_notif(Op* op);
+bool Op_notif(Op* op);
 
-size_t op_toaltstack(Op* op, Op* altstack);
+bool Op_toaltstack(Op* op, Op* altstack);
 
-size_t op_fromaltstack(Op* op, Op* altstack);
+bool Op_fromaltstack(Op* op, Op* altstack);
 
-size_t op_2drop(Op* op);
+bool Op_2drop(Op* op);
 
-size_t op_2dup(Op* op);
+bool Op_2dup(Op* op);
 
-size_t op_3dup(Op* op);
+bool Op_3dup(Op* op);
 
-size_t op_2over(Op* op);
+bool Op_2over(Op* op);
 
-size_t op_2rot(Op* op);
+bool Op_2rot(Op* op);
 
-size_t op_2swap(Op* op);
+bool Op_2swap(Op* op);
 
-size_t op_ifdup(Op* op);
+bool Op_ifdup(Op* op);
 
-size_t op_nip(Op* op);
+bool Op_nip(Op* op);
 
-size_t op_over(Op* op);
+bool Op_over(Op* op);
 
-size_t op_pick(Op* op);
+bool Op_pick(Op* op);
 
-size_t op_roll(Op* op);
+bool Op_roll(Op* op);
 
-size_t op_rot(Op* op);
+bool Op_rot(Op* op);
 
-size_t op_swap(Op* op);
+bool Op_swap(Op* op);
 
-size_t op_tuck(Op* op);
+bool Op_tuck(Op* op);
 
-size_t op_size(Op* op);
+bool Op_size(Op* op);
 
-size_t op_equal(Op* op);
+bool Op_equal(Op* op);
 
-size_t op_mul(Op* op);
+bool Op_mul(Op* op);
 
-size_t op_equalverify(Op* op);
+bool Op_equalverify(Op* op);
 
-size_t op_1add(Op* op);
+bool Op_1add(Op* op);
 
-size_t op_1sub(Op* op);
+bool Op_1sub(Op* op);
 
-size_t op_negate(Op* op);
+bool Op_negate(Op* op);
 
-size_t op_abs(Op* op);
+bool Op_abs(Op* op);
 
-size_t op_not(Op* op);
+bool Op_not(Op* op);
 
-size_t op_0notequal(Op* op);
+bool Op_0notequal(Op* op);
 
-size_t op_add(Op* op);
+bool Op_add(Op* op);
 
-size_t op_sub(Op* op);
+bool Op_sub(Op* op);
 
-size_t op_booland(Op* op);
+bool Op_booland(Op* op);
 
-size_t op_boolor(Op* op);
+bool Op_boolor(Op* op);
 
-size_t op_numequal(Op* op);
+bool Op_numequal(Op* op);
 
-size_t op_numequalverify(Op* op);
+bool Op_numequalverify(Op* op);
 
-size_t op_numnotequal(Op* op);
+bool Op_numnotequal(Op* op);
 
-size_t op_lessthan(Op* op);
+bool Op_lessthan(Op* op);
 
-size_t op_greaterthan(Op* op);
+bool Op_greaterthan(Op* op);
 
-size_t op_lessthanorequal(Op* op);
+bool Op_lessthanorequal(Op* op);
 
-size_t op_greaterthanorequal(Op* op);
+bool Op_greaterthanorequal(Op* op);
 
-size_t op_min(Op* op);
+bool Op_min(Op* op);
 
-size_t op_max(Op* op);
+bool Op_max(Op* op);
 
-size_t op_within(Op* op);
+bool Op_within(Op* op);
 
-size_t op_sha1(Op* op);
+bool Op_sha1(Op* op);
 
-size_t op_checksigverify(Op* op, S256Field* z);
+bool Op_checksigverify(Op* op, S256Field* z);
 
-size_t op_checkmultisig(Op* op, S256Field* z);
+bool Op_checkmultisig(Op* op, S256Field* z);
 
-size_t op_checkmultisigverify(Op* op, S256Field* z);
+bool Op_checkmultisigverify(Op* op, S256Field* z);
 
-size_t op_checklocktimeverify(Op* op);
+bool Op_checklocktimeverify(Op* op);
 
-size_t op_checksequenceverify(Op* op);
+bool Op_checksequenceverify(Op* op);
 
-char* op_code_functions(int cmd_int);
+char* Op_code_functions(uint8_t cmd_int);
 
-void op_perform_operation_basic(Op* op, int cmd_int);
+void Op_perform_operation_basic(Op* op, uint8_t cmd_int);
 
-void op_perform_operation_z(Op* op, int cmd_int, S256Field* z);
+void Op_perform_operation_z(Op* op, uint8_t cmd_int, S256Field* z);
 
-void op_perform_operation_alt(Op* op, int cmd_int, Op* altstack);
+void Op_perform_operation_alt(Op* op, uint8_t cmd_int, Op* altstack);
 
 #endif // OP_H

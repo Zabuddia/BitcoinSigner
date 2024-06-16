@@ -5,14 +5,17 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <gmp.h>
 #include <openssl/evp.h>
 #include <openssl/ripemd.h>
 #include <openssl/hmac.h>
 #include <sys/types.h>
 
-#define TRUE 1
-#define FALSE 0
+#define HEX 16
+
+#define HASH256_LEN 32
 
 #define SIGHASH_ALL 1
 
@@ -27,68 +30,72 @@ extern mpz_t B;
 extern mpz_t gx;
 extern mpz_t gy;
 
-void sha1(const unsigned char* message, size_t message_len, unsigned char* digest);
+void sha1(const uint8_t* message, uint32_t message_len, uint8_t* digest);
 
-void sha256(const unsigned char *message, size_t message_len, unsigned char *digest);
+void sha256(const uint8_t *message, uint32_t message_len, uint8_t *digest);
 
-void ripemd160(const unsigned char *message, size_t message_len, unsigned char *digest);
+void ripemd160(const uint8_t *message, uint32_t message_len, uint8_t *digest);
 
-void hash160(const unsigned char *message, size_t message_len, unsigned char *digest);
+void hash160(const uint8_t *message, uint32_t message_len, uint8_t *digest);
 
-void hash256(const unsigned char *message, size_t message_len, unsigned char *digest);
+void hash256(const uint8_t *message, uint32_t message_len, uint8_t *digest);
 
-void hash_to_mpz_t(const unsigned char* data, size_t data_len, mpz_t res);
+void hash_to_mpz_t(const uint8_t* data, uint32_t data_len, mpz_t res);
 
-void mpz_to_bytes(const mpz_t op, unsigned char *out, size_t out_len);
+void mpz_to_bytes(const mpz_t op, uint8_t *out, uint32_t out_len);
 
-void mpz_to_32bytes(mpz_t num, unsigned char *output);
+void mpz_to_32bytes(mpz_t num, uint8_t *output);
 
-void compute_hmac_sha256(unsigned char *key, int key_len,
-                  unsigned char *data, int data_len,
-                  unsigned char *output, unsigned int *output_len);
+void compute_hmac_sha256(uint8_t *key, int32_t key_len,
+                  uint8_t *data, int32_t data_len,
+                  uint8_t *output, uint32_t* output_len);
 
-void memzero(void* const pnt, const size_t len);
+void memzero(void* const pnt, const uint32_t len);
 
-void encode_base58(unsigned char *b58, size_t *b58sz, const void *data, size_t binsz);
+void encode_base58(uint8_t *b58, uint32_t *b58sz, const void *data, uint32_t binsz);
 
-void decode_base58(unsigned char* b58, size_t b58sz, unsigned char* out);
+void decode_base58(uint8_t* b58, uint32_t b58sz, uint8_t* out);
 
-void encode_base58_checksum_address(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz);
+void encode_base58_checksum_address(uint8_t *b58c, uint32_t *b58c_sz, const void *data, uint32_t binsz);
 
-void encode_base58_checksum_wif_uncompressed(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz);
+void encode_base58_checksum_wif_uncompressed(uint8_t *b58c, uint32_t *b58c_sz, const void *data, uint32_t binsz);
 
-void encode_base58_checksum_wif_compressed(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz);
+void encode_base58_checksum_wif_compressed(uint8_t *b58c, uint32_t *b58c_sz, const void *data, uint32_t binsz);
 
 //Max data_len is 4
-int little_endian_to_int(const unsigned char *data, size_t data_len);
+int32_t little_endian_to_int(const uint8_t *data, uint32_t data_len);
 
 //Max data_len is 8
-unsigned long long little_endian_to_long(const unsigned char *data, size_t data_len);
+uint64_t little_endian_to_long(const uint8_t *data, uint32_t data_len);
 
 //Max output_len is 4
-void int_to_little_endian(int num, unsigned char *output, size_t output_len);
+void int_to_little_endian(int32_t num, uint8_t *output, uint32_t output_len);
 
 //Max output_len is 8
-void long_to_little_endian(unsigned long long num, unsigned char *output, size_t output_len);
+void long_to_little_endian(uint64_t num, uint8_t *output, uint32_t output_len);
 
-void print_formatted_bytes(const unsigned char* hex);
+void print_formatted_bytes(const uint8_t* hex);
 
 void find_differences(const char* data1, const char* data2);
 
-unsigned long long read_varint(unsigned char* data);
+uint64_t read_varint(uint8_t* data);
 
-void encode_varint(unsigned char* output, unsigned long long num);
+uint8_t read_varint_size(uint8_t* data);
 
-void little_endian_to_big_endian(unsigned char* data, size_t data_len);
+uint8_t add_varint_size(uint64_t num);
 
-unsigned char hex_char_to_byte(char c);
+void encode_varint(uint8_t* output, uint64_t num);
 
-void hex_string_to_byte_array(const char* hexStr, unsigned char* byteArray);
+void little_endian_to_big_endian(uint8_t* data, uint32_t data_len);
 
-void byte_array_to_hex_string(unsigned char* byte_array, size_t byte_array_len, char* hex_string);
+uint8_t hex_char_to_byte(uint8_t c);
 
-void h160_to_p2pkh_address(unsigned char* h160, unsigned char* address, size_t* address_size, __uint8_t testnet);
+void hex_string_to_byte_array(const char* hexStr, uint8_t* byteArray);
 
-void h160_to_p2sh_address(unsigned char* h160, unsigned char* address, size_t* address_size, __uint8_t testnet);
+void byte_array_to_hex_string(uint8_t* byte_array, uint32_t byte_array_len, char* hex_string);
+
+void h160_to_p2pkh_address(uint8_t* h160, uint8_t* address, uint32_t* address_size, bool testnet);
+
+void h160_to_p2sh_address(uint8_t* h160, uint8_t* address, uint32_t* address_size, bool testnet);
 
 #endif //HELPER_H

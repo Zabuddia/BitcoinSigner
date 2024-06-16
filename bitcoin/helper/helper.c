@@ -1,15 +1,11 @@
-#include <stdio.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <string.h>
-#include <openssl/evp.h>
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 #include "helper.h"
 
 const char b58digits_ordered[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-void sha1(const unsigned char* message, size_t message_len, unsigned char* digest) {
-    EVP_MD_CTX *mdctx;
+void sha1(const uint8_t* message, uint32_t message_len, uint8_t* digest) {
+    EVP_MD_CTX* mdctx;
     
     if((mdctx = EVP_MD_CTX_new()) == NULL)
         return;
@@ -20,15 +16,15 @@ void sha1(const unsigned char* message, size_t message_len, unsigned char* diges
     if(1 != EVP_DigestUpdate(mdctx, message, message_len))
         return;
     
-    unsigned int digest_len;
+    uint32_t digest_len;
     if(1 != EVP_DigestFinal_ex(mdctx, digest, &digest_len))
         return;
     
     EVP_MD_CTX_free(mdctx);
 }
 
-void sha256(const unsigned char *message, size_t message_len, unsigned char *digest) {
-    EVP_MD_CTX *mdctx;
+void sha256(const uint8_t* message, uint32_t message_len, uint8_t* digest) {
+    EVP_MD_CTX* mdctx;
     
     if((mdctx = EVP_MD_CTX_new()) == NULL)
         return;
@@ -39,37 +35,37 @@ void sha256(const unsigned char *message, size_t message_len, unsigned char *dig
     if(1 != EVP_DigestUpdate(mdctx, message, message_len))
         return;
     
-    unsigned int digest_len;
+    uint32_t digest_len;
     if(1 != EVP_DigestFinal_ex(mdctx, digest, &digest_len))
         return;
     
     EVP_MD_CTX_free(mdctx);
 }
 
-void ripemd160(const unsigned char *message, size_t message_len, unsigned char *digest) {
+void ripemd160(const uint8_t* message, uint32_t message_len, uint8_t* digest) {
     RIPEMD160_CTX ctx;
     RIPEMD160_Init(&ctx);
     RIPEMD160_Update(&ctx, message, message_len);
     RIPEMD160_Final(digest, &ctx);
 }
 
-void hash160(const unsigned char *message, size_t message_len, unsigned char *digest) {
-    unsigned char sha256_digest[32];
+void hash160(const uint8_t* message, uint32_t message_len, uint8_t* digest) {
+    uint8_t sha256_digest[HASH256_LEN];
     sha256(message, message_len, sha256_digest);
-    ripemd160(sha256_digest, 32, digest);
+    ripemd160(sha256_digest, HASH256_LEN, digest);
 }
 
-void hash256(const unsigned char *message, size_t message_len, unsigned char *digest) {
+void hash256(const uint8_t* message, uint32_t message_len, uint8_t* digest) {
     sha256(message, message_len, digest);
-    sha256(digest, 32, digest);
+    sha256(digest, HASH256_LEN, digest);
 }
 
-void hash_to_mpz_t(const unsigned char* data, size_t data_len, mpz_t res) {
+void hash_to_mpz_t(const uint8_t* data, uint32_t data_len, mpz_t res) {
     mpz_init(res);
 
     EVP_MD_CTX *mdctx;
-    unsigned char hash[EVP_MAX_MD_SIZE]; // Buffer for hash output
-    unsigned int hash_len;
+    uint8_t hash[EVP_MAX_MD_SIZE]; // Buffer for hash output
+    uint32_t hash_len;
 
     // Initialize context for the first round of SHA-256
     if((mdctx = EVP_MD_CTX_new()) == NULL) {
@@ -118,16 +114,14 @@ void hash_to_mpz_t(const unsigned char* data, size_t data_len, mpz_t res) {
     EVP_MD_CTX_free(mdctx);
 
     mpz_import(res, hash_len, 1, sizeof(hash[0]), 0, 0, hash);
-
-    //S256Field* result = S256Field_init(res);
 }
 
-void mpz_to_bytes(const mpz_t op, unsigned char *out, size_t out_len) {
-    size_t op_size = (mpz_sizeinbase(op, 2) + 7) / 8;
+void mpz_to_bytes(const mpz_t op, uint8_t *out, uint32_t out_len) {
+    uint32_t op_size = (mpz_sizeinbase(op, 2) + 7) / 8;
     mpz_export(out + (out_len - op_size), NULL, 1, 1, 0, 0, op);
 }
 
-void mpz_to_32bytes(mpz_t num, unsigned char *output) {
+void mpz_to_32bytes(mpz_t num, uint8_t *output) {
     size_t count = 0;
     mpz_export(output, &count, 1, 1, 1, 0, num);
     if (count < 32) {
@@ -137,9 +131,9 @@ void mpz_to_32bytes(mpz_t num, unsigned char *output) {
     }
 }
 
-void compute_hmac_sha256(unsigned char *key, int key_len,
-                  unsigned char *data, int data_len,
-                  unsigned char *output, unsigned int *output_len) {
+void compute_hmac_sha256(uint8_t *key, int32_t key_len,
+                  uint8_t *data, int32_t data_len,
+                  uint8_t *output, uint32_t *output_len) {
     if (!key || !data || !output || !output_len) {
         fprintf(stderr, "Invalid input to HMAC computation.\n");
         return;
@@ -178,52 +172,75 @@ void compute_hmac_sha256(unsigned char *key, int key_len,
     HMAC_CTX_free(ctx);
 }
 
-void memzero(void *const pnt, const size_t len) {
-    volatile unsigned char *volatile pnt_ = (volatile unsigned char *volatile)pnt;
-    size_t i = (size_t)0U;
+void memzero(void* const pnt, const uint32_t len) {
+    volatile uint8_t *volatile pnt_ = (volatile uint8_t *volatile)pnt;
+    uint32_t i = (uint32_t)0U;
 
     while (i < len) {
     pnt_[i++] = 0U;
     }
 }
 
-void encode_base58(unsigned char *b58, size_t *b58sz, const void *data, size_t binsz) {
-    const uint8_t *bin = data;
-    int carry;
-    ssize_t i, j, high, zcount = 0;
-    size_t size;
+void encode_base58(uint8_t* b58, uint32_t* b58sz, const void* data, uint32_t binsz) {
+    if (!data || !b58 || !b58sz) {
+        fprintf(stderr, "Null pointer input\n");
+        return;
+    }
 
-    while (zcount < (ssize_t)binsz && !bin[zcount]) ++zcount;
+    const uint8_t* bin = data;
+    int32_t carry;
+    int32_t i, j, high, zcount = 0;
+    uint32_t size;
 
+    // Count leading zeroes
+    while (zcount < binsz && !bin[zcount]) ++zcount;
+
+    // Calculate buffer size
     size = (binsz - zcount) * 138 / 100 + 1;
-    uint8_t buf[size];
+    uint8_t* buf = malloc(size);
+    if (!buf) {
+        fprintf(stderr, "Memory allocation failed\n");
+        return;
+    }
     memzero(buf, size);
 
-    for (i = zcount, high = size - 1; i < (ssize_t)binsz; ++i, high = j) {
-    for (carry = bin[i], j = size - 1; (j > high) || carry; --j) {
-        carry += 256 * buf[j];
-        buf[j] = carry % 58;
-        carry /= 58;
-    }
+    // Perform the base58 encoding
+    for (i = zcount, high = size - 1; i < binsz; ++i) {
+        carry = bin[i];
+        for (j = size - 1; (j > high) || carry; --j) {
+            if (j >= size) {
+                fprintf(stderr, "Index out of bounds: j=%u, size=%u\n", j, size);
+                free(buf);
+                return;
+            }
+            carry += 256 * buf[j];
+            buf[j] = carry % 58;
+            carry /= 58;
+        }
+        high = j;
     }
 
-    for (j = 0; j < (ssize_t)size && !buf[j]; ++j)
-    ;
+    // Skip leading zeroes in buffer
+    for (j = 0; j < size && !buf[j]; ++j);
 
+    // Output leading '1' characters for leading zeroes in input
     if (zcount) memset(b58, '1', zcount);
-    for (i = zcount; j < (ssize_t)size; ++i, ++j) {
-    b58[i] = b58digits_ordered[buf[j]];
+    // Output base58 digits
+    for (i = zcount; j < size; ++i, ++j) {
+        b58[i] = b58digits_ordered[buf[j]];
     }
     b58[i] = '\0';
     *b58sz = i + 1;
+
+    free(buf);
 }
 
-void decode_base58(unsigned char* b58, size_t b58sz, unsigned char* out) {
-    size_t size = 0;
+void decode_base58(uint8_t* b58, uint32_t b58sz, uint8_t* out) {
+    uint32_t size = 0;
 
-    for (size_t i = 0; i < b58sz; i++) {
-        unsigned char c = b58[i];
-        int val = -1;
+    for (uint32_t i = 0; i < b58sz; i++) {
+        uint8_t c = b58[i];
+        int32_t val = -1;
         if (c >= '1' && c <= '9') val = c - '1';
         else if (c >= 'A' && c <= 'H') val = c - 'A' + 9;
         else if (c >= 'J' && c <= 'N') val = c - 'J' + 17;
@@ -235,8 +252,8 @@ void decode_base58(unsigned char* b58, size_t b58sz, unsigned char* out) {
             exit(1);
         }
 
-        int carry = val;
-        for (size_t j = 0; j <= size; j++) {
+        int32_t carry = val;
+        for (uint32_t j = 0; j <= size; j++) {
             carry += out[j] * 58;
             out[j] = carry % 256;
             carry /= 256;
@@ -249,14 +266,14 @@ void decode_base58(unsigned char* b58, size_t b58sz, unsigned char* out) {
     }
 
     // Reverse the result
-    for (size_t i = 0; i < size / 2; i++) {
-        unsigned char temp = out[i];
+    for (uint32_t i = 0; i < size / 2; i++) {
+        uint8_t temp = out[i];
         out[i] = out[size - i - 1];
         out[size - i - 1] = temp;
     }
 }
 
-void encode_base58_checksum_address(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {
+void encode_base58_checksum_address(uint8_t *b58c, uint32_t *b58c_sz, const void *data, uint32_t binsz) {
     uint8_t buf[21 + 4] = {0};
     uint8_t hash[21] = {0};
     memcpy(buf, data, binsz);
@@ -265,7 +282,7 @@ void encode_base58_checksum_address(unsigned char *b58c, size_t *b58c_sz, const 
     encode_base58(b58c, b58c_sz, buf, sizeof(buf));
 }
 
-void encode_base58_checksum_wif_uncompressed(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {
+void encode_base58_checksum_wif_uncompressed(uint8_t *b58c, uint32_t *b58c_sz, const void *data, uint32_t binsz) {
     uint8_t buf[33 + 4] = {0};
     uint8_t hash[33] = {0};
     memcpy(buf, data, binsz);
@@ -274,7 +291,7 @@ void encode_base58_checksum_wif_uncompressed(unsigned char *b58c, size_t *b58c_s
     encode_base58(b58c, b58c_sz, buf, sizeof(buf));
 }
 
-void encode_base58_checksum_wif_compressed(unsigned char *b58c, size_t *b58c_sz, const void *data, size_t binsz) {
+void encode_base58_checksum_wif_compressed(uint8_t *b58c, uint32_t *b58c_sz, const void *data, uint32_t binsz) {
     uint8_t buf[34 + 4] = {0};
     uint8_t hash[34] = {0};
     memcpy(buf, data, binsz);
@@ -283,40 +300,40 @@ void encode_base58_checksum_wif_compressed(unsigned char *b58c, size_t *b58c_sz,
     encode_base58(b58c, b58c_sz, buf, sizeof(buf));
 }
 
-int little_endian_to_int(const unsigned char *data, size_t data_len) {
-    int result = 0;
+int32_t little_endian_to_int(const uint8_t *data, uint32_t data_len) {
+    int32_t result = 0;
     for (int i = 0; i < data_len; i++) {
         result += data[i] << (8 * i);
     }
     return result;
 }
 
-unsigned long long little_endian_to_long(const unsigned char *data, size_t data_len) {
-    unsigned long long result = 0;
+uint64_t little_endian_to_long(const uint8_t *data, uint32_t data_len) {
+    uint64_t result = 0;
     for (int i = 0; i < data_len; i++) {
-        result += (unsigned long long)data[i] << (8 * i);
+        result += (uint64_t)data[i] << (8 * i);
     }
     return result;
 }
 
-void int_to_little_endian(int num, unsigned char *output, size_t output_len) {
-    for (int i = 0; i < output_len; i++) {
+void int_to_little_endian(int32_t num, uint8_t *output, uint32_t output_len) {
+    for (int32_t i = 0; i < output_len; i++) {
         output[i] = (num >> (8 * i)) & 0xff;
     }
 }
 
-void long_to_little_endian(unsigned long long num, unsigned char *output, size_t output_len) {
-    for (int i = 0; i < output_len; i++) {
+void long_to_little_endian(uint64_t num, uint8_t *output, uint32_t output_len) {
+    for (int32_t i = 0; i < output_len; i++) {
         output[i] = (num >> (8 * i)) & 0xff;
     }
 }
 
-void print_formatted_bytes(const unsigned char* hex) {
-    int len = strlen((const char*)hex);
-    int i;
+void print_formatted_bytes(const uint8_t* hex) {
+    int32_t len = strlen((const char*)hex);
+    int32_t i;
     printf("Formatted output:\n");
     for (i = 0; i < len; i += 2) {
-        unsigned int byte;
+        uint32_t byte;
         sscanf((const char*)hex + i, "%2x", &byte);
         printf("0x%02x, ", byte);
     }
@@ -325,12 +342,12 @@ void print_formatted_bytes(const unsigned char* hex) {
 }
 
 void find_differences(const char* data1, const char* data2) {
-    int data_len = strlen(data1);
+    int32_t data_len = strlen(data1);
     if (data_len != strlen(data2)) {
         printf("Data lengths are different\n");
         return;
     }
-    for (int i = 0; i < data_len; i++) {
+    for (int32_t i = 0; i < data_len; i++) {
         if (data1[i] != data2[i]) {
             printf("Difference found at index %d\n", i);
             printf("Data1: %d\n", data1[i]);
@@ -339,20 +356,45 @@ void find_differences(const char* data1, const char* data2) {
     }
 }
 
-unsigned long long read_varint(unsigned char* data) {
-    unsigned char i = data[0];
+uint64_t read_varint(uint8_t* data) {
+    uint8_t i = data[0];
     if (i == 0xfd) {
-        return (unsigned long long)little_endian_to_int(data + 1, 2);
+        return (uint64_t)little_endian_to_int(data + 1, 2);
     } else if (i == 0xfe) {
-        return (unsigned long long)little_endian_to_long(data + 1, 4);
+        return (uint64_t)little_endian_to_long(data + 1, 4);
     } else if (i == 0xff) {
         return little_endian_to_long(data + 1, 8);
     } else {
-        return (unsigned long long)i;
+        return (uint64_t)i;
     }
 }
 
-void encode_varint(unsigned char* output, unsigned long long num) {
+uint8_t read_varint_size(uint8_t* data) {
+    uint8_t i = data[0];
+    if (i == 0xfd) {
+        return 3;
+    } else if (i == 0xfe) {
+        return 5;
+    } else if (i == 0xff) {
+        return 9;
+    } else {
+        return 1;
+    }
+}
+
+uint8_t add_varint_size(uint64_t num) {
+    if (num < 0xfd) {
+        return 1;
+    } else if (num <= 0xffff) {
+        return 3;
+    } else if (num <= 0xffffffff) {
+        return 5;
+    } else {
+        return 9;
+    }
+}
+
+void encode_varint(uint8_t* output, uint64_t num) {
     if (num < 0xfd) {
         output[0] = num;
     } else if (num <= 0xffff) {
@@ -367,20 +409,20 @@ void encode_varint(unsigned char* output, unsigned long long num) {
     }
 }
 
-void little_endian_to_big_endian(unsigned char* data, size_t data_len) {
-    unsigned char* temp = (unsigned char*)malloc(data_len);
+void little_endian_to_big_endian(uint8_t* data, uint32_t data_len) {
+    uint8_t* temp = (uint8_t*)malloc(data_len);
     if (temp == NULL) {
         printf("Memory allocation failed\n");
         exit(1);
     }
-    for (int i = 0; i < data_len; i++) {
+    for (int32_t i = 0; i < data_len; i++) {
         temp[i] = data[data_len - i - 1];
     }
     memcpy(data, temp, data_len);
     free(temp);
 }
 
-unsigned char hex_char_to_byte(char c) {
+uint8_t hex_char_to_byte(uint8_t c) {
     if (c >= '0' && c <= '9') {
         return c - '0';
     } else if (c >= 'a' && c <= 'f') {
@@ -391,31 +433,31 @@ unsigned char hex_char_to_byte(char c) {
     return 0; // Not a hex char
 }
 
-void hex_string_to_byte_array(const char* hexStr, unsigned char* byteArray) {
-    size_t len = strlen(hexStr);
+void hex_string_to_byte_array(const char* hexStr, uint8_t* byteArray) {
+    uint32_t len = strlen(hexStr);
     if (len % 2 != 0) {
         printf("Hex string must have even length\n");
         exit(1);
     }
 
-    size_t nBytes = len / 2;
+    uint32_t nBytes = len / 2;
 
-    for (size_t i = 0; i < nBytes; i++) {
-        unsigned char high = hex_char_to_byte(hexStr[2 * i]);
-        unsigned char low = hex_char_to_byte(hexStr[2 * i + 1]);
+    for (uint32_t i = 0; i < nBytes; i++) {
+        uint8_t high = hex_char_to_byte(hexStr[2 * i]);
+        uint8_t low = hex_char_to_byte(hexStr[2 * i + 1]);
         byteArray[i] = (high << 4) | low;
     }
 }
 
-void byte_array_to_hex_string(unsigned char* byte_array, size_t byte_array_len, char* hex_string) {
-    for (size_t i = 0; i < byte_array_len; i++) {
+void byte_array_to_hex_string(uint8_t* byte_array, uint32_t byte_array_len, char* hex_string) {
+    for (uint32_t i = 0; i < byte_array_len; i++) {
         sprintf(hex_string + 2 * i, "%02x", byte_array[i]);
     }
     hex_string[2 * byte_array_len] = '\0';
 }
 
-void h160_to_p2pkh_address(unsigned char* h160, unsigned char* address, size_t* address_size, __uint8_t testnet) {
-    unsigned char prefix_plus_h160[21] = {0};
+void h160_to_p2pkh_address(uint8_t* h160, uint8_t* address, uint32_t* address_size, bool testnet) {
+    uint8_t prefix_plus_h160[21] = {0};
     if (testnet) {
         prefix_plus_h160[0] = 0x6f;
     } else {
@@ -425,8 +467,8 @@ void h160_to_p2pkh_address(unsigned char* h160, unsigned char* address, size_t* 
     encode_base58_checksum_address(address, address_size, prefix_plus_h160, 21);
 }
 
-void h160_to_p2sh_address(unsigned char* h160, unsigned char* address, size_t* address_size, __uint8_t testnet) {
-    unsigned char prefix_plus_h160[21] = {0};
+void h160_to_p2sh_address(uint8_t* h160, uint8_t* address, uint32_t* address_size, bool testnet) {
+    uint8_t prefix_plus_h160[21] = {0};
     if (testnet) {
         prefix_plus_h160[0] = 0xc4;
     } else {

@@ -1,10 +1,8 @@
 #ifndef S256FIELD_H
 #define S256FIELD_H
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
-#include <gmp.h>
+#include <assert.h>
 
 #include "../helper/helper.h"
 
@@ -23,9 +21,9 @@ void S256Field_free(S256Field* element);
 
 void S256Field_toString(S256Field* element);
 
-int S256Field_eq(S256Field* e1, S256Field* e2);
+bool S256Field_eq(S256Field* e1, S256Field* e2);
 
-int S256Field_ne(S256Field* e1, S256Field* e2);
+bool S256Field_ne(S256Field* e1, S256Field* e2);
 
 S256Field* S256Field_add(S256Field* e1, S256Field* e2);
 

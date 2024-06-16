@@ -1,10 +1,9 @@
 #ifndef PRIVATEKEY_H
 #define PRIVATEKEY_H
 
-#include <string.h>
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+// Check if I need these
+// #include <openssl/sha.h>
+// #include <openssl/kdf.h>
 
 #include "s256point.h"
 #include "signature.h"
@@ -15,15 +14,7 @@ typedef struct {
     S256Point* point;
 } PrivateKey;
 
-// typedef struct {
-//     const char* secret;
-//     S256Field* e;
-//     S256Point* point;
-// } PrivateKey;
-
 PrivateKey* PrivateKey_init(mpz_t secret);
-
-// PrivateKey* PrivateKey_init(const char* secret);
 
 void PrivateKey_free(PrivateKey* key);
 
@@ -31,6 +22,6 @@ S256Field* Deterministic_k(PrivateKey* key, S256Field* z);
 
 Signature* PrivateKey_sign(PrivateKey* key, S256Field* z);
 
-void PrivateKey_wif(PrivateKey* key, unsigned char* output, uint8_t compressed, uint8_t testnet);
+void PrivateKey_wif(PrivateKey* key, uint8_t* output, bool compressed, bool testnet);
 
 #endif //PRIVATEKEY_H

@@ -1,9 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
 #include "s256point.h"
+
+#define SEC_COMPRESSED_LEN 33
+#define SEC_UNCOMPRESSED_LEN 65
 
 S256Point* S256Point_init(S256Field* x, S256Field* y) {
     if (x == NULL && y == NULL) {
@@ -111,11 +109,11 @@ void S256Point_toString(S256Point* p) {
     }
 }
 
-int S256Point_eq(S256Point* p1, S256Point* p2) {
+bool S256Point_eq(S256Point* p1, S256Point* p2) {
     return (S256Field_eq(p1->x, p2->x) && S256Field_eq(p1->y, p2->y) && S256Field_eq(p1->a, p2->a) && S256Field_eq(p1->b, p2->b));
 }
 
-int S256Point_ne(S256Point* p1, S256Point* p2) {
+bool S256Point_ne(S256Point* p1, S256Point* p2) {
     if (p1->x == NULL && p2->x != NULL) {
         return 1;
     }
@@ -222,7 +220,7 @@ S256Point* S256Point_mul(S256Point* p, mpz_t coefficient) {
     S256Point* current = S256Point_deepcopy(p);
     mpz_t coef;
     mpz_t n;
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, N, HEX);
     mpz_init_set(coef, coefficient);
     mpz_mod(coef, coef, n);
     int i = 0;
@@ -254,11 +252,11 @@ S256Point* S256Point_mul(S256Point* p, mpz_t coefficient) {
     return result;
 }
 
-int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
+bool S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
     mpz_t gx;
     mpz_t gy;
-    mpz_init_set_str(gx, GX, 16);
-    mpz_init_set_str(gy, GY, 16);
+    mpz_init_set_str(gx, GX, HEX);
+    mpz_init_set_str(gy, GY, HEX);
     S256Field* x = S256Field_init(gx);
     S256Field* y = S256Field_init(gy);
     S256Point* G = S256Point_init(x, y);
@@ -270,7 +268,7 @@ int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
     S256Point* v_times_p = S256Point_mul(p, v->num);
     S256Point* total = S256Point_add(u_times_G, v_times_p);
 
-    int isVerified = S256Field_eq(total->x, sig->r);
+    bool isVerified = S256Field_eq(total->x, sig->r);
     
     S256Field_free(s_inv);
     S256Field_free(u);
@@ -283,7 +281,7 @@ int S256Point_verify(S256Point* p, S256Field* z, Signature* sig) {
     return isVerified;
 }
 
-void S256Point_sec_uncompressed(S256Point* p, unsigned char* output) {
+void S256Point_sec_uncompressed(S256Point* p, uint8_t* output) {
     output[0] = 0x04;
 
     mpz_to_32bytes(p->x->num, output + 1);
@@ -291,7 +289,7 @@ void S256Point_sec_uncompressed(S256Point* p, unsigned char* output) {
     mpz_to_32bytes(p->y->num, output + 33);
 }
 
-void S256Point_sec_compressed(S256Point* p, unsigned char* output) {
+void S256Point_sec_compressed(S256Point* p, uint8_t* output) {
     mpz_t y_mod_2;
     mpz_init(y_mod_2);
     mpz_mod_ui(y_mod_2, p->y->num, 2);
@@ -304,7 +302,7 @@ void S256Point_sec_compressed(S256Point* p, unsigned char* output) {
     mpz_clear(y_mod_2);
 }
 
-S256Point* S256Point_parse_sec(unsigned char* sec_bin) {
+S256Point* S256Point_parse_sec(uint8_t* sec_bin) {
     mpz_t X;
     mpz_t Y;
     mpz_init(X);
@@ -340,7 +338,7 @@ S256Point* S256Point_parse_sec(unsigned char* sec_bin) {
             return result;
         } else {
             mpz_t temp_p;
-            mpz_init_set_str(temp_p, P, 16);
+            mpz_init_set_str(temp_p, P, HEX);
             mpz_sub(beta->num, temp_p, beta->num);
             S256Point* result = S256Point_init(x, beta);
             mpz_clear(three);
@@ -376,7 +374,7 @@ S256Point* S256Point_parse_sec(unsigned char* sec_bin) {
             return result;
         } else {
             mpz_t temp_p;
-            mpz_init_set_str(temp_p, P, 16);
+            mpz_init_set_str(temp_p, P, HEX);
             mpz_sub(beta->num, temp_p, beta->num);
             S256Point* result = S256Point_init(x, beta);
             mpz_clear(three);
@@ -390,26 +388,26 @@ S256Point* S256Point_parse_sec(unsigned char* sec_bin) {
     }
 }
 
-void S256Point_hash160(S256Point* p, unsigned char* output, uint8_t compressed) {
+void S256Point_hash160(S256Point* p, uint8_t* output, bool compressed) {
     if (compressed) {
-        unsigned char sec[33];
+        uint8_t sec[SEC_COMPRESSED_LEN];
         S256Point_sec_compressed(p, sec);
-        hash160(sec, 33, output);
+        hash160(sec, SEC_COMPRESSED_LEN, output);
         return;
     }
-    unsigned char sec[65];
+    uint8_t sec[SEC_UNCOMPRESSED_LEN];
     S256Point_sec_uncompressed(p, sec);
-    hash160(sec, 65, output);
+    hash160(sec, SEC_UNCOMPRESSED_LEN, output);
 }
 
-void S256Point_address(S256Point* p, unsigned char* output, uint8_t compressed, uint8_t testnet) {
-    unsigned char h160[21] = {0};
+void S256Point_address(S256Point* p, uint8_t* output, bool compressed, bool testnet) {
+    uint8_t h160[21] = {0};
     if (testnet) {
         h160[0] = 0x6f;
     } else {
         h160[0] = 0x00;
     }
     S256Point_hash160(p, h160 + 1, compressed);
-    size_t output_len = 34;
+    uint32_t output_len = 34;
     encode_base58_checksum_address(output, &output_len, h160, 21);
 }

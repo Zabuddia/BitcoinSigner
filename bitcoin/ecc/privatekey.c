@@ -1,14 +1,21 @@
-#include <string.h>
-#include <openssl/evp.h>
-#include <openssl/kdf.h>
-
 #include "privatekey.h"
+
+#define K_LEN 32
+#define V_LEN 32
+#define Z_LEN 32
+#define SECRET_LEN 32
+#define SHA256_DIGEST_LENGTH 32
+
+#define WIF_RAW_COMPRESSED_LEN 34
+#define WIF_COMPRESSED_LEN 52
+#define WIF_RAW_UNCOMPRESSED_LEN 33
+#define WIF_UNCOMPRESSED_LEN 51
 
 PrivateKey* PrivateKey_init(mpz_t secret) {
     mpz_t gx;
     mpz_t gy;
-    mpz_init_set_str(gx, GX, 16);
-    mpz_init_set_str(gy, GY, 16);
+    mpz_init_set_str(gx, GX, HEX);
+    mpz_init_set_str(gy, GY, HEX);
 
     S256Field* x = S256Field_init(gx);
     S256Field* y = S256Field_init(gy);
@@ -24,29 +31,6 @@ PrivateKey* PrivateKey_init(mpz_t secret) {
     return key;
 }
 
-// PrivateKey* PrivateKey_init(const char* secret) {
-//     mpz_t gx;
-//     mpz_t gy;
-//     mpz_init_set_str(gx, GX, 16);
-//     mpz_init_set_str(gy, GY, 16);
-
-//     S256Field* x = S256Field_init(gx);
-//     S256Field* y = S256Field_init(gy);
-
-//     S256Point* G = S256Point_init(x, y);
-
-//     mpz_t E;
-//     hash_to_mpz_t((const unsigned char*)secret, strlen(secret), E);
-
-//     S256Field* e = S256Field_init(E);
-
-//     PrivateKey* key = malloc(sizeof(PrivateKey));
-//     key->secret = secret;
-//     key->e = e;
-//     key->point = S256Point_mul(G, e->num);
-//     return key;
-// }
-
 void PrivateKey_free(PrivateKey* key) {
     if (key != NULL) {
         S256Field_free(key->e);
@@ -56,56 +40,54 @@ void PrivateKey_free(PrivateKey* key) {
 }
 
 S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
-    unsigned char k[32] = {0};
-    int k_len = 32;
-    unsigned char v[32];
-    memset(v, 0x01, 32);
-    int v_len = 32;
+    uint8_t k[K_LEN] = {0};
+    uint8_t v[V_LEN];
+    memset(v, 0x01, V_LEN);
 
     S256Field* zee = z;
 
     mpz_t n;
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, N, HEX);
 
     if (mpz_cmp(zee->num, n) > 0) {
         mpz_sub(zee->num, zee->num, n);
     }
 
-    unsigned char z_bytes[32] = {0};
-    unsigned char secret_bytes[32] = {0};
-    mpz_to_bytes(zee->num, z_bytes, 32);
-    mpz_to_bytes(key->e->num, secret_bytes, 32);
+    uint8_t z_bytes[Z_LEN] = {0};
+    uint8_t secret_bytes[SECRET_LEN] = {0};
+    mpz_to_bytes(zee->num, z_bytes, Z_LEN);
+    mpz_to_bytes(key->e->num, secret_bytes, SECRET_LEN);
 
     //k = hmac.new(k, v + b'\x00' + secret_bytes + z_bytes, s256).digest()
-    unsigned char data_1[sizeof(v) + 1 + sizeof(secret_bytes) + sizeof(z_bytes)];
+    uint8_t data_1[V_LEN + 1 + SECRET_LEN + Z_LEN];
 
-    memcpy(data_1, v, sizeof(v));
-    data_1[sizeof(v)] = 0x00;
-    memcpy(data_1 + sizeof(v) + 1, secret_bytes, sizeof(secret_bytes));
-    memcpy(data_1 + sizeof(v) + sizeof(secret_bytes) + 1, z_bytes, sizeof(z_bytes));
+    memcpy(data_1, v, V_LEN);
+    data_1[V_LEN] = 0x00;
+    memcpy(data_1 + V_LEN + 1, secret_bytes, SECRET_LEN);
+    memcpy(data_1 + V_LEN + SECRET_LEN + 1, z_bytes, Z_LEN);
 
-    unsigned int output_len = 32;
-    compute_hmac_sha256(k, k_len, data_1, sizeof(data_1), k, &output_len);
+    uint32_t output_len = SHA256_DIGEST_LENGTH;
+    compute_hmac_sha256(k, K_LEN, data_1, sizeof(data_1), k, &output_len);
 
     //v = hmac.new(k, v, s256).digest()
-    unsigned char data_v[sizeof(v)];
+    uint8_t data_v[V_LEN];
 
-    memcpy(data_v, v, sizeof(v));
+    memcpy(data_v, v, V_LEN);
 
-    compute_hmac_sha256(k, k_len, data_v, sizeof(data_v), v, &output_len);
+    compute_hmac_sha256(k, K_LEN, data_v, V_LEN, v, &output_len);
 
     //k = hmac.new(k, v + b'\x00' + secret_bytes + z_bytes, s256).digest()
-    unsigned char data_2[sizeof(v) + 1 + sizeof(secret_bytes) + sizeof(z_bytes)];
+    uint8_t data_2[V_LEN + 1 + SECRET_LEN + Z_LEN];
 
-    memcpy(data_2, v, sizeof(v));
-    data_2[sizeof(v)] = 0x01;
-    memcpy(data_2 + sizeof(v) + 1, secret_bytes, sizeof(secret_bytes));
-    memcpy(data_2 + sizeof(v) + sizeof(secret_bytes) + 1, z_bytes, sizeof(z_bytes));
-    compute_hmac_sha256(k, k_len, data_2, sizeof(data_2), k, &output_len);
+    memcpy(data_2, v, V_LEN);
+    data_2[V_LEN] = 0x01;
+    memcpy(data_2 + V_LEN + 1, secret_bytes, SECRET_LEN);
+    memcpy(data_2 + V_LEN + SECRET_LEN + 1, z_bytes, Z_LEN);
+    compute_hmac_sha256(k, K_LEN, data_2, sizeof(data_2), k, &output_len);
 
     //v = hmac.new(k, v, s256).digest()
-    memcpy(data_v, v, sizeof(v));
-    compute_hmac_sha256(k, k_len, data_v, sizeof(data_v), v, &output_len);
+    memcpy(data_v, v, V_LEN);
+    compute_hmac_sha256(k, K_LEN, data_v, V_LEN, v, &output_len);
 
     // while True:
     // v = hmac.new(k, v, s256).digest()
@@ -119,27 +101,27 @@ S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
     mpz_init(candidate);
     while (1) {
         //v = hmac.new(k, v, s256).digest()
-        memcpy(data_v, v, sizeof(v));
-        compute_hmac_sha256(k, k_len, data_v, sizeof(data_v), v, &output_len);
-        mpz_import(candidate, v_len, 1, sizeof(v[0]), 0, 0, v);
+        memcpy(data_v, v, V_LEN);
+        compute_hmac_sha256(k, K_LEN, data_v, V_LEN, v, &output_len);
+        mpz_import(candidate, V_LEN, 1, sizeof(v[0]), 0, 0, v);
         if (mpz_cmp_ui(candidate, 1) >= 0 && mpz_cmp(candidate, n) < 0) {
             S256Field* K = S256Field_init(candidate);
             mpz_clear(n);
             return K;
         }
         //k = hmac.new(k, v + b'\x00' + secret_bytes + z_bytes, s256).digest()
-        unsigned char data_3[sizeof(v) + 1];
-        memcpy(data_3, v, sizeof(v));
-        data_3[sizeof(v)] = 0x00;
-        compute_hmac_sha256(k, k_len, data_3, sizeof(data_3), k, &output_len);
+        uint8_t data_3[V_LEN + 1];
+        memcpy(data_3, v, V_LEN);
+        data_3[V_LEN] = 0x00;
+        compute_hmac_sha256(k, K_LEN, data_3, sizeof(data_3), k, &output_len);
         //v = hmac.new(k, v, s256).digest()
-        compute_hmac_sha256(k, k_len, data_v, sizeof(data_v), v, &output_len);
+        compute_hmac_sha256(k, K_LEN, data_v, V_LEN, v, &output_len);
     }
 
     //Will never get here
     mpz_t result;
     mpz_init(result);
-    mpz_import(result, k_len, 1, sizeof(k[0]), 1, 0, k);
+    mpz_import(result, K_LEN, 1, sizeof(k[0]), 1, 0, k);
 
     S256Field* K = S256Field_init(result);
 
@@ -151,8 +133,8 @@ S256Field* Deterministic_k(PrivateKey* key, S256Field* z) {
 Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
     mpz_t gx;
     mpz_t gy;
-    mpz_init_set_str(gx, GX, 16);
-    mpz_init_set_str(gy, GY, 16);
+    mpz_init_set_str(gx, GX, HEX);
+    mpz_init_set_str(gy, GY, HEX);
 
     S256Field* x = S256Field_init(gx);
     S256Field* y = S256Field_init(gy);
@@ -160,7 +142,7 @@ Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
     S256Point* G = S256Point_init(x, y);
 
     mpz_t n;
-    mpz_init_set_str(n, N, 16);
+    mpz_init_set_str(n, N, HEX);
 
     S256Field* k = Deterministic_k(key, z);
 
@@ -206,9 +188,9 @@ Signature* PrivateKey_sign(PrivateKey* key, S256Field* z) {
     }
 }
 
-void PrivateKey_wif(PrivateKey* key, unsigned char* output, uint8_t compressed, uint8_t testnet) {
+void PrivateKey_wif(PrivateKey* key, uint8_t* output, bool compressed, bool testnet) {
     if (compressed) {
-        unsigned char wif[34] = {0};
+        uint8_t wif[WIF_RAW_COMPRESSED_LEN] = {0};
         if (testnet) {
             wif[0] = 0xef;
         } else {
@@ -216,17 +198,17 @@ void PrivateKey_wif(PrivateKey* key, unsigned char* output, uint8_t compressed, 
         }
         wif[33] = 0x01;
         mpz_to_bytes(key->e->num, wif + 1, 32);
-        size_t output_len = 52;
-        encode_base58_checksum_wif_compressed(output, &output_len, wif, 34);
+        uint32_t output_len = WIF_COMPRESSED_LEN;
+        encode_base58_checksum_wif_compressed(output, &output_len, wif, WIF_RAW_COMPRESSED_LEN);
     } else {
-        unsigned char wif[33] = {0};
+        uint8_t wif[WIF_RAW_UNCOMPRESSED_LEN] = {0};
         if (testnet) {
             wif[0] = 0xef;
         } else {
             wif[0] = 0x80;
         }
         mpz_to_bytes(key->e->num, wif + 1, 32);
-        size_t output_len = 52;
-        encode_base58_checksum_wif_uncompressed(output, &output_len, wif, 33);
+        uint32_t output_len = WIF_UNCOMPRESSED_LEN;
+        encode_base58_checksum_wif_uncompressed(output, &output_len, wif, WIF_RAW_UNCOMPRESSED_LEN);
     }
 }

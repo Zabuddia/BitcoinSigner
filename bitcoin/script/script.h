@@ -7,43 +7,43 @@
 #define CMDS_SIZE 520
 
 typedef struct {
-    unsigned char data[CMDS_SIZE];
-    int data_len;
+    uint8_t data[CMDS_SIZE];
+    int32_t data_len;
 } Command;
 
 typedef struct {
     Command cmds[CMDS_SIZE];
-    int cmds_len;
+    int32_t cmds_len;
 } Script;
 
-Script* script_init();
+Script* Script_init();
 
-void script_free(Script* script);
+void Script_free(Script* script);
 
-void script_toString(Script* script);
+void Script_toString(Script* script);
 
-unsigned long long script_length(Script* script);
+uint64_t Script_length(Script* script);
 
-Script* p2pkh_script(unsigned char* h160);
+Script* p2pkh_script(uint8_t* h160);
 
-void script_set_cmds(Script* script, Command* cmds, int cmds_len);
+void Script_set_cmds(Script* script, Command* cmds, int32_t cmds_len);
 
-Script* script_parse(unsigned char* s);
+Script* Script_parse(uint8_t* s);
 
-void script_serialize(Script* script, unsigned char* result);
+void Script_serialize(Script* script, uint8_t* result);
 
-Script* script_add(Script* script_1, Script* script_2);
+Script* Script_add(Script* script_1, Script* script_2);
 
-size_t script_evaluate(Script* script, S256Field* z);
+bool Script_evaluate(Script* script, S256Field* z);
 
-void cmds_deep_copy(Command* dest, Command* src, int len);
+void cmds_deep_copy(Command* dest, Command* src, int32_t len);
 
-void script_deep_copy(Script* dest, Script* src);
+void Script_deep_copy(Script* dest, Script* src);
 
-size_t script_evaluate(Script* script, S256Field* z);
+bool is_p2pkh_script_pubkey(Script* script);
 
-size_t is_p2pkh_script_pubkey(Script* script);
+bool is_p2sh_script_pubkey(Script* script);
 
-size_t is_p2sh_script_pubkey(Script* script);
+bool is_p2wpkh_script_pubkey(Script* script);
 
 #endif // SCRIPT_H
