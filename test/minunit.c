@@ -1839,7 +1839,7 @@ static char* test_p2pkh() {
     Script* scriptsig = Script_init();
     Script_set_cmds(scriptsig, cmds_sig, 2);
     Script* combined_script = Script_add(scriptsig, scriptpubkey);
-    size_t worked = Script_evaluate(combined_script, test_z);
+    bool worked = Script_evaluate(combined_script, test_z);
     mu_assert("Error: Script_evaluate doesn't work", worked);
     Script_free(scriptpubkey);
     Script_free(scriptsig);
