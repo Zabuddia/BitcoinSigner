@@ -30,18 +30,8 @@ int main() {
     delay_ms(1000);
     display_draw_string(0, 0, "Enter on the keyboard the secret phrase for your private key.", &Font8, BACKGROUND_COLOR, FONT_COLOR);
     uint8_t secret[100];
-    int32_t i = 0;
-    while (true) {
-        uint8_t c = (uint8_t)getc(stdin);
-        display_draw_char(3 * i, 50, (const char)c, &Font8, BACKGROUND_COLOR, FONT_COLOR);
-        printf("%c\n", c);
-        if (c == '\n') {
-            break;
-        }
-        secret[i] = c;
-        i++;
-    }
-    secret[i] = '\0';
+    scanf("%s", secret);
+    display_draw_string(0, 10, secret, &Font8, BACKGROUND_COLOR, FONT_COLOR);
 
     mpz_t secret_num;
     hash_to_mpz_t((const uint8_t*)secret, 6, secret_num);
