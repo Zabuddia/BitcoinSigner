@@ -10,6 +10,8 @@
 
 #define BACKGROUND_COLOR WHITE
 #define FONT_COLOR BLACK
+#define STARTING_X 10
+#define STARTING_Y 10
 
 void intHandler(int dummy) {
     log_info("Exiting...");
@@ -28,11 +30,12 @@ int main() {
     display_clear(BACKGROUND_COLOR);
     /* place lines here*/
     delay_ms(1000);
-    display_draw_string(0, 0, "Enter on the keyboard the secret phrase for your private key.", &Font8, BACKGROUND_COLOR, FONT_COLOR);
-    uint8_t secret[100];
+    display_draw_string(STARTING_X, STARTING_Y, "Enter on the keyboard the secret phrase for your private key.", &Font8, BACKGROUND_COLOR, FONT_COLOR);
+    char secret[100];
     scanf("%s", secret);
-    display_draw_string(0, 10, secret, &Font8, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(0, 20, "Press the center button to generate the address.", &Font8, BACKGROUND_COLOR, FONT_COLOR);
+    display_clear(BACKGROUND_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y,(const char*)secret, &Font8, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + 50, "Press the center button to generate the address.", &Font8, BACKGROUND_COLOR, FONT_COLOR);
     while (button_center() != 0) {
         delay_ms(100);
     }
