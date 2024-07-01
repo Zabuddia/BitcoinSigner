@@ -12,6 +12,7 @@
 #define FONT_COLOR BLACK
 #define STARTING_X 5
 #define STARTING_Y 5
+#define DEFAULT_FONT (&Font12)
 
 void intHandler(int dummy) {
     log_info("Exiting...");
@@ -30,12 +31,12 @@ int main() {
     display_clear(BACKGROUND_COLOR);
     /* place lines here*/
     delay_ms(1000);
-    display_draw_string(STARTING_X, STARTING_Y, "Enter on the keyboard the secret phrase for your private key.", &Font8, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Enter on the keyboard the secret phrase for your private key.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     char secret[100];
     scanf("%s", secret);
     display_clear(BACKGROUND_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y,(const char*)secret, &Font8, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + 50, "Press the center button to generate the address.", &Font8, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y,(const char*)secret, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + 50, "Press the center button to generate the address.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     while (button_center() != 0) {
         delay_ms(100);
     }
@@ -45,7 +46,7 @@ int main() {
     uint8_t address[1024];
     S256Point_address(test_key->point, address, false, false);
     display_clear(BACKGROUND_COLOR);
-    display_draw_string(STARTING_X, STARTING_X, (const char*)address, &Font8, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_X, (const char*)address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     PrivateKey_free(test_key);
 
     return 0;
