@@ -8,6 +8,7 @@
 #include "bitcoin/ecc/signature.h"
 #include "bitcoin/ecc/privatekey.h"
 #include "config.h"
+#include "menu.h"
 
 void intHandler(int dummy) {
     log_info("Exiting...");
@@ -19,6 +20,7 @@ int main() {
     signal(SIGINT, intHandler);
 
     Initialize_prime();
+    menu_init();
 
     log_info("Starting...");
     display_init();
@@ -26,6 +28,7 @@ int main() {
     display_clear(BACKGROUND_COLOR);
     /* place lines here*/
     delay_ms(1000);
+
     display_draw_string(STARTING_X, STARTING_Y, "Enter on the keyboard the secret phrase for your private key.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     char secret[100];
     scanf("%s", secret);
@@ -43,6 +46,12 @@ int main() {
     display_clear(BACKGROUND_COLOR);
     display_draw_string(STARTING_X, STARTING_X, (const char*)address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     PrivateKey_free(test_key);
+
+    while (true) {
+        delay_ms(200);
+    }
+
+    Free_prime();
 
     return 0;
 }
