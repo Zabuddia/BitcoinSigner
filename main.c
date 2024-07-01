@@ -10,6 +10,7 @@
 #include "config.h"
 #include "menu.h"
 #include "generateAddress.h"
+#include "checkBalance.h"
 
 void intHandler(int dummy) {
     log_info("Exiting...");
@@ -23,6 +24,7 @@ int main() {
     Initialize_prime();
     menu_init();
     generate_address_init();
+    check_balance_init();
 
     log_info("Starting...");
     display_init();
@@ -34,6 +36,7 @@ int main() {
     while (true) {
         menu_tick();
         generate_address_tick();
+        check_balance_tick();
         delay_ms(100);
     }
 
