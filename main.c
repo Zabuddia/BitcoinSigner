@@ -9,6 +9,7 @@
 #include "bitcoin/ecc/privatekey.h"
 #include "config.h"
 #include "menu.h"
+#include "generateAddress.h"
 
 void intHandler(int dummy) {
     log_info("Exiting...");
@@ -21,6 +22,7 @@ int main() {
 
     Initialize_prime();
     menu_init();
+    generate_address_init();
 
     log_info("Starting...");
     display_init();
@@ -31,6 +33,7 @@ int main() {
 
     while (true) {
         menu_tick();
+        generate_address_tick();
         delay_ms(100);
     }
 
