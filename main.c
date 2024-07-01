@@ -29,27 +29,9 @@ int main() {
     /* place lines here*/
     delay_ms(1000);
 
-    display_draw_string(STARTING_X, STARTING_Y, "Enter on the keyboard the secret phrase for your private key.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    char secret[100];
-    scanf("%s", secret);
-    display_clear(BACKGROUND_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y,(const char*)secret, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + 50, "Press the center button to generate the address.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    while (button_center() != 0) {
-        delay_ms(100);
-    }
-    mpz_t secret_num;
-    hash_to_mpz_t((const uint8_t*)secret, 6, secret_num);
-    PrivateKey* test_key = PrivateKey_init(secret_num);
-    uint8_t address[1024];
-    S256Point_address(test_key->point, address, false, false);
-    display_clear(BACKGROUND_COLOR);
-    display_draw_string(STARTING_X, STARTING_X, (const char*)address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    PrivateKey_free(test_key);
-
     while (true) {
         menu_tick();
-        delay_ms(200);
+        delay_ms(100);
     }
 
     Free_prime();
