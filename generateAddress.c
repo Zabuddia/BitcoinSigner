@@ -8,6 +8,7 @@ enum generate_address_state {
     STATE_GENERATE_ADDRESS_WAITING,
     STATE_GENERATE_ADDRESS_INSTRUCTIONS,
     STATE_GENERATE_ADDRESS_CONFIRM,
+    STATE_GENERATE_ADDRESS_COMPUTE,
     STATE_GENERATE_ADDRESS_DISPLAY
 } generate_address_state;
 
@@ -23,7 +24,7 @@ static void display_confirm() {
     display_draw_string(STARTING_X, STARTING_Y + 50, "Press the center button to generate the address.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
-static void display_generate_address() {
+static void display_compute() {
     mpz_t secret_num;
     hash_to_mpz_t((const uint8_t*)secret, 6, secret_num);
     PrivateKey* key = PrivateKey_init(secret_num);
@@ -52,9 +53,12 @@ void generate_address_tick() {
             break;
         case STATE_GENERATE_ADDRESS_CONFIRM:
             if (button_center() == 0) {
-                generate_address_state = STATE_GENERATE_ADDRESS_DISPLAY;
+                generate_address_state = STATE_GENERATE_ADDRESS_COMPUTE;
                 display_clear(BACKGROUND_COLOR);
             }
+            break;
+        case STATE_GENERATE_ADDRESS_COMPUTE:
+            generate_address_state = STATE_GENERATE_ADDRESS_DISPLAY;
             break;
         case STATE_GENERATE_ADDRESS_DISPLAY:
             if (button_left() == 0) {
@@ -72,8 +76,10 @@ void generate_address_tick() {
         case STATE_GENERATE_ADDRESS_CONFIRM:
             display_confirm();
             break;
+        case STATE_GENERATE_ADDRESS_COMPUTE:
+            display_compute();
+            break;
         case STATE_GENERATE_ADDRESS_DISPLAY:
-            display_generate_address();
             break;
     }
 }
