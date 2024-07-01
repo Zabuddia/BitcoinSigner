@@ -39,7 +39,7 @@ void check_balance_tick() {
             }
             break;
         case CHECK_BALANCE_GETADDR:
-            check_balance_state = CHECK_BALANCE_DISPLAYING;
+            check_balance_state = CHECK_BALANCE_FETCHING;
             display_clear(BACKGROUND_COLOR);
             break;
         case CHECK_BALANCE_FETCHING:
