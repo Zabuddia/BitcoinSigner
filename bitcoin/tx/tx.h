@@ -2,8 +2,7 @@
 #define TX_H
 
 #include <curl/curl.h>
-// Check if I need this
-//#include <jansson.h>
+#include <cjson/cJSON.h>
 
 #include "../helper/helper.h"
 #include "../script/script.h"
@@ -114,6 +113,8 @@ size_t write_callback(void* contents, size_t size, size_t nmemb, void* userp);
 uint64_t http_get(const char* url, char* response);
 
 const char* get_url(bool testnet);
+
+uint64_t get_balance(const char* address);
 
 Tx* fetch(uint8_t* tx_id, bool testnet);
 

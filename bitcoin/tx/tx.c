@@ -674,6 +674,35 @@ const char* get_url(bool testnet) {
         return "https://blockstream.info/api/";
 }
 
+uint64_t get_balance(const char* address) {
+    char url[256] = {0};
+    char response[10000] = {0};
+    snprintf(url, sizeof(url), "https://api.blockcypher.com/v1/btc/main/addrs/%s/balance", address);
+
+    uint64_t response_size = http_get(url, response);
+
+    if (response_size == 0) {
+        fprintf(stderr, "Failed to fetch balance\n");
+        return 0;
+    }
+
+    cJSON *json = cJSON_Parse(response);
+    if (json == NULL) {
+        fprintf(stderr, "Failed to parse JSON\n");
+        return 0;
+    }
+    uint64_t balance = 0;
+    cJSON *balance_json = cJSON_GetObjectItemCaseSensitive(json, "final_balance");
+    if (cJSON_IsNumber(balance_json)) {
+        balance = balance_json->valueint;
+    } else {
+        fprintf(stderr, "Failed to get balance\n");
+        return 0;
+    }
+    cJSON_Delete(json);
+    return balance;
+}
+
 Tx *fetch(uint8_t *tx_id, bool testnet) {
     char url[MAX_URL_LENGTH];
     snprintf(url, sizeof(url), "%stx/", get_url(testnet));

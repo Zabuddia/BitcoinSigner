@@ -18,8 +18,9 @@
 #define Tx_TEST 0
 #define OP_TEST 0
 #define Script_TEST 0
-#define Address_TEST 1
+#define Address_TEST 0
 #define Other_TEST 0
+#define Wallet_TEST 1
 
 //For testing compressed sec and adding points with the same x
 #define TEST_N "6d183de4400510e40d4f32da2e72168a5eaa3ee28bf6250923603284adfe55af"
@@ -2108,6 +2109,17 @@ static char* test_verify_signature_from_transaction() {
     return 0;
 }
 
+static char* test_get_balance() {
+    const char* address = "1HqC6HfkvV8rXsAiKYaW6bFEoU4U8a17rH";
+    uint64_t balance = get_balance(address);
+    mu_assert("Error: get_balance doesn't work", balance == 10000);
+
+    const char* address2 = "1FQc5LGHMHEN9nwk8A3QY4f8vzj2Zj8U";
+    uint64_t balance2 = get_balance(address2);
+    mu_assert("Error: get_balance doesn't work", balance2 == 0);
+    return 0;
+}
+
 static char* all_tests() {
     // mu_run_test(test_print_formatted_bytes);
     // mu_run_test(test_find_differences);
@@ -2230,6 +2242,10 @@ static char* all_tests() {
 
     #if Other_TEST
     mu_run_test(test_verify_signature_from_transaction);
+    #endif
+    
+    #if Wallet_TEST
+    mu_run_test(test_get_balance);
     #endif
 
     return 0;
