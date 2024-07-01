@@ -48,6 +48,7 @@ int main() {
     PrivateKey_free(test_key);
 
     while (true) {
+        menu_tick();
         delay_ms(200);
     }
 
