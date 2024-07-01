@@ -31,7 +31,7 @@ static void display_getkey() {
     mpz_t secret_num;
     hash_to_mpz_t((const uint8_t*)private_key, 6, secret_num);
     PrivateKey* key = PrivateKey_init(secret_num);
-    S256Point_address(key->point, address, false, false);
+    S256Point_address(key->point, (uint8_t*)address, false, false);
     PrivateKey_free(key);
 }
 
