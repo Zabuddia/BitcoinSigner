@@ -8,32 +8,49 @@
 #include "bitcoin/ecc/signature.h"
 #include "bitcoin/ecc/privatekey.h"
 
+#define BACKGROUND_COLOR WHITE
+#define FONT_COLOR BLACK
+
+void intHandler(int dummy) {
+    log_info("Exiting...");
+    display_exit();
+    exit(0);
+}
+
 int main() {
+    signal(SIGINT, intHandler);
+
     Initialize_prime();
 
-    mpz_t five_thousand;
-
-    mpz_init_set_ui(five_thousand, 5000);
-
-    PrivateKey* key = PrivateKey_init("5000");
-
-    S256Point* p = key->point;
-
-    S256Point_toString(p);
-
-    unsigned char output[65];
-    S256Point_sec_compressed(p, output);
-
-    for (int i = 0; i < 33; i++) {
-        printf("%02x", output[i]);
+    log_info("Starting...");
+    display_init();
+    buttons_init();
+    display_clear(BACKGROUND_COLOR);
+    /* place lines here*/
+    delay_ms(1000);
+    display_draw_string(0, 0, "Enter on the keyboard the secret phrase for your private key.", &Font8, BACKGROUND_COLOR, FONT_COLOR);
+    uint8_t secret[100];
+    int32_t i = 0;
+    while (true) {
+        uint8_t c = (uint8_t)getc(stdin);
+        display_draw_char(3 * i, 50, (const char)c, &Font8, BACKGROUND_COLOR, FONT_COLOR);
+        printf("%c\n", c);
+        if (c == '\n') {
+            break;
+        }
+        secret[i] = c;
+        i++;
     }
-    printf("\n");
+    secret[i] = '\0';
 
-    S256Point* new_p = S256Point_parse_sec(output);
-
-    S256Point_toString(new_p);
-
-    Free_prime();
+    mpz_t secret_num;
+    hash_to_mpz_t((const uint8_t*)secret, 6, secret_num);
+    PrivateKey* test_key = PrivateKey_init(secret_num);
+    uint8_t address[1024];
+    S256Point_address(test_key->point, address, false, false);
+    display_clear(BACKGROUND_COLOR);
+    display_draw_string(0, 0, (const char*)address, &Font8, BACKGROUND_COLOR, FONT_COLOR);
+    PrivateKey_free(test_key);
 
     return 0;
 }

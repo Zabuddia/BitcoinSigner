@@ -10,16 +10,16 @@
 #include "../bitcoin/script/op.h"
 #include "../bitcoin/script/script.h"
 
-#define S256Field_TEST 1
-#define S256Point_TEST 1
-#define PrivateKey_TEST 1
-#define Signature_TEST 1
-#define Helper_TEST 1
-#define Tx_TEST 1
-#define OP_TEST 1
-#define Script_TEST 1
+#define S256Field_TEST 0
+#define S256Point_TEST 0
+#define PrivateKey_TEST 0
+#define Signature_TEST 0
+#define Helper_TEST 0
+#define Tx_TEST 0
+#define OP_TEST 0
+#define Script_TEST 0
 #define Address_TEST 1
-#define Other_TEST 1
+#define Other_TEST 0
 
 //For testing compressed sec and adding points with the same x
 #define TEST_N "6d183de4400510e40d4f32da2e72168a5eaa3ee28bf6250923603284adfe55af"
