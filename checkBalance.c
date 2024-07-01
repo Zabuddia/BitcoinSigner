@@ -51,7 +51,7 @@ void check_balance_tick() {
     switch (check_balance_state) {
         case CHECK_BALANCE_WAITING:
             if (in_check_balance) {
-                check_balance_state = CHECK_BALANCE_GETADDR;
+                check_balance_state = CHECK_BALANCE_GETMODE;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
