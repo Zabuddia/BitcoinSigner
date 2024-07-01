@@ -277,9 +277,12 @@ void encode_base58_checksum_address(uint8_t *b58c, uint32_t *b58c_sz, const void
     uint8_t buf[21 + 4] = {0};
     uint8_t hash[21] = {0};
     memcpy(buf, data, binsz);
+    // I don't know why I have to do the next two lines. That is the way to get it to work on the Raspberry Pi. 
+    uint8_t buf_copy[25] = {0};
+    memcpy(buf_copy, buf, 21);
     hash256(buf, binsz, hash);
-    memcpy(buf + binsz, hash, 4);
-    encode_base58(b58c, b58c_sz, buf, sizeof(buf));
+    memcpy(buf_copy + binsz, hash, 4);
+    encode_base58(b58c, b58c_sz, buf_copy, sizeof(buf_copy));
 }
 
 void encode_base58_checksum_wif_uncompressed(uint8_t *b58c, uint32_t *b58c_sz, const void *data, uint32_t binsz) {
