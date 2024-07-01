@@ -10,8 +10,8 @@
 
 #define BACKGROUND_COLOR WHITE
 #define FONT_COLOR BLACK
-#define STARTING_X 10
-#define STARTING_Y 10
+#define STARTING_X 5
+#define STARTING_Y 5
 
 void intHandler(int dummy) {
     log_info("Exiting...");
@@ -45,7 +45,7 @@ int main() {
     uint8_t address[1024];
     S256Point_address(test_key->point, address, false, false);
     display_clear(BACKGROUND_COLOR);
-    display_draw_string(0, 0, (const char*)address, &Font8, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_X, (const char*)address, &Font8, BACKGROUND_COLOR, FONT_COLOR);
     PrivateKey_free(test_key);
 
     return 0;
