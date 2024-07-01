@@ -73,7 +73,7 @@ void generate_address_tick() {
             display_confirm();
             break;
         case STATE_GENERATE_ADDRESS_DISPLAY:
-            display_draw_string(STARTING_X, STARTING_Y, "Display", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+            display_generate_address();
             break;
     }
 }
