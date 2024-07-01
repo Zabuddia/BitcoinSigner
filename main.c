@@ -7,12 +7,7 @@
 #include "bitcoin/ecc/s256point.h"
 #include "bitcoin/ecc/signature.h"
 #include "bitcoin/ecc/privatekey.h"
-
-#define BACKGROUND_COLOR WHITE
-#define FONT_COLOR BLACK
-#define STARTING_X 5
-#define STARTING_Y 5
-#define DEFAULT_FONT (&Font12)
+#include "config.h"
 
 void intHandler(int dummy) {
     log_info("Exiting...");

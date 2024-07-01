@@ -1,0 +1,11 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define BACKGROUND_COLOR WHITE
+#define FONT_COLOR BLACK
+#define SELECTED_COLOR BLUE
+#define STARTING_X 5
+#define STARTING_Y 5
+#define DEFAULT_FONT (&Font12)
+
+#endif // CONFIG_H
