@@ -32,7 +32,10 @@ int main() {
     uint8_t secret[100];
     scanf("%s", secret);
     display_draw_string(0, 10, secret, &Font8, BACKGROUND_COLOR, FONT_COLOR);
-
+    display_draw_string(0, 20, "Press the center button to generate the address.", &Font8, BACKGROUND_COLOR, FONT_COLOR);
+    while (button_center() != 0) {
+        delay_ms(100);
+    }
     mpz_t secret_num;
     hash_to_mpz_t((const uint8_t*)secret, 6, secret_num);
     PrivateKey* test_key = PrivateKey_init(secret_num);
