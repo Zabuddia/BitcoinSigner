@@ -29,7 +29,7 @@ static void draw_menu() {
 }
 
 void menu_init() {
-    menu_state = STATE_GENERATE_ADDRESS;
+    menu_state = STATE_WAITING;
 }
 
 void menu_tick() {
