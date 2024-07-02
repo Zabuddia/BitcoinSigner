@@ -126,13 +126,13 @@ static void display_fetching() {
         prev_txs[i] = (uint8_t*)malloc(32 * sizeof(uint8_t));
         hex_string_to_byte_array(txids[utxo_indexes[i]], prev_txs[i]);
     }
-    for (int32_t i = 0; i < num_utxo_indexes; i++) {
-        printf("Prev tx: ");
-        for (int32_t j = 0; j < 32; j++) {
-            printf("%02x", prev_txs[i][j]);
-        }
-        printf("\n");
-    }
+    // for (int32_t i = 0; i < num_utxo_indexes; i++) {
+    //     printf("Prev tx: ");
+    //     for (int32_t j = 0; j < 32; j++) {
+    //         printf("%02x", prev_txs[i][j]);
+    //     }
+    //     printf("\n");
+    // }
 
     Script** script_sigs = (Script**)malloc(num_utxo_indexes * sizeof(Script*));
     for (int32_t i = 0; i < num_utxo_indexes; i++) {

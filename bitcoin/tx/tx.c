@@ -817,7 +817,7 @@ void broadcast_transaction(const char *tx_hex) {
     curl = curl_easy_init();
     if (curl) {
         // Set the URL
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.blockcypher.com/v1/btc/main/txs/push");
+        curl_easy_setopt(curl, CURLOPT_URL, "https://blockstream.info/api/tx");
 
         // Set the headers
         headers = curl_slist_append(headers, "Content-Type: application/json");
