@@ -691,7 +691,7 @@ uint64_t get_utxo_balance(const char* tx_id, const char* address) {
     snprintf(url, sizeof(url), "%stx/", get_url(false));
     int32_t start = strlen(url);
     snprintf(url + start, 65, "%s", tx_id);
-    printf("URL: %s\n", url);
+    //printf("URL: %s\n", url);
     char response[10000] = {0};
     http_get(url, response);
     cJSON *json = cJSON_Parse(response);
