@@ -52,9 +52,9 @@ static bool is_duplicate(int32_t* array, int32_t size, int32_t value) {
 
 static void format_utxo_info(char *str, int i, const char *txid, long balance) {
     char temp[256];
-    sprintf(temp, "%d. ", i);
+    sprintf(temp, "%d.", i);
     strcat(str, temp);
-    sprintf(temp, "%s: ", txid);
+    sprintf(temp, "%s:", txid);
     strcat(str, temp);
     sprintf(temp, "%ld", balance);
     strcat(str, temp);
@@ -68,7 +68,7 @@ static void display_getutxos() {
     for (int32_t i = 0; i < num_utxos; i++) {
         uint64_t balance = get_utxo_balance(txids[i], public_key);
         format_utxo_info(str, i, txids[i], balance);
-        strcat(str, "\t");
+        strcat(str, "     ");
         printf("Txid: %s\n", txids[i]);
         printf("Vout: %d\n", vouts[i]);
     }
