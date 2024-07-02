@@ -68,8 +68,7 @@ static void display_getutxos() {
     for (int32_t i = 0; i < num_utxos; i++) {
         uint64_t balance = get_utxo_balance(txids[i], public_key);
         format_utxo_info(str, i, txids[i], balance);
-        strcat(str, "\n");
-        printf("str: %s\n", str);
+        strcat(str, "\t");
         printf("Txid: %s\n", txids[i]);
         printf("Vout: %d\n", vouts[i]);
     }
