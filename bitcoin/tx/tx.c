@@ -751,10 +751,10 @@ Tx *fetch(uint8_t *tx_id, bool testnet) {
         snprintf(url + start + 2 * i, 3, "%02x", tx_id[i]);
     }
     snprintf(url + start + 64, 5, "%s", "/hex");
-    // printf("URL: %s\n", url);
+    printf("URL: %s\n", url);
     char response[100000] = {0};
     http_get(url, response);
-    // printf("Response: %s\n", response);
+    printf("Response: %s\n", response);
     uint64_t raw_length = strlen(response) / 2;
     uint8_t raw[raw_length];
     memset(raw, 0, raw_length);
