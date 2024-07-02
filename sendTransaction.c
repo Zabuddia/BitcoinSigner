@@ -74,16 +74,16 @@ static void display_getutxos() {
     }
     display_draw_string(STARTING_X, STARTING_Y, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
-    int32_t index = 0;
-    int32_t count = 0;
-    while (scanf("%d", &index) == 1) {
-        if (is_duplicate(utxo_indexes, num_utxos, index)) {
-            printf("Duplicate index!\n");
-            continue;
+    printf("Enter the number of utxos you would like to use: \n");
+    scanf("%d", &num_utxo_indexes);
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        printf("Enter the index of the utxo you would like to use: \n");
+        scanf("%d", &utxo_indexes[i]);
+        while (is_duplicate(utxo_indexes, i, utxo_indexes[i])) {
+            printf("You have already selected that utxo. Please select a different one.\n");
+            scanf("%d", &utxo_indexes[i]);
         }
-        utxo_indexes[count++] = index;
     }
-    num_utxo_indexes = count;
     printf("UTXO indexes: ");
     for (int32_t i = 0; i < num_utxo_indexes; i++) {
         printf("%d ", utxo_indexes[i]);
