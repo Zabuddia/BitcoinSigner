@@ -51,20 +51,29 @@ static bool is_duplicate(int32_t* array, int32_t size, int32_t value) {
 
 }
 
+static void format_utxo_info(char *str, int i, const char *txid, long balance) {
+    char temp[256];
+    sprintf(temp, "%d. ", i);
+    strcat(str, temp);
+    sprintf(temp, "%s: ", txid);
+    strcat(str, temp);
+    sprintf(temp, "%ld", balance);
+    strcat(str, temp);
+}
+
 static void display_getutxos() {
     char utxo_response[10000] = {0};
     get_utxos(public_key, utxo_response);
     extract_all_utxo_info(utxo_response, &txids, &vouts, &num_utxos);
+    char str[10000] = {0};
     for (int32_t i = 0; i < num_utxos; i++) {
-        char str[100];
-        sprintf(str, "%d. ", i);
-        sprintf(str, "%s: ", txids[i]);
-        sprintf(str, "%d", get_utxo_balance(txids[i], public_key));
+        uint64_t balance = get_utxo_balance(txids[i], public_key);
+        format_utxo_info(str, i, txids[i], balance);
+        strcat(str, "\n");
         printf("Txid: %s\n", txids[i]);
         printf("Vout: %d\n", vouts[i]);
-        display_draw_string(STARTING_X, STARTING_Y + i * 30, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     }
-    display_draw_string(STARTING_X, STARTING_Y + num_utxos * 30, "Enter the indexes of the UTXOs to spend.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
     int32_t index = 0;
     int32_t count = 0;

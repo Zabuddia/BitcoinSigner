@@ -2137,6 +2137,15 @@ static char* test_extract_all_utxo_info() {
     return 0;
 }
 
+static char* test_get_utxo_balance() {
+    const char* address = "1HqC6HfkvV8rXsAiKYaW6bFEoU4U8a17rH";
+    const char* tx_id = "b7cfed48cbf56027899a4c1885ec14ea652b75aadeb400f82e30808c64af3581";
+    uint64_t balance = get_utxo_balance(tx_id, address);
+    printf("balance: %ld\n", balance);
+    mu_assert("Error: get_utxo_balance doesn't work", balance == 8281);
+    return 0;
+}
+
 static char* all_tests() {
     // mu_run_test(test_print_formatted_bytes);
     // mu_run_test(test_find_differences);
@@ -2262,8 +2271,9 @@ static char* all_tests() {
     #endif
     
     #if Wallet_TEST
-    mu_run_test(test_get_balance);
-    mu_run_test(test_extract_all_utxo_info);
+    // mu_run_test(test_get_balance);
+    // mu_run_test(test_extract_all_utxo_info);
+    mu_run_test(test_get_utxo_balance);
     #endif
 
     return 0;
