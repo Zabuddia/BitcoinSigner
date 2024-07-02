@@ -810,14 +810,14 @@ void broadcast_transaction(const char *tx_hex) {
     char post_fields[1024];
 
     // Create the POST fields with the transaction hex
-    snprintf(post_fields, sizeof(post_fields), "{\"tx\":\"%s\"}", tx_hex);
+    snprintf(post_fields, sizeof(post_fields), "{\"tx_hex\":\"%s\"}", tx_hex);
 
     // Initialize curl
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if (curl) {
         // Set the URL
-        curl_easy_setopt(curl, CURLOPT_URL, "https://blockstream.info/api/tx");
+        curl_easy_setopt(curl, CURLOPT_URL, "https://sochain.com/api/v2/send_tx/BTC");
 
         // Set the headers
         headers = curl_slist_append(headers, "Content-Type: application/json");
