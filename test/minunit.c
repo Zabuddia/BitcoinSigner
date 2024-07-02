@@ -2120,6 +2120,19 @@ static char* test_get_balance() {
     return 0;
 }
 
+static char* test_extract_all_utxo_info() {
+    const char* address = "1HqC6HfkvV8rXsAiKYaW6bFEoU4U8a17rH";
+    char utxo_response[10000] = {0};
+    char txid[65] = {0};
+    int32_t vout = 0;
+    get_utxos(address, utxo_response);
+    extract_all_utxo_info(utxo_response, txid, &vout);
+    printf("txid: %s\n", txid);
+    mu_assert("Error: extract_all_utxo_info doesn't work", strcmp(txid, "bac535273e6e97ea8a4b7103be53a6d59ce861674fe3477feb2497d939a694a7") == 0);
+    mu_assert("Error: extract_all_utxo_info doesn't work", vout == 1);
+    return 0;
+}
+
 static char* all_tests() {
     // mu_run_test(test_print_formatted_bytes);
     // mu_run_test(test_find_differences);
@@ -2246,6 +2259,7 @@ static char* all_tests() {
     
     #if Wallet_TEST
     mu_run_test(test_get_balance);
+    mu_run_test(test_extract_all_utxo_info);
     #endif
 
     return 0;

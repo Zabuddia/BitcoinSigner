@@ -45,6 +45,8 @@ Tx* Tx_init(int version, uint64_t num_inputs, TxIn** tx_ins, uint64_t num_output
 
 Tx* Tx_deep_copy(Tx* src);
 
+uint64_t Tx_length(Tx* tx);
+
 void Tx_free(Tx* tx);
 
 void Tx_id(Tx* tx, uint8_t* result);
@@ -115,6 +117,10 @@ uint64_t http_get(const char* url, char* response);
 const char* get_url(bool testnet);
 
 uint64_t get_balance(const char* address);
+
+void get_utxos(const char *address, char *response);
+
+void extract_all_utxo_info(const char *response, char* tx_id, int32_t* vout);
 
 Tx* fetch(uint8_t* tx_id, bool testnet);
 

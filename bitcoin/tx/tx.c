@@ -40,6 +40,17 @@ Tx* Tx_deep_copy(Tx* src) {
     return new_tx;
 }
 
+uint64_t Tx_length(Tx* tx) {
+    uint64_t length = 8;
+    for (uint64_t i = 0; i < tx->num_inputs; i++) {
+        length += TxIn_length(tx->tx_ins[i]);
+    }
+    for (uint64_t i = 0; i < tx->num_outputs; i++) {
+        length += TxOut_length(tx->tx_outs[i]);
+    }
+    return length;
+}
+
 void Tx_free(Tx* tx) {
     for (uint64_t i = 0; i < tx->num_inputs; i++) {
         TxIn_free(tx->tx_ins[i]);
@@ -701,6 +712,35 @@ uint64_t get_balance(const char* address) {
     }
     cJSON_Delete(json);
     return balance;
+}
+
+void get_utxos(const char *address, char *response) {
+    char url[256];
+    snprintf(url, sizeof(url), "https://api.blockcypher.com/v1/btc/main/addrs/%s?unspentOnly=true", address);
+    http_get(url, response);
+}
+
+void extract_all_utxo_info(const char *response, char* txid, int32_t* vout) {
+    cJSON *json = cJSON_Parse(response);
+    if (json == NULL) {
+        fprintf(stderr, "Error parsing JSON response\n");
+        return;
+    }
+
+    cJSON *txrefs = cJSON_GetObjectItemCaseSensitive(json, "txrefs");
+    if (!cJSON_IsArray(txrefs)) {
+        fprintf(stderr, "No UTXOs found\n");
+        cJSON_Delete(json);
+        return;
+    }
+
+    cJSON *utxo;
+    cJSON_ArrayForEach(utxo, txrefs) {
+        strcpy(txid, cJSON_GetObjectItemCaseSensitive(utxo, "tx_hash")->valuestring);
+        *vout = cJSON_GetObjectItemCaseSensitive(utxo, "tx_output_n")->valueint;
+    }
+
+    cJSON_Delete(json);
 }
 
 Tx *fetch(uint8_t *tx_id, bool testnet) {
