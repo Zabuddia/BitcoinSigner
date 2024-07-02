@@ -48,7 +48,6 @@ static bool is_duplicate(int32_t* array, int32_t size, int32_t value) {
         }
     }
     return false;
-
 }
 
 static void format_utxo_info(char *str, int i, const char *txid, long balance) {
@@ -70,6 +69,7 @@ static void display_getutxos() {
         uint64_t balance = get_utxo_balance(txids[i], public_key);
         format_utxo_info(str, i, txids[i], balance);
         strcat(str, "\n");
+        printf("str: %s\n", str);
         printf("Txid: %s\n", txids[i]);
         printf("Vout: %d\n", vouts[i]);
     }
