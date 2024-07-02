@@ -161,7 +161,7 @@ static void display_fetching() {
     byte_array_to_hex_string(tx_serialized, Tx_length(tx), tx_hex);
     display_draw_string(STARTING_X, STARTING_Y, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     printf("Verified?: %d\n", Tx_verify(tx));
-    //broadcast_transaction(tx_hex);
+    broadcast_transaction(tx_hex);
 }
 
 void send_transaction_init() {
