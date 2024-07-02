@@ -707,11 +707,47 @@ uint64_t get_balance(const char* address) {
     if (cJSON_IsNumber(balance_json)) {
         balance = balance_json->valueint;
     } else {
+        cJSON_Delete(json);
         fprintf(stderr, "Failed to get balance\n");
         return 0;
     }
     cJSON_Delete(json);
     return balance;
+}
+
+uint64_t get_utxo_balance(const char* tx_id, const char* address) {
+    char url[MAX_URL_LENGTH];
+    snprintf(url, sizeof(url), "%stx/", get_url(false));
+    int32_t start = strlen(url);
+    for (int32_t i = 0; i < 32; i++) {
+        snprintf(url + start + 2 * i, 3, "%02x", tx_id[i]);
+    }
+    char response[10000] = {0};
+    http_get(url, response);
+    cJSON *json = cJSON_Parse(response);
+    if (json == NULL) {
+        fprintf(stderr, "Error parsing JSON response\n");
+        return 0;
+    }
+    cJSON *vout = cJSON_GetObjectItemCaseSensitive(json, "vout");
+    if (!cJSON_IsArray(vout)) {
+        fprintf(stderr, "No vout found\n");
+        cJSON_Delete(json);
+        return 0;
+    }
+    cJSON *output;
+    cJSON_ArrayForEach(output, vout) {
+        cJSON * scriptpubkey_address = cJSON_GetObjectItemCaseSensitive(output, "scriptpubkey_address");
+        if (cJSON_IsString(scriptpubkey_address) && strcmp(scriptpubkey_address->valuestring, address) == 0) {
+            cJSON *value = cJSON_GetObjectItemCaseSensitive(output, "value");
+            if (cJSON_IsNumber(value)) {
+                cJSON_Delete(json);
+                return value->valueint;
+            }
+        }
+    }
+    cJSON_Delete(json);
+    return 0;
 }
 
 void get_utxos(const char *address, char *response) {
@@ -720,7 +756,7 @@ void get_utxos(const char *address, char *response) {
     http_get(url, response);
 }
 
-void extract_all_utxo_info(const char *response, char* txid, int32_t* vout) {
+void extract_all_utxo_info(const char *response, char*** txid, int32_t** vout, int32_t* num_utxos) {
     cJSON *json = cJSON_Parse(response);
     if (json == NULL) {
         fprintf(stderr, "Error parsing JSON response\n");
@@ -734,13 +770,29 @@ void extract_all_utxo_info(const char *response, char* txid, int32_t* vout) {
         return;
     }
 
+    *num_utxos = cJSON_GetArraySize(txrefs);
+    *txid = (char**)malloc(*num_utxos * sizeof(char*));
+    *vout = (int32_t*)malloc(*num_utxos * sizeof(int32_t));
+    int32_t i = 0;
     cJSON *utxo;
     cJSON_ArrayForEach(utxo, txrefs) {
-        strcpy(txid, cJSON_GetObjectItemCaseSensitive(utxo, "tx_hash")->valuestring);
-        *vout = cJSON_GetObjectItemCaseSensitive(utxo, "tx_output_n")->valueint;
+        (*txid)[i] = (char*)malloc(65 * sizeof(char)); // Allocate memory for each txid string
+        strcpy((*txid)[i], cJSON_GetObjectItemCaseSensitive(utxo, "tx_hash")->valuestring);
+        (*vout)[i] = cJSON_GetObjectItemCaseSensitive(utxo, "tx_output_n")->valueint;
+        printf("txid: %s\n", cJSON_GetObjectItemCaseSensitive(utxo, "tx_hash")->valuestring);
+        printf("vout: %d\n", cJSON_GetObjectItemCaseSensitive(utxo, "tx_output_n")->valueint);
+        i++;
     }
 
     cJSON_Delete(json);
+}
+
+void free_all_utxo_info(char** txid, int32_t* vout, int32_t num_utxos) {
+    for (int32_t i = 0; i < num_utxos; i++) {
+        free(txid[i]);
+    }
+    free(txid);
+    free(vout);
 }
 
 Tx *fetch(uint8_t *tx_id, bool testnet) {

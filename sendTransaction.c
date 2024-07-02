@@ -9,6 +9,7 @@
 enum send_transaction_state {
     SEND_TRANSACTION_WAITING,
     SEND_TRANSACTION_GETKEY,
+    SEND_TRANSACTION_GETUTXOS,
     SEND_TRANSACTION_GETADDR,
     SEND_TRANSACTION_GETAMOUNT,
     SEND_TRANSACTION_GETFEE,
@@ -23,6 +24,11 @@ static char target_address[100];
 static uint64_t amount;
 static uint64_t txFee;
 static uint64_t change;
+static char** txids;
+static int32_t* vouts;
+static int32_t num_utxos;
+static int32_t* utxo_indexes;
+static int32_t num_utxo_indexes;
 
 static void display_getkey() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the private key to send the transaction with.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
@@ -33,6 +39,49 @@ static void display_getkey() {
     S256Point_address(key->point, (uint8_t*)public_key, false, false);
     printf("Private key: %s\n", private_key);
     printf("Public key: %s\n", public_key);
+}
+
+static bool is_duplicate(int32_t* array, int32_t size, int32_t value) {
+    for (int32_t i = 0; i < size; i++) {
+        if (array[i] == value) {
+            return true;
+        }
+    }
+    return false;
+
+}
+
+static void display_getutxos() {
+    char utxo_response[10000] = {0};
+    get_utxos(public_key, utxo_response);
+    extract_all_utxo_info(utxo_response, &txids, &vouts, &num_utxos);
+    for (int32_t i = 0; i < num_utxos; i++) {
+        char str[100];
+        sprintf(str, "%d. ", i);
+        sprintf(str, "%s: ", txids[i]);
+        sprintf(str, "%d", get_utxo_balance(txids[i], public_key));
+        printf("Txid: %s\n", txids[i]);
+        printf("Vout: %d\n", vouts[i]);
+        display_draw_string(STARTING_X, STARTING_Y + i * 30, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    }
+    display_draw_string(STARTING_X, STARTING_Y + num_utxos * 30, "Enter the indexes of the UTXOs to spend.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
+    int32_t index = 0;
+    int32_t count = 0;
+    while (scanf("%d", &index) == 1) {
+        if (is_duplicate(utxo_indexes, num_utxos, index)) {
+            printf("Duplicate index!\n");
+            continue;
+        }
+        utxo_indexes[count++] = index;
+    }
+    num_utxo_indexes = count;
+    printf("UTXO indexes: ");
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        printf("%d ", utxo_indexes[i]);
+    }
+    printf("\n");
+
 }
 
 static void display_getaddr() {
@@ -50,7 +99,11 @@ static void display_getamount() {
 static void display_getfee() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the fee to send the transaction with.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%lu", &txFee);
-    change = get_balance(public_key) - amount - txFee;
+    uint64_t total_balance = 0;
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        total_balance += get_utxo_balance(txids[utxo_indexes[i]], public_key);
+    }
+    change = total_balance - amount - txFee;
     printf("Fee: %lu\n", txFee);
     printf("Change: %lu\n", change);
     if (change < 0) {
@@ -60,21 +113,27 @@ static void display_getfee() {
 }
 
 static void display_fetching() {
-    char utxo_response[10000] = {0};
-    char txid[65] = {0};
-    int32_t vout = 0;
-    get_utxos(public_key, utxo_response);
-    extract_all_utxo_info(utxo_response, txid, &vout);
-    printf("Txid: %s\n", txid);
-    printf("Vout: %d\n", vout);
-    uint8_t prev_tx[32] = {0};
-    hex_string_to_byte_array(txid, prev_tx);
-    for (int i = 0; i < 32; i++) {
-        printf("%02x", prev_tx[i]);
+    uint8_t** prev_txs = (uint8_t**)malloc(num_utxo_indexes * sizeof(uint8_t*));
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        prev_txs[i] = (uint8_t*)malloc(32 * sizeof(uint8_t));
+        hex_string_to_byte_array(txids[utxo_indexes[i]], prev_txs[i]);
     }
-    printf("\n");
-    Script* script_sig = Script_init();
-    TxIn* tx_in = TxIn_init(prev_tx, vout, script_sig, 0xffffffff);
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        printf("Prev tx: ");
+        for (int32_t j = 0; j < 32; j++) {
+            printf("%02x", prev_txs[i][j]);
+        }
+        printf("\n");
+    }
+
+    Script** script_sigs = (Script**)malloc(num_utxo_indexes * sizeof(Script*));
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        script_sigs[i] = Script_init();
+    }
+    TxIn** tx_ins = (TxIn**)malloc(num_utxo_indexes * sizeof(TxIn*));
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        tx_ins[i] = TxIn_init(prev_txs[i], vouts[utxo_indexes[i]], script_sigs[i], 0xffffffff);
+    }
     uint8_t target_h160[20] = {0};
     decode_base58((uint8_t*)target_address, strlen(target_address), target_h160);
     Script* target_script = p2pkh_script(target_h160);
@@ -83,10 +142,11 @@ static void display_fetching() {
     decode_base58((uint8_t*)public_key, strlen(public_key), change_h160);
     Script* change_script = p2pkh_script(change_h160);
     TxOut* change_tx_out = TxOut_init(change, change_script);
-    TxIn* inputs[1] = {tx_in};
     TxOut* outputs[2] = {tx_out, change_tx_out};
-    Tx* tx = Tx_init(1, 1, inputs, 2, outputs, 0, false, false);
-    sign_input(tx, 0, key);
+    Tx* tx = Tx_init(1, num_utxo_indexes, tx_ins, 2, outputs, 0, false, false);
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        sign_input(tx, i, key);
+    }
     uint8_t tx_serialized[10000] = {0};
     Tx_serialize(tx, tx_serialized);
     char tx_hex[10000] = {0};
@@ -108,6 +168,10 @@ void send_transaction_tick() {
             }
             break;
         case SEND_TRANSACTION_GETKEY:
+            send_transaction_state = SEND_TRANSACTION_GETUTXOS;
+            display_clear(BACKGROUND_COLOR);
+            break;
+        case SEND_TRANSACTION_GETUTXOS:
             send_transaction_state = SEND_TRANSACTION_GETADDR;
             display_clear(BACKGROUND_COLOR);
             break;
@@ -138,6 +202,9 @@ void send_transaction_tick() {
             break;
         case SEND_TRANSACTION_GETKEY:
             display_getkey();
+            break;
+        case SEND_TRANSACTION_GETUTXOS:
+            display_getutxos();
             break;
         case SEND_TRANSACTION_GETADDR:
             display_getaddr();

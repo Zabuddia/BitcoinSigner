@@ -118,9 +118,13 @@ const char* get_url(bool testnet);
 
 uint64_t get_balance(const char* address);
 
+uint64_t get_utxo_balance(const char* tx_id, const char* address);
+
 void get_utxos(const char *address, char *response);
 
-void extract_all_utxo_info(const char *response, char* tx_id, int32_t* vout);
+void extract_all_utxo_info(const char *response, char*** txid, int32_t** vout, int32_t* num_utxos);
+
+void free_all_utxo_info(char** txid, int32_t* vout, int32_t num_utxos);
 
 Tx* fetch(uint8_t* tx_id, bool testnet);
 
