@@ -67,8 +67,8 @@ static void display_fetching() {
     decode_base58(target_address, strlen(target_address), target_h160);
     Script* target_script = p2pkh_script(target_h160);
     TxOut* tx_out = TxOut_init(amount, target_script);
-    uint8_t change_h160 = {0};
-    decode_base58(public_key, strlen(public_key), change_h160);
+    uint8_t change_h160[20] = {0};
+    decode_base58((uint8_t*)public_key, strlen(public_key), change_h160);
     Script* change_script = p2pkh_script(change_h160);
     TxOut* change_tx_out = TxOut_init(change, change_script);
     TxIn* inputs[1] = {tx_in};
