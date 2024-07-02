@@ -120,6 +120,17 @@ static void display_getfee() {
     }
 }
 
+// Function to write the serialized transaction to a file
+static void write_tx_to_file(const char *filename, const char *tx_hex) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("Failed to open file");
+        exit(EXIT_FAILURE);
+    }
+    fprintf(file, "%s\n", tx_hex);
+    fclose(file);
+}
+
 static void display_fetching() {
     uint8_t** prev_txs = (uint8_t**)malloc(num_utxo_indexes * sizeof(uint8_t*));
     for (int32_t i = 0; i < num_utxo_indexes; i++) {
@@ -160,6 +171,7 @@ static void display_fetching() {
     Tx_serialize(tx, tx_serialized);
     char tx_hex[10000] = {0};
     byte_array_to_hex_string(tx_serialized, Tx_length(tx), tx_hex);
+    write_tx_to_file("tx.txt", tx_hex);
     display_draw_string(STARTING_X, STARTING_Y, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     printf("Verified?: %d\n", Tx_verify(tx));
     broadcast_transaction(tx_hex);
