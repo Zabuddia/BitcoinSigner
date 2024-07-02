@@ -31,22 +31,28 @@ static void display_getkey() {
     hash_to_mpz_t((const uint8_t*)private_key, 6, secret_num);
     key = PrivateKey_init(secret_num);
     S256Point_address(key->point, (uint8_t*)public_key, false, false);
+    printf("Private key: %s\n", private_key);
+    printf("Public key: %s\n", public_key);
 }
 
 static void display_getaddr() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the address to send the transaction to.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%s", target_address);
+    printf("Target address: %s\n", target_address);
 }
 
 static void display_getamount() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the amount to send.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%lu", &amount);
+    printf("Amount: %lu\n", amount);
 }
 
 static void display_getfee() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the fee to send the transaction with.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%lu", &txFee);
     change = get_balance(public_key) - amount - txFee;
+    printf("Fee: %lu\n", txFee);
+    printf("Change: %lu\n", change);
     if (change < 0) {
         display_draw_string(STARTING_X, STARTING_Y, "Insufficient funds!", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
         return;
@@ -59,8 +65,14 @@ static void display_fetching() {
     int32_t vout = 0;
     get_utxos(public_key, utxo_response);
     extract_all_utxo_info(utxo_response, txid, &vout);
+    printf("Txid: %s\n", txid);
+    printf("Vout: %d\n", vout);
     uint8_t prev_tx[32] = {0};
     hex_string_to_byte_array(txid, prev_tx);
+    for (int i = 0; i < 32; i++) {
+        printf("%02x", prev_tx[i]);
+    }
+    printf("\n");
     Script* script_sig = Script_init();
     TxIn* tx_in = TxIn_init(prev_tx, vout, script_sig, 0xffffffff);
     uint8_t target_h160[20] = {0};
