@@ -21,7 +21,7 @@ static PrivateKey* key;
 static char public_key[100];
 static char target_address[100];
 static uint64_t amount;
-static uint64_t fee;
+static uint64_t txFee;
 static uint64_t change;
 
 static void display_getkey() {
@@ -45,8 +45,8 @@ static void display_getamount() {
 
 static void display_getfee() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the fee to send the transaction with.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    scanf("%lu", &fee);
-    change = get_balance(public_key) - amount - fee;
+    scanf("%lu", &txFee);
+    change = get_balance(public_key) - amount - txFee;
     if (change < 0) {
         display_draw_string(STARTING_X, STARTING_Y, "Insufficient funds!", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
         return;
@@ -64,7 +64,7 @@ static void display_fetching() {
     Script* script_sig = Script_init();
     TxIn* tx_in = TxIn_init(prev_tx, vout, script_sig, 0xffffffff);
     uint8_t target_h160[20] = {0};
-    decode_base58(target_address, strlen(target_address), target_h160);
+    decode_base58((uint8_t*)target_address, strlen(target_address), target_h160);
     Script* target_script = p2pkh_script(target_h160);
     TxOut* tx_out = TxOut_init(amount, target_script);
     uint8_t change_h160[20] = {0};
