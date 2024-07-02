@@ -749,8 +749,8 @@ void extract_all_utxo_info(const char *response, char*** txid, int32_t** vout, i
         (*txid)[i] = (char*)malloc(65 * sizeof(char)); // Allocate memory for each txid string
         strcpy((*txid)[i], cJSON_GetObjectItemCaseSensitive(utxo, "tx_hash")->valuestring);
         (*vout)[i] = cJSON_GetObjectItemCaseSensitive(utxo, "tx_output_n")->valueint;
-        printf("txid: %s\n", cJSON_GetObjectItemCaseSensitive(utxo, "tx_hash")->valuestring);
-        printf("vout: %d\n", cJSON_GetObjectItemCaseSensitive(utxo, "tx_output_n")->valueint);
+        // printf("txid: %s\n", cJSON_GetObjectItemCaseSensitive(utxo, "tx_hash")->valuestring);
+        // printf("vout: %d\n", cJSON_GetObjectItemCaseSensitive(utxo, "tx_output_n")->valueint);
         i++;
     }
 
