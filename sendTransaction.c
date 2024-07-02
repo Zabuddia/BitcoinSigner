@@ -152,9 +152,10 @@ static void display_fetching() {
     TxOut* change_tx_out = TxOut_init(change, change_script);
     TxOut* outputs[2] = {tx_out, change_tx_out};
     Tx* tx = Tx_init(1, num_utxo_indexes, tx_ins, 2, outputs, 0, false, false);
-    for (int32_t i = 0; i < num_utxo_indexes; i++) {
-        sign_input(tx, i, key);
-    }
+    // for (int32_t i = 0; i < num_utxo_indexes; i++) {
+    //     sign_input(tx, i, key);
+    // }
+    sign_input(tx, 0, key);
     uint8_t tx_serialized[10000] = {0};
     Tx_serialize(tx, tx_serialized);
     char tx_hex[10000] = {0};
