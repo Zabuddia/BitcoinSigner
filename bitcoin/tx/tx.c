@@ -186,12 +186,16 @@ void Tx_serialize_legacy(Tx* tx, uint8_t* result) {
     result += 4;
     result += add_varint_size(tx->num_inputs);
     for (uint64_t i = 0; i < tx->num_inputs; i++) {
-        result += TxIn_length(tx->tx_ins[i]);
+        uint64_t tx_in_length = TxIn_length(tx->tx_ins[i]);
+        TxIn_serialize(tx->tx_ins[i], result);
+        result += tx_in_length;
     }
     encode_varint(result, tx->num_outputs);
     result += add_varint_size(tx->num_outputs);
     for (uint64_t i = 0; i < tx->num_outputs; i++) {
-        result += TxOut_length(tx->tx_outs[i]);
+        uint64_t tx_out_length = TxOut_length(tx->tx_outs[i]);
+        TxOut_serialize(tx->tx_outs[i], result);
+        result += tx_out_length;
     }
     long_to_little_endian(tx->locktime, result, 4);
 }
@@ -783,14 +787,14 @@ Tx *fetch(uint8_t *tx_id, bool testnet) {
 
     uint8_t tx_id_result[32];
     Tx_id(tx, tx_id_result);
-    for (int i = 0; i < 32; i++) {
-        printf("%02x", tx_id_result[i]);
-    }
-    printf("\n");
-    for (int i = 0; i < 32; i++) {
-        printf("%02x", tx_id[i]);
-    }
-    printf("\n");
+    // for (int i = 0; i < 32; i++) {
+    //     printf("%02x", tx_id_result[i]);
+    // }
+    // printf("\n");
+    // for (int i = 0; i < 32; i++) {
+    //     printf("%02x", tx_id[i]);
+    // }
+    // printf("\n");
     if (memcmp(tx_id_result, tx_id, 32) != 0) {
         fprintf(stderr, "Tx ID mismatch\n");
         return NULL;
