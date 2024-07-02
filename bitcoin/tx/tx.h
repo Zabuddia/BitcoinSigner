@@ -128,4 +128,6 @@ void free_all_utxo_info(char** txid, int32_t* vout, int32_t num_utxos);
 
 Tx* fetch(uint8_t* tx_id, bool testnet);
 
+void broadcast_transaction(const char *tx_hex);
+
 #endif //TX_H
