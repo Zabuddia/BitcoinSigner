@@ -1,7 +1,5 @@
 #include "tx.h"
 
-#define RPC_URL "http://127.0.0.1:8332/"
-
 Tx* Tx_init(int version, uint64_t num_inputs, TxIn** tx_ins, uint64_t num_outputs, TxOut** tx_outs, uint64_t locktime, bool testnet, bool segwit) {
     Tx* tx = (Tx*)malloc(sizeof(Tx));
     if (tx == NULL) {
@@ -839,39 +837,26 @@ void broadcast_transaction(const char *tx_hex) {
     CURLcode res;
     struct curl_slist *headers = NULL;
     char post_fields[1024];
-    char auth[128];
 
     // Create the POST fields with the transaction hex
-    snprintf(post_fields, sizeof(post_fields),
-             "{\"jsonrpc\":\"1.0\",\"id\":\"curltext\",\"method\":\"sendrawtransaction\",\"params\":[\"%s\"]}",
-             tx_hex);
-
-    // Create the authentication string
-
-    char username[128];
-    char password[128];
-    printf("Enter username: ");
-    scanf("%s", username);
-    printf("Enter password: ");
-    scanf("%s", password);
-    snprintf(auth, sizeof(auth), "%s:%s", username, password);
+    snprintf(post_fields, sizeof(post_fields), "{\"tx\":\"%s\"}", tx_hex);
 
     // Initialize curl
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if (curl) {
         // Set the URL
-        curl_easy_setopt(curl, CURLOPT_URL, RPC_URL);
+        curl_easy_setopt(curl, CURLOPT_URL, "https://api.blockcypher.com/v1/btc/main/txs/push");
 
         // Set the headers
         headers = curl_slist_append(headers, "Content-Type: application/json");
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-        // Set the authentication
-        curl_easy_setopt(curl, CURLOPT_USERPWD, auth);
-
         // Set the POST fields
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_fields);
+
+        // Enable verbose output for debugging
+        curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
         // Perform the request
         res = curl_easy_perform(curl);
@@ -886,6 +871,8 @@ void broadcast_transaction(const char *tx_hex) {
         // Cleanup
         curl_easy_cleanup(curl);
         curl_slist_free_all(headers);
+    } else {
+        fprintf(stderr, "curl_easy_init() failed\n");
     }
 
     curl_global_cleanup();
