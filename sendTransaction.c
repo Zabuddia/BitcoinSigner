@@ -159,7 +159,7 @@ static void display_fetching() {
     Tx_serialize(tx, tx_serialized);
     char tx_hex[10000] = {0};
     byte_array_to_hex_string(tx_serialized, Tx_length(tx), tx_hex);
-    display_draw_string(STARTING_X, STARTING_Y, tx_hex, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 void send_transaction_init() {
