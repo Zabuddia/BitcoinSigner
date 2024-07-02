@@ -57,7 +57,7 @@ static void display_fetching() {
     char utxo_response[10000] = {0};
     char txid[65] = {0};
     int32_t vout = 0;
-    get_utxos(target_address, utxo_response);
+    get_utxos(public_key, utxo_response);
     extract_all_utxo_info(utxo_response, txid, &vout);
     uint8_t prev_tx[32] = {0};
     hex_string_to_byte_array(txid, prev_tx);
