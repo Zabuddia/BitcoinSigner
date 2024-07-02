@@ -186,35 +186,12 @@ void Tx_serialize_legacy(Tx* tx, uint8_t* result) {
     result += 4;
     result += add_varint_size(tx->num_inputs);
     for (uint64_t i = 0; i < tx->num_inputs; i++) {
-        uint64_t script_sig_length = 0;
-        for (uint64_t j = 0; j < tx->tx_ins[i]->script_sig->cmds_len; j++) {
-            script_sig_length += tx->tx_ins[i]->script_sig->cmds[j].data_len;
-            if (tx->tx_ins[i]->script_sig->cmds[j].data_len > 1) {
-                script_sig_length++;
-            }
-        }
-        if (script_sig_length >= 0xfd) {
-            script_sig_length++;
-        }
-        script_sig_length += add_varint_size(script_sig_length);
-        uint64_t tx_in_length = 40 + script_sig_length;
-        TxIn_serialize(tx->tx_ins[i], result);
-        result += tx_in_length;
+        result += TxIn_length(tx->tx_ins[i]);
     }
     encode_varint(result, tx->num_outputs);
     result += add_varint_size(tx->num_outputs);
     for (uint64_t i = 0; i < tx->num_outputs; i++) {
-        uint64_t script_pubkey_length = 0;
-        for (uint64_t j = 0; j < tx->tx_outs[i]->script_pubkey->cmds_len; j++) {
-            script_pubkey_length += tx->tx_outs[i]->script_pubkey->cmds[j].data_len;
-            if (tx->tx_outs[i]->script_pubkey->cmds[j].data_len > 1) {
-                script_pubkey_length++;
-            }
-        }
-        script_pubkey_length += add_varint_size(script_pubkey_length);
-        uint64_t tx_out_length = 8 + script_pubkey_length;
-        TxOut_serialize(tx->tx_outs[i], result);
-        result += tx_out_length;
+        result += TxOut_length(tx->tx_outs[i]);
     }
     long_to_little_endian(tx->locktime, result, 4);
 }
@@ -513,17 +490,7 @@ TxIn* TxIn_parse(uint8_t* s) {
 }
 
 void TxIn_serialize(TxIn* tx_in, uint8_t* result) {
-    uint64_t script_sig_len = 0;
-    for (int32_t i = 0; i < tx_in->script_sig->cmds_len; i++) {
-        script_sig_len += tx_in->script_sig->cmds[i].data_len;
-        if (tx_in->script_sig->cmds[i].data_len > 1) {
-            script_sig_len++;
-        }
-    }
-    if (script_sig_len >= 0xfd) {
-        script_sig_len++;
-    }
-    script_sig_len += add_varint_size(script_sig_len);
+    uint64_t script_sig_len = Script_length(tx_in->script_sig);
     uint8_t prev_tx_copy[32] = {0};
     memcpy(prev_tx_copy, tx_in->prev_tx, 32);
     little_endian_to_big_endian(prev_tx_copy, 32);
@@ -802,10 +769,10 @@ Tx *fetch(uint8_t *tx_id, bool testnet) {
         snprintf(url + start + 2 * i, 3, "%02x", tx_id[i]);
     }
     snprintf(url + start + 64, 5, "%s", "/hex");
-    printf("URL: %s\n", url);
+    //printf("URL: %s\n", url);
     char response[100000] = {0};
     http_get(url, response);
-    printf("Response: %s\n", response);
+    //printf("Response: %s\n", response);
     uint64_t raw_length = strlen(response) / 2;
     uint8_t raw[raw_length];
     memset(raw, 0, raw_length);
