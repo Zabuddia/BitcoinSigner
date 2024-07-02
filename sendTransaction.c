@@ -73,7 +73,7 @@ static void display_getutxos() {
         printf("Txid: %s\n", txids[i]);
         printf("Vout: %d\n", vouts[i]);
     }
-    display_draw_string(STARTING_X, STARTING_Y, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
     int32_t index = 0;
     int32_t count = 0;

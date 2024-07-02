@@ -8,5 +8,6 @@
 #define STARTING_X 5
 #define STARTING_Y 5
 #define DEFAULT_FONT (&Font12)
+#define SMALL_FONT (&Font8)
 
 #endif // CONFIG_H
