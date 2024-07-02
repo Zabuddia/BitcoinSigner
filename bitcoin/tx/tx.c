@@ -765,7 +765,14 @@ Tx *fetch(uint8_t *tx_id, bool testnet) {
 
     uint8_t tx_id_result[32];
     Tx_id(tx, tx_id_result);
-
+    for (int i = 0; i < 32; i++) {
+        printf("%02x", tx_id_result[i]);
+    }
+    printf("\n");
+    for (int i = 0; i < 32; i++) {
+        printf("%02x", tx_id[i]);
+    }
+    printf("\n");
     if (memcmp(tx_id_result, tx_id, 32) != 0) {
         fprintf(stderr, "Tx ID mismatch\n");
         return NULL;
