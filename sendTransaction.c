@@ -154,11 +154,11 @@ static void display_fetching() {
         tx_ins[i] = TxIn_init(prev_txs[i], vouts[utxo_indexes[i]], script_sigs[i], 0xffffffff);
     }
     uint8_t target_h160[20] = {0};
-    decode_base58((uint8_t*)target_address, strlen(target_address), target_h160);
+    decode_base58((const char*)target_address, (char*)target_h160);
     Script* target_script = p2pkh_script(target_h160);
     TxOut* tx_out = TxOut_init(amount, target_script);
     uint8_t change_h160[20] = {0};
-    decode_base58((uint8_t*)public_key, strlen(public_key), change_h160);
+    decode_base58((const char*)public_key, (char*)change_h160);
     Script* change_script = p2pkh_script(change_h160);
     TxOut* change_tx_out = TxOut_init(change, change_script);
     TxOut* outputs[2] = {tx_out, change_tx_out};
