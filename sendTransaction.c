@@ -69,8 +69,8 @@ static void display_getutxos() {
         uint64_t balance = get_utxo_balance(txids[i], public_key);
         format_utxo_info(str, i, txids[i], balance);
         strcat(str, "     ");
-        // printf("Txid: %s\n", txids[i]);
-        // printf("Vout: %d\n", vouts[i]);
+        printf("Txid: %s\n", txids[i]);
+        printf("Vout: %d\n", vouts[i]);
     }
     display_draw_string(STARTING_X, STARTING_Y, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
