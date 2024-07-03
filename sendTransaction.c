@@ -153,14 +153,36 @@ static void display_fetching() {
     for (int32_t i = 0; i < num_utxo_indexes; i++) {
         tx_ins[i] = TxIn_init(prev_txs[i], vouts[utxo_indexes[i]], script_sigs[i], 0xffffffff);
     }
+    printf("txin: ");
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        TxIn_toString(tx_ins[i]);
+    }
     uint8_t target_h160[20] = {0};
     decode_base58((const char*)target_address, (char*)target_h160);
+    printf("Target h160: ");
+    for (int32_t i = 0; i < 20; i++) {
+        printf("%02x", target_h160[i]);
+    }
+    printf("\n");
     Script* target_script = p2pkh_script(target_h160);
+    printf("Target script: ");
+    Script_toString(target_script);
     TxOut* tx_out = TxOut_init(amount, target_script);
+    printf("Tx out: ");
+    TxOut_toString(tx_out);
     uint8_t change_h160[20] = {0};
     decode_base58((const char*)public_key, (char*)change_h160);
+    printf("Change h160: ");
+    for (int32_t i = 0; i < 20; i++) {
+        printf("%02x", change_h160[i]);
+    }
+    printf("\n");
     Script* change_script = p2pkh_script(change_h160);
+    printf("Change script: ");
+    Script_toString(change_script);
     TxOut* change_tx_out = TxOut_init(change, change_script);
+    printf("Change tx out: ");
+    TxOut_toString(change_tx_out);
     TxOut* outputs[2] = {tx_out, change_tx_out};
     Tx* tx = Tx_init(1, num_utxo_indexes, tx_ins, 2, outputs, 0, false, false);
     for (int32_t i = 0; i < num_utxo_indexes; i++) {
@@ -168,6 +190,11 @@ static void display_fetching() {
     }
     uint8_t tx_serialized[10000] = {0};
     Tx_serialize(tx, tx_serialized);
+    printf("Tx serialized: ");
+    for (int32_t i = 0; i < Tx_length(tx); i++) {
+        printf("%02x", tx_serialized[i]);
+    }
+    printf("\n");
     char tx_hex[10000] = {0};
     byte_array_to_hex_string(tx_serialized, Tx_length(tx), tx_hex);
     write_tx_to_file("tx.txt", tx_hex);
