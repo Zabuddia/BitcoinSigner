@@ -54,7 +54,11 @@ void memzero(void* const pnt, const uint32_t len);
 
 void encode_base58(uint8_t *b58, uint32_t *b58sz, const void *data, uint32_t binsz);
 
-void decode_base58(uint8_t* b58, uint32_t b58sz, uint8_t* out);
+int32_t base58_index(char c);
+
+void decode_base58(const char* s, unsigned char* result);
+
+// void decode_base58(uint8_t* b58, uint32_t b58sz, uint8_t* out, uint32_t outsz);
 
 void encode_base58_checksum_address(uint8_t *b58c, uint32_t *b58c_sz, const void *data, uint32_t binsz);
 

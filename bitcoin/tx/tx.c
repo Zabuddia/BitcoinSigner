@@ -465,10 +465,13 @@ void TxIn_toString(TxIn* tx_in) {
     if (tx_in == NULL) {
         printf("TxIn_(NULL)\n");
     } else {
-        printf("TxIn_(\n");
-        printf("  prev_tx: %s\n", tx_in->prev_tx);
-        printf("  prev_index: %d\n", tx_in->prev_index);
-        printf(")\n");
+        uint64_t length = TxIn_length(tx_in);
+        uint8_t serialized[length];
+        TxIn_serialize(tx_in, serialized);
+        for (uint64_t i = 0; i < length; i++) {
+            printf("%02x", serialized[i]);
+        }
+        printf("\n");
     }
 }
 
@@ -559,9 +562,13 @@ void TxOut_toString(TxOut* tx_out) {
     if (tx_out == NULL) {
         printf("TxOut_(NULL)\n");
     } else {
-        printf("TxOut_(\n");
-        printf("  amount: %lu\n", tx_out->amount);
-        printf(")\n");
+        uint64_t length = TxOut_length(tx_out);
+        uint8_t serialized[length];
+        TxOut_serialize(tx_out, serialized);
+        for (uint64_t i = 0; i < length; i++) {
+            printf("%02x", serialized[i]);
+        }
+        printf("\n");
     }
 }
 

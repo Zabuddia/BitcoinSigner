@@ -114,6 +114,7 @@ void hash_to_mpz_t(const uint8_t* data, uint32_t data_len, mpz_t res) {
     EVP_MD_CTX_free(mdctx);
 
     mpz_import(res, hash_len, 1, sizeof(hash[0]), 0, 0, hash);
+    // gmp_printf("Hash to mpz_t: %Zx\n", res);
 }
 
 void mpz_to_bytes(const mpz_t op, uint8_t *out, uint32_t out_len) {
@@ -235,42 +236,36 @@ void encode_base58(uint8_t* b58, uint32_t* b58sz, const void* data, uint32_t bin
     free(buf);
 }
 
-void decode_base58(uint8_t* b58, uint32_t b58sz, uint8_t* out) {
-    uint32_t size = 0;
+int32_t base58_index(char c) {
+    for (int32_t i = 0; i < 58; i++) {
+        if (b58digits_ordered[i] == c) {
+            return i;
+        }
+    }
+    return -1; // Character not found
+}
 
-    for (uint32_t i = 0; i < b58sz; i++) {
-        uint8_t c = b58[i];
-        int32_t val = -1;
-        if (c >= '1' && c <= '9') val = c - '1';
-        else if (c >= 'A' && c <= 'H') val = c - 'A' + 9;
-        else if (c >= 'J' && c <= 'N') val = c - 'J' + 17;
-        else if (c >= 'P' && c <= 'Z') val = c - 'P' + 22;
-        else if (c >= 'a' && c <= 'k') val = c - 'a' + 33;
-        else if (c >= 'm' && c <= 'z') val = c - 'm' + 44;
-        else {
-            printf("Invalid character in base58 string\n");
+void decode_base58(const char* s, unsigned char* result) {
+    mpz_t num;
+    mpz_init(num);
+    mpz_set_ui(num, 0);
+    for (int32_t i = 0; i < strlen(s); i++) {
+        int32_t index = base58_index(s[i]);
+        if (index == -1) {
+            fprintf(stderr, "Invalid character in base58 string\n");
             exit(1);
         }
-
-        int32_t carry = val;
-        for (uint32_t j = 0; j <= size; j++) {
-            carry += out[j] * 58;
-            out[j] = carry % 256;
-            carry /= 256;
-        }
-
-        while (carry) {
-            out[++size] = carry % 256;
-            carry /= 256;
-        }
+        mpz_mul_ui(num, num, 58);
+        mpz_add_ui(num, num, index);
     }
 
-    // Reverse the result
-    for (uint32_t i = 0; i < size / 2; i++) {
-        uint8_t temp = out[i];
-        out[i] = out[size - i - 1];
-        out[size - i - 1] = temp;
-    }
+    unsigned char combined[25];
+    
+    mpz_to_bytes(num, combined, 25);
+
+    memcpy(result, combined + 1, 20);
+
+    mpz_clear(num);
 }
 
 void encode_base58_checksum_address(uint8_t *b58c, uint32_t *b58c_sz, const void *data, uint32_t binsz) {

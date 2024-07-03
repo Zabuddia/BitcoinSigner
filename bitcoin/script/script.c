@@ -15,14 +15,21 @@ void Script_free(Script* script) {
 }
 
 void Script_toString(Script* script) {
-    for (int32_t i = 0; i < script->cmds_len; i++) {
-        Command cmd = script->cmds[i];
-        printf("Command: ");
-        for (int32_t j = 0; j < cmd.data_len; j++) {
-            printf("%02x", cmd.data[j]);
-        }
-        printf("\n");
+    // for (int32_t i = 0; i < script->cmds_len; i++) {
+    //     Command cmd = script->cmds[i];
+    //     printf("Command: ");
+    //     for (int32_t j = 0; j < cmd.data_len; j++) {
+    //         printf("%02x", cmd.data[j]);
+    //     }
+    //     printf("\n");
+    // }
+    uint64_t length = Script_length(script);
+    uint8_t result[length];
+    Script_serialize(script, result);
+    for (int32_t i = 0; i < length; i++) {
+        printf("%02x", result[i]);
     }
+    printf("\n");
 }
 
 uint64_t Script_length(Script* script) {
