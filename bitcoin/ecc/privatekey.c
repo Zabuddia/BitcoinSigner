@@ -19,9 +19,7 @@ PrivateKey* PrivateKey_init(mpz_t secret) {
 
     S256Field* x = S256Field_init(gx);
     S256Field* y = S256Field_init(gy);
-
     S256Point* G = S256Point_init(x, y);
-
     S256Field* e = S256Field_init(secret);
 
     PrivateKey* key = malloc(sizeof(PrivateKey));

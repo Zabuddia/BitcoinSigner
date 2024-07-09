@@ -63,58 +63,13 @@ void hash256(const uint8_t* message, uint32_t message_len, uint8_t* digest) {
 void hash_to_mpz_t(const uint8_t* data, uint32_t data_len, mpz_t res) {
     mpz_init(res);
 
-    EVP_MD_CTX *mdctx;
-    uint8_t hash[EVP_MAX_MD_SIZE]; // Buffer for hash output
-    uint32_t hash_len;
+    uint8_t hash[HASH256_LEN];
+    hash256(data, data_len, hash);
+    // gmp_printf("Hash: %Zx\n", hash);
 
-    // Initialize context for the first round of SHA-256
-    if((mdctx = EVP_MD_CTX_new()) == NULL) {
-        perror("EVP_MD_CTX_new failed");
-        exit(1);
-    }
-
-    if(1 != EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL)) {
-        perror("EVP_DigestInit_ex failed");
-        EVP_MD_CTX_free(mdctx);
-        exit(1);
-    }
-
-    if(1 != EVP_DigestUpdate(mdctx, data, data_len)) {
-        perror("EVP_DigestUpdate failed");
-        EVP_MD_CTX_free(mdctx);
-        exit(1);
-    }
-
-    if(1 != EVP_DigestFinal_ex(mdctx, hash, &hash_len)) {
-        perror("EVP_DigestFinal_ex failed");
-        EVP_MD_CTX_free(mdctx);
-        exit(1);
-    }
-
-    // Re-initialize context for the second round of SHA-256 using the hash from the first round
-    if(1 != EVP_DigestInit_ex(mdctx, EVP_sha256(), NULL)) {
-        perror("EVP_DigestInit_ex failed");
-        EVP_MD_CTX_free(mdctx);
-        exit(1);
-    }
-
-    if(1 != EVP_DigestUpdate(mdctx, hash, hash_len)) {
-        perror("EVP_DigestUpdate failed");
-        EVP_MD_CTX_free(mdctx);
-        exit(1);
-    }
-
-    // Finalize the second round of hashing
-    if(1 != EVP_DigestFinal_ex(mdctx, hash, &hash_len)) {
-        perror("EVP_DigestFinal_ex failed");
-        EVP_MD_CTX_free(mdctx);
-        exit(1);
-    }
-
-    EVP_MD_CTX_free(mdctx);
-
-    mpz_import(res, hash_len, 1, sizeof(hash[0]), 0, 0, hash);
-    // gmp_printf("Hash to mpz_t: %Zx\n", res);
+    mpz_import(res, HASH256_LEN, 1, sizeof(hash[0]), 1, 0, hash);
+    little_endian_to_big_endian((uint8_t*)res->_mp_d, res->_mp_size * sizeof(mp_limb_t));
+    //gmp_printf("Hash to mpz_t: %Zx\n", res);
 }
 
 void mpz_to_bytes(const mpz_t op, uint8_t *out, uint32_t out_len) {

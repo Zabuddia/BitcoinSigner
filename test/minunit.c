@@ -10,17 +10,17 @@
 #include "../bitcoin/script/op.h"
 #include "../bitcoin/script/script.h"
 
-#define S256Field_TEST 0
-#define S256Point_TEST 0
-#define PrivateKey_TEST 0
-#define Signature_TEST 0
-#define Helper_TEST 0
+#define S256Field_TEST 1
+#define S256Point_TEST 1
+#define PrivateKey_TEST 1
+#define Signature_TEST 1
+#define Helper_TEST 1
 #define Tx_TEST 1
-#define OP_TEST 0
-#define Script_TEST 0
-#define Address_TEST 0
-#define Other_TEST 0
-#define Wallet_TEST 0
+#define OP_TEST 1
+#define Script_TEST 1
+#define Address_TEST 1
+#define Other_TEST 1
+#define Wallet_TEST 1
 
 //For testing compressed sec and adding points with the same x
 #define TEST_N "6d183de4400510e40d4f32da2e72168a5eaa3ee28bf6250923603284adfe55af"
@@ -438,6 +438,29 @@ static char* test_S256Point_mul() {
     mpz_clear(expected_y);
     S256Point_free(b);
     S256Point_free(result);
+
+    mpz_t test_E;
+    mpz_init_set_str(test_E, "f8c3c567420a3a8d085773412e8e02ecc0f3b959eb1bb6926acfe53b584d9827", HEX);
+    mpz_t gx;
+    mpz_t gy;
+    mpz_init_set_str(gx, GX, HEX);
+    mpz_init_set_str(gy, GY, HEX);
+    S256Field* x = S256Field_init(gx);
+    S256Field* y = S256Field_init(gy);
+    S256Point* G = S256Point_init(x, y);
+    S256Point* result2 = S256Point_mul(G, test_E);
+    mpz_t expected_x2;
+    mpz_init_set_str(expected_x2, "c0df4f18b17d4b123e5e8b0baae79cc6fba8f27838d9a8a9efb165bf5e207186", HEX);
+    mpz_t expected_y2;
+    mpz_init_set_str(expected_y2, "3a7cc43dc5cde30e56495039216a54dd6060ab7543712bc2c546d5006dff26c7", HEX);
+    S256Field* expected_x2_field = S256Field_init(expected_x2);
+    S256Field* expected_y2_field = S256Field_init(expected_y2);
+    S256Point* expected_result2 = S256Point_init(expected_x2_field, expected_y2_field);
+    mu_assert("Error: S256Point_mul doesn't work", S256Point_eq(result2, expected_result2) == true);
+    S256Point_free(G);
+    S256Point_free(result2);
+    S256Point_free(expected_result2);
+    mpz_clear(test_E);
     return 0;
 }
 
@@ -651,32 +674,41 @@ static char* test_PrivateKey_sign() {
 }
 
 static char* test_PrivateKey_wif() {
-    mpz_t secret;
-    hash_to_mpz_t((const uint8_t*)"test secret", 11, secret);
-    PrivateKey* test_key = PrivateKey_init(secret);
+    mpz_t secret1;
+    mpz_init_set_ui(secret1, 5003);
+    PrivateKey* test_key1 = PrivateKey_init(secret1);
+
+    mpz_t secret2;
+    mpz_init_set_ui(secret2, 33715652388894101);
+    PrivateKey* test_key2 = PrivateKey_init(secret2);
+
+    mpz_t secret3;
+    mpz_init_set_ui(secret3, 0x54321deadbeef);
+    PrivateKey* test_key3 = PrivateKey_init(secret3);
 
     uint8_t result1[1024];
-    PrivateKey_wif(test_key, result1, false, false);
-    char* expected_result1 = "5K4T5kjMFenTMzWNNwAjBcBrBVwhLqWuWm2MPBfAnb9LnexWEmJ";
+    PrivateKey_wif(test_key1, result1, true, true);
+    char* expected_result1 = "cMahea7zqjxrtgAbB7LSGbcQUr1uX1ojuat9jZodMN8rFTv2sfUK";
 
     uint8_t result2[1024];
-    PrivateKey_wif(test_key, result2, true, false);
-    char* expected_result2 = "L2iE7z1vPfmdMepdMp5wBpJt5LkR4Z8znMJxxv3UCDhpL6DGw9pC";
+    PrivateKey_wif(test_key2, result2, false, true);
+    char* expected_result2 = "91avARGdfge8E4tZfYLoxeJ5sGBdNJQH4kvjpWAxgzczjbCwxic";
 
     uint8_t result3[1024];
-    PrivateKey_wif(test_key, result3, false, true);
-    char* expected_result3 = "92q5fVYtqsrbL41f1H4e4CjoqAJQW146rhtJTp1g8KtPZgBaKKL";
+    PrivateKey_wif(test_key3, result3, true, false);
+    char* expected_result3 = "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgiuQJv1h8Ytr2S53a";
 
     uint8_t result4[1024];
-    PrivateKey_wif(test_key, result4, true, true);
-    char* expected_result4 = "cT5Dau1mpjTtX6HtkDu4Z8owha3pj1EgrPTS5LVyhLMpaqPXeAbg";
+    PrivateKey_wif(test_key1, result4, false, false);
+    char* expected_result4 = "5HpHagT65TZzG1PH3CSu63k8DbpvD8s5ip4nEB3kEsrou4T5tkU";
 
-    mu_assert("Error: PrivateKey_wif doesn't work", strcmp((char*)result1, expected_result1) == 0);
-    mu_assert("Error: PrivateKey_wif doesn't work", strcmp((char*)result2, expected_result2) == 0);
-    mu_assert("Error: PrivateKey_wif doesn't work", strcmp((char*)result3, expected_result3) == 0);
-    mu_assert("Error: PrivateKey_wif doesn't work", strcmp((char*)result4, expected_result4) == 0);
-
-    PrivateKey_free(test_key);
+    mu_assert("Error: PrivateKey_wif doesn't work (result1)", strcmp((char*)result1, expected_result1) == 0);
+    mu_assert("Error: PrivateKey_wif doesn't work (result2)", strcmp((char*)result2, expected_result2) == 0);
+    mu_assert("Error: PrivateKey_wif doesn't work (result3)", strcmp((char*)result3, expected_result3) == 0);
+    mu_assert("Error: PrivateKey_wif doesn't work (result4)", strcmp((char*)result4, expected_result4) == 0);
+    PrivateKey_free(test_key1);
+    PrivateKey_free(test_key2);
+    PrivateKey_free(test_key3);
     return 0;
 }
 
@@ -870,12 +902,12 @@ static char* test_hash_to_mpz_t() {
     mpz_t result1;
     hash_to_mpz_t((const uint8_t*)"test", 4, result1);
     mpz_t expected_result1;
-    mpz_init_set_str(expected_result1, "954d5a49fd70d9b8bcdb35d252267829957f7ef7fa6c74f88419bdc5e82209f4", HEX);
+    mpz_init_set_str(expected_result1, "f40922e8c5bd1984f8746cfaf77e7f9529782652d235dbbcb8d970fd495a4d95", HEX);
     mu_assert("Error: hash_to_mpz_t doesn't work", mpz_cmp(result1, expected_result1) == 0);
     mpz_t result2;
     hash_to_mpz_t((const uint8_t*)"test2", 5, result2);
     mpz_t expected_result2;
-    mpz_init_set_str(expected_result2, "b8928207364d445daa42f4ba8be0ef661b8d7190206c01f6ee8281566b3dec0a", HEX);
+    mpz_init_set_str(expected_result2, "aec3d6b568182eef6016c2090718d1b66efe08bbaf442aa5d444d36078292b8", HEX);
     mu_assert("Error: hash_to_mpz_t doesn't work", mpz_cmp(result2, expected_result2) == 0);
     mpz_clear(expected_result1);
     mpz_clear(expected_result2);
@@ -952,17 +984,17 @@ static char* test_encode_base58() {
 }
 
 static char* test_decode_base58() {
-    uint8_t* string1 = (uint8_t*)"1CgvQuEBc7FU1QVWDL3cMF5bG5w3QRKsYt";
+    const char* string1 = "1CgvQuEBc7FU1QVWDL3cMF5bG5w3QRKsYt";
     uint8_t result1[25] = {0};
     decode_base58(string1, result1);
     uint8_t expected_result1[20] = {0x80, 0x36, 0x31, 0x39, 0xc8, 0x40, 0xaa, 0xeb, 0xe2, 0xcd, 0x2e, 0x2c, 0x35, 0x5e, 0x25, 0x9f, 0x43, 0x46, 0x1f, 0x6c};
     mu_assert("Error: decode_base58 doesn't work", memcmp(result1, expected_result1, 20) == 0);
-    uint8_t* string2 = (uint8_t*)"1HqC6HfkvV8rXsAiKYaW6bFEoU4U8a17rH";
+    const char* string2 = "1HqC6HfkvV8rXsAiKYaW6bFEoU4U8a17rH";
     uint8_t result2[25] = {0};
     decode_base58(string2, result2);
     uint8_t expected_result2[20] = {0xb8, 0x9f, 0x3c, 0xb5, 0x55, 0x5f, 0xa0, 0xdb, 0xb5, 0xe1, 0x43, 0x9b, 0x05, 0x07, 0x95, 0xf3, 0x1d, 0x10, 0x3b, 0x2e};
     mu_assert("Error: decode_base58 doesn't work", memcmp(result2, expected_result2, 20) == 0);
-    uint8_t* string = (uint8_t*)"mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf";
+    const char* string = "mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf";
     uint8_t result[20] = {0};
     decode_base58(string, result);
     uint8_t expected_result[25] = {0x50, 0x7b, 0x27, 0x41, 0x1c, 0xcf, 0x7f, 0x16, 0xf1, 0x02, 0x97, 0xde, 0x6c, 0xef, 0x3f, 0x29, 0x16, 0x23, 0xed, 0xdf};
@@ -1190,10 +1222,12 @@ static char* test_h160_to_p2sh_address() {
 
 static char* generate_testnet_address() {
     mpz_t secret;
-    hash_to_mpz_t((const uint8_t*)"test secret", 11, secret);
+    hash_to_mpz_t((const uint8_t*)"test", 4, secret);
     PrivateKey* test_key = PrivateKey_init(secret);
+    S256Point_toString(test_key->point);
+    S256Field_toString(test_key->e);
     uint8_t testnet_address[1024];
-    S256Point_address(test_key->point, testnet_address, false, true);
+    S256Point_address(test_key->point, testnet_address, true, true);
     printf("Testnet address: %s\n", testnet_address);
     PrivateKey_free(test_key);
     return 0;
@@ -1563,13 +1597,13 @@ static char* test_p2pkh_script() {
     TxIn* tx_in = TxIn_init(prev_tx, prev_index, script_sig, 0xffffffff);
     uint64_t change_amount = 33000000ULL;
     uint8_t change_h160[20] = {0};
-    uint8_t* change_base58 = (uint8_t*)"mzx5YhAH9kNHtcN481u6WkjeHjYtVeKVh2";
+    const char* change_base58 = "mzx5YhAH9kNHtcN481u6WkjeHjYtVeKVh2";
     decode_base58(change_base58, change_h160);
     Script* change_script = p2pkh_script(change_h160);
     TxOut* change_output = TxOut_init(change_amount, change_script);
     uint64_t target_amount = 10000000ULL;
     uint8_t target_h160[20] = {0};
-    uint8_t* target_base58 = (uint8_t*)"mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf";
+    const char* target_base58 = "mnrVtF8DWjMu839VW3rBfgYaAfKk8983Xf";
     decode_base58(target_base58, target_h160);
     Script* target_script = p2pkh_script(target_h160);
     TxOut* target_output = TxOut_init(target_amount, target_script);
@@ -1973,7 +2007,7 @@ static char* test_create_real_transaciton() {
     TxIn_toString(tx_in);
     TxIn* tx_ins[1] = {tx_in};
     uint8_t target_h160[20] = {0};
-    decode_base58((uint8_t*)target_address, target_h160);
+    decode_base58((const char*)target_address, target_h160);
     printf("target_h160: ");
     for (int i = 0; i < 20; i++) {
         printf("%02x", target_h160[i]);
@@ -1986,7 +2020,7 @@ static char* test_create_real_transaciton() {
     printf("target_txout: ");
     TxOut_toString(target_txout);
     uint8_t change_h160[20] = {0};
-    decode_base58((uint8_t*)change_address, change_h160);
+    decode_base58((const char*)change_address, change_h160);
     printf("change_h160: ");
     for (int i = 0; i < 20; i++) {
         printf("%02x", change_h160[i]);
@@ -2001,6 +2035,7 @@ static char* test_create_real_transaciton() {
     TxOut* tx_outs[2] = {target_txout, change_txout};
     Tx* tx = Tx_init(1, 1, tx_ins, 2, tx_outs, 0, false, false);
     bool result = sign_input(tx, 0, priv);
+    printf("result: %d\n", result);
     uint8_t serialized[226] = {0};
     Tx_serialize(tx, serialized);
     printf("serialized: ");
@@ -2019,12 +2054,12 @@ static char* test_create_real_transaciton() {
 }
 
 static char* test_create_testnet_transaction() {
-    uint8_t* target_address = (uint8_t*)"miKegze5FQNCnGw6PKyqUbYUeBa4x2hFeM";
+    const char* target_address = "miKegze5FQNCnGw6PKyqUbYUeBa4x2hFeM";
     uint8_t prev_tx[32] = {0x75, 0xa1, 0xc4, 0xbc, 0x67, 0x1f, 0x55, 0xf6, 0x26, 0xdd, 0xa1, 0x07, 0x4c, 0x77, 0x25, 0x99, 0x1e, 0x6f, 0x68, 0xb8, 0xfc, 0xef, 0xcf, 0xca, 0x7b, 0x64, 0x40, 0x5c, 0xa3, 0xb4, 0x5f, 0x1c};
     int prev_index = 1;
     uint64_t target_amount = 1000000;
     uint64_t change_amount = 899999;
-    uint8_t* change_address = (uint8_t*)"mzx5YhAH9kNHtcN481u6WkjeHjYtVeKVh2";
+    const char* change_address = "mzx5YhAH9kNHtcN481u6WkjeHjYtVeKVh2";
     mpz_t secret;
     mpz_init_set_ui(secret, 8675309);
     PrivateKey* private_key = PrivateKey_init(secret);
@@ -2060,7 +2095,7 @@ static char* test_create_testnet_transaction() {
     uint8_t prev_tx_2[32] = {0x51, 0xf6, 0x1f, 0x77, 0xbd, 0x06, 0x1b, 0x9a, 0x0d, 0xa6, 0x0d, 0x4b, 0xed, 0xaa, 0xf1, 0xb1, 0xfa, 0xd0, 0xc1, 0x1e, 0x65, 0xfd, 0xc7, 0x44, 0x79, 0x7e, 0xe2, 0x2d, 0x20, 0xb0, 0x3d, 0x15};
     int prev_index_1 = 1;
     int prev_index_2 = 1;
-    uint8_t* target_address_1 = (uint8_t*)"mwJn1YPMq7y5F8J3LkC5Hxg9PHyZ5K4cFv";
+    const char* target_address_1 = "mwJn1YPMq7y5F8J3LkC5Hxg9PHyZ5K4cFv";
     uint64_t target_amount_1 = 4290000;
     mpz_t secret_1;
     mpz_init_set_ui(secret_1, 8675309);
@@ -2273,24 +2308,24 @@ static char* all_tests() {
     #endif
 
     #if Tx_TEST
-    // mu_run_test(test_Tx_id);
-    // mu_run_test(test_Tx_parse_version);
-    // mu_run_test(test_Tx_parse_inputs);
-    // mu_run_test(test_Tx_parse_outputs);
-    // mu_run_test(test_Tx_parse_locktime);
-    // mu_run_test(test_Tx_parse);
-    // mu_run_test(test_TxOut_serialize);
-    // mu_run_test(test_TxIn_serialize);
-    // mu_run_test(test_Tx_serialize);
-    // mu_run_test(test_fee);
-    // mu_run_test(test_http_get);
-    // mu_run_test(test_sig_hash);
-    // mu_run_test(test_verify_p2pkh);
-    // mu_run_test(test_verify_p2sh);
-    // mu_run_test(test_signing_transaction);
-    // mu_run_test(test_sign_input);
-    mu_run_test(test_create_real_transaciton);
-    //mu_run_test(test_create_testnet_transaction);
+    mu_run_test(test_Tx_id);
+    mu_run_test(test_Tx_parse_version);
+    mu_run_test(test_Tx_parse_inputs);
+    mu_run_test(test_Tx_parse_outputs);
+    mu_run_test(test_Tx_parse_locktime);
+    mu_run_test(test_Tx_parse);
+    mu_run_test(test_TxOut_serialize);
+    mu_run_test(test_TxIn_serialize);
+    mu_run_test(test_Tx_serialize);
+    mu_run_test(test_fee);
+    mu_run_test(test_http_get);
+    mu_run_test(test_sig_hash);
+    mu_run_test(test_verify_p2pkh);
+    mu_run_test(test_verify_p2sh);
+    mu_run_test(test_signing_transaction);
+    mu_run_test(test_sign_input);
+    //mu_run_test(test_create_real_transaciton);
+    mu_run_test(test_create_testnet_transaction);
     #endif
 
     #if OP_TEST

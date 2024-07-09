@@ -32,7 +32,6 @@ int main() {
     display_init();
     buttons_init();
     display_clear(BACKGROUND_COLOR);
-    /* place lines here*/
     delay_ms(1000);
 
     while (true) {
