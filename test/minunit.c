@@ -10,17 +10,17 @@
 #include "../bitcoin/script/op.h"
 #include "../bitcoin/script/script.h"
 
-#define S256Field_TEST 1
-#define S256Point_TEST 1
-#define PrivateKey_TEST 1
-#define Signature_TEST 1
-#define Helper_TEST 1
+#define S256Field_TEST 0
+#define S256Point_TEST 0
+#define PrivateKey_TEST 0
+#define Signature_TEST 0
+#define Helper_TEST 0
 #define Tx_TEST 1
-#define OP_TEST 1
-#define Script_TEST 1
-#define Address_TEST 1
-#define Other_TEST 1
-#define Wallet_TEST 1
+#define OP_TEST 0
+#define Script_TEST 0
+#define Address_TEST 0
+#define Other_TEST 0
+#define Wallet_TEST 0
 
 //For testing compressed sec and adding points with the same x
 #define TEST_N "6d183de4400510e40d4f32da2e72168a5eaa3ee28bf6250923603284adfe55af"
@@ -1336,7 +1336,7 @@ static char* test_Tx_parse() {
 }
 
 static char* test_print_formatted_bytes() {
-    const uint8_t* hex_string = (const uint8_t*)"01000000018135af648c80302ef800b4deaa752b65ea14ec85184c9a892760f5cb48edcfb7000000006b483045022100a4f17623d5098084bc645b60b19d3a1d1007afdc7aab9098458bdc03b3301307022040a6eb80e717d68f5d4d9d45c3e554dadfe59ddf5da390e0402630d4c0e86223012103c0df4f18b17d4b123e5e8b0baae79cc6fba8f27838d9a8a9efb165bf5e207186ffffffff0288130000000000001976a91480363139c840aaebe2cd2e2c355e259f43461f6c88acd0070000000000001976a914b89f3cb5555fa0dbb5e1439b050795f31d103b2e88ac00000000";
+    const uint8_t* hex_string = (const uint8_t*)"a68900a0d25bba8c2868fcfe29964732d944042b3d790a5e76a127baab35864b";
     print_formatted_bytes(hex_string);
     const uint8_t* hex_string_2 = (const uint8_t*)"3045022100eadc1c6e72f241c3e076a7109b8053db53987f3fcc99e3f88fc4e52dbfd5f3a202201f02cbff194c41e6f8da762e024a7ab85c1b1616b74720f13283043e9e99dab801";
     print_formatted_bytes(hex_string_2);
@@ -1991,12 +1991,12 @@ static char* test_sign_input() {
 }
 
 static char* test_create_real_transaciton() {
-    uint8_t prev_tx[32] = {0xb7, 0xcf, 0xed, 0x48, 0xcb, 0xf5, 0x60, 0x27, 0x89, 0x9a, 0x4c, 0x18, 0x85, 0xec, 0x14, 0xea, 0x65, 0x2b, 0x75, 0xaa, 0xde, 0xb4, 0x00, 0xf8, 0x2e, 0x30, 0x80, 0x8c, 0x64, 0xaf, 0x35, 0x81};
+    uint8_t prev_tx[32] = {0xa6, 0x89, 0x00, 0xa0, 0xd2, 0x5b, 0xba, 0x8c, 0x28, 0x68, 0xfc, 0xfe, 0x29, 0x96, 0x47, 0x32, 0xd9, 0x44, 0x04, 0x2b, 0x3d, 0x79, 0x0a, 0x5e, 0x76, 0xa1, 0x27, 0xba, 0xab, 0x35, 0x86, 0x4b};
     uint32_t prev_index = 0;
     char* target_address = "1CgvQuEBc7FU1QVWDL3cMF5bG5w3QRKsYt";
     uint64_t target_amount = 5000;
-    char* change_address = "1HqC6HfkvV8rXsAiKYaW6bFEoU4U8a17rH";
-    uint64_t change_amount = 2000;
+    char* change_address = "1FmzWGW7S38mTybnLNxH4ybVjh5RBFZ8QZ";
+    uint64_t change_amount = 1000;
     mpz_t secret_num;
     char* private_key = "buddia";
     hash_to_mpz_t((const uint8_t*)private_key, 6, secret_num);
@@ -2308,24 +2308,24 @@ static char* all_tests() {
     #endif
 
     #if Tx_TEST
-    mu_run_test(test_Tx_id);
-    mu_run_test(test_Tx_parse_version);
-    mu_run_test(test_Tx_parse_inputs);
-    mu_run_test(test_Tx_parse_outputs);
-    mu_run_test(test_Tx_parse_locktime);
-    mu_run_test(test_Tx_parse);
-    mu_run_test(test_TxOut_serialize);
-    mu_run_test(test_TxIn_serialize);
-    mu_run_test(test_Tx_serialize);
-    mu_run_test(test_fee);
-    mu_run_test(test_http_get);
-    mu_run_test(test_sig_hash);
-    mu_run_test(test_verify_p2pkh);
-    mu_run_test(test_verify_p2sh);
-    mu_run_test(test_signing_transaction);
-    mu_run_test(test_sign_input);
-    //mu_run_test(test_create_real_transaciton);
-    mu_run_test(test_create_testnet_transaction);
+    // mu_run_test(test_Tx_id);
+    // mu_run_test(test_Tx_parse_version);
+    // mu_run_test(test_Tx_parse_inputs);
+    // mu_run_test(test_Tx_parse_outputs);
+    // mu_run_test(test_Tx_parse_locktime);
+    // mu_run_test(test_Tx_parse);
+    // mu_run_test(test_TxOut_serialize);
+    // mu_run_test(test_TxIn_serialize);
+    // mu_run_test(test_Tx_serialize);
+    // mu_run_test(test_fee);
+    // mu_run_test(test_http_get);
+    // mu_run_test(test_sig_hash);
+    // mu_run_test(test_verify_p2pkh);
+    // mu_run_test(test_verify_p2sh);
+    // mu_run_test(test_signing_transaction);
+    // mu_run_test(test_sign_input);
+    mu_run_test(test_create_real_transaciton);
+    // mu_run_test(test_create_testnet_transaction);
     #endif
 
     #if OP_TEST

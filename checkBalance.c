@@ -29,9 +29,9 @@ static void display_getkey() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the private key to check the balance of.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%s", private_key);
     mpz_t secret_num;
-    hash_to_mpz_t((const uint8_t*)private_key, 6, secret_num);
+    hash_to_mpz_t((const uint8_t*)private_key, strlen(private_key), secret_num);
     PrivateKey* key = PrivateKey_init(secret_num);
-    S256Point_address(key->point, (uint8_t*)address, false, false);
+    S256Point_address(key->point, (uint8_t*)address, true, false);
     PrivateKey_free(key);
 }
 

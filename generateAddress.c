@@ -26,10 +26,10 @@ static void display_confirm() {
 
 static void display_compute() {
     mpz_t secret_num;
-    hash_to_mpz_t((const uint8_t*)secret, 6, secret_num);
+    hash_to_mpz_t((const uint8_t*)secret, strlen(secret), secret_num);
     PrivateKey* key = PrivateKey_init(secret_num);
     uint8_t address[1024];
-    S256Point_address(key->point, address, false, false);
+    S256Point_address(key->point, address, true, false);
     display_draw_string(STARTING_X, STARTING_X, (const char*)address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     PrivateKey_free(key);
 }
