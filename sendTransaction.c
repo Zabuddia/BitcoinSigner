@@ -34,9 +34,9 @@ static void display_getkey() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the private key to send the transaction with.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%s", private_key);
     mpz_t secret_num;
-    hash_to_mpz_t((const uint8_t*)private_key, 6, secret_num);
+    hash_to_mpz_t((const uint8_t*)private_key, strlen(private_key), secret_num);
     key = PrivateKey_init(secret_num);
-    S256Point_address(key->point, (uint8_t*)public_key, false, false);
+    S256Point_address(key->point, (uint8_t*)public_key, true, false);
     printf("Private key: %s\n", private_key);
     printf("Public key: %s\n", public_key);
 }
