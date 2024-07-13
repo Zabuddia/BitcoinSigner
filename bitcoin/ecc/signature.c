@@ -73,15 +73,19 @@ void Signature_der(Signature* sig, uint8_t* output) {
 }
 
 Signature* Signature_parse(uint8_t* s) {
+    for (int i = 0; i < strlen(s); i++) {
+        printf("%02x", s[i]);
+    }
+    printf("\n");
     uint8_t compound = s[0];
     if (compound != 0x30) {
-        printf("Bad Signature\n");
+        printf("Bad Signature (compound)\n");
         exit(1);
     }
     uint8_t length = s[1];
     uint8_t marker = s[2];
     if (marker != 0x02) {
-        printf("Bad Signature\n");
+        printf("Bad Signature (marker1)\n");
         exit(1);
     }
     uint8_t r_length = s[3];
@@ -90,7 +94,7 @@ Signature* Signature_parse(uint8_t* s) {
     memcpy(r_bin, s + 4, r_length);
     marker = s[4 + r_length];
     if (marker != 0x02) {
-        printf("Bad Signature\n");
+        printf("Bad Signature (marker2)\n");
         exit(1);
     }
     uint8_t s_length = s[5 + r_length];

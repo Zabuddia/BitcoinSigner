@@ -151,6 +151,7 @@ static void display_fetching() {
     }
     TxIn** tx_ins = (TxIn**)malloc(num_utxo_indexes * sizeof(TxIn*));
     for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        printf("Previous index: %d\n", vouts[utxo_indexes[i]]);
         tx_ins[i] = TxIn_init(prev_txs[i], vouts[utxo_indexes[i]], script_sigs[i], 0xffffffff);
     }
     printf("txin: ");

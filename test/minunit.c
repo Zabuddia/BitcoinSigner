@@ -1336,7 +1336,7 @@ static char* test_Tx_parse() {
 }
 
 static char* test_print_formatted_bytes() {
-    const uint8_t* hex_string = (const uint8_t*)"a68900a0d25bba8c2868fcfe29964732d944042b3d790a5e76a127baab35864b";
+    const uint8_t* hex_string = (const uint8_t*)"782a6443de8e43a7212b157de2412239faa77f0d7d01d0f73360eee6c9dd9cb1";
     print_formatted_bytes(hex_string);
     const uint8_t* hex_string_2 = (const uint8_t*)"3045022100eadc1c6e72f241c3e076a7109b8053db53987f3fcc99e3f88fc4e52dbfd5f3a202201f02cbff194c41e6f8da762e024a7ab85c1b1616b74720f13283043e9e99dab801";
     print_formatted_bytes(hex_string_2);
@@ -1991,15 +1991,18 @@ static char* test_sign_input() {
 }
 
 static char* test_create_real_transaciton() {
-    uint8_t prev_tx[32] = {0xa6, 0x89, 0x00, 0xa0, 0xd2, 0x5b, 0xba, 0x8c, 0x28, 0x68, 0xfc, 0xfe, 0x29, 0x96, 0x47, 0x32, 0xd9, 0x44, 0x04, 0x2b, 0x3d, 0x79, 0x0a, 0x5e, 0x76, 0xa1, 0x27, 0xba, 0xab, 0x35, 0x86, 0x4b};
-    uint32_t prev_index = 0;
-    char* target_address = "1CgvQuEBc7FU1QVWDL3cMF5bG5w3QRKsYt";
-    uint64_t target_amount = 5000;
+    uint8_t prev_tx[32] = {0x78, 0x2a, 0x64, 0x43, 0xde, 0x8e, 0x43, 0xa7, 0x21, 0x2b, 0x15, 0x7d, 0xe2, 0x41, 0x22, 0x39, 0xfa, 0xa7, 0x7f, 0x0d, 0x7d, 0x01, 0xd0, 0xf7, 0x33, 0x60, 0xee, 0xe6, 0xc9, 0xdd, 0x9c, 0xb1};
+    // uint8_t prev_tx[32];
+    // hex_string_to_byte_array("782a6443de8e43a7212b157de2412239faa77f0d7d01d0f73360eee6c9dd9cb1", prev_tx);
+    uint32_t prev_index = 1;
+    char* target_address = "1Ltohf2AnWVmmvMiVyykPaak2YiZeeV5X4";
+    uint64_t target_amount = 7000;
     char* change_address = "1FmzWGW7S38mTybnLNxH4ybVjh5RBFZ8QZ";
-    uint64_t change_amount = 1000;
+    uint64_t change_amount = 13000;
     mpz_t secret_num;
     char* private_key = "buddia";
-    hash_to_mpz_t((const uint8_t*)private_key, 6, secret_num);
+    hash_to_mpz_t((const uint8_t*)private_key, strlen(private_key), secret_num);
+    gmp_printf("secret_num: %Zd\n", secret_num);
     PrivateKey* priv = PrivateKey_init(secret_num);
     Script* script_sig = Script_init();
     TxIn* tx_in = TxIn_init(prev_tx, prev_index, script_sig, 0xffffffff);
