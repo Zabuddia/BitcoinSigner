@@ -187,7 +187,7 @@ static void display_fetching() {
     TxOut* outputs[2] = {tx_out, change_tx_out};
     Tx* tx = Tx_init(1, num_utxo_indexes, tx_ins, 2, outputs, 0, false, false);
     for (int32_t i = 0; i < num_utxo_indexes; i++) {
-        sign_input(tx, vouts[i], key);
+        sign_input(tx, utxo_indexes[i], key);
     }
     uint8_t tx_serialized[10000] = {0};
     Tx_serialize(tx, tx_serialized);
