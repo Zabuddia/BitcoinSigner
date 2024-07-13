@@ -73,10 +73,6 @@ void Signature_der(Signature* sig, uint8_t* output) {
 }
 
 Signature* Signature_parse(uint8_t* s) {
-    for (int i = 0; i < strlen(s); i++) {
-        printf("%02x", s[i]);
-    }
-    printf("\n");
     uint8_t compound = s[0];
     if (compound != 0x30) {
         printf("Bad Signature (compound)\n");

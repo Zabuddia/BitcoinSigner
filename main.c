@@ -12,6 +12,7 @@
 #include "generateAddress.h"
 #include "checkBalance.h"
 #include "sendTransaction.h"
+#include "testSendTransaction.h"
 
 void intHandler(int dummy) {
     log_info("Exiting...");
@@ -23,6 +24,8 @@ int main() {
     signal(SIGINT, intHandler);
 
     Initialize_prime();
+
+    #if RASPBERRY_PI
     menu_init();
     generate_address_init();
     check_balance_init();
@@ -34,11 +37,19 @@ int main() {
     display_clear(BACKGROUND_COLOR);
     delay_ms(1000);
 
+    #else
+    test_send_transaction_init();
+    #endif
+
     while (true) {
+        #if RASPBERRY_PI
         menu_tick();
         generate_address_tick();
         check_balance_tick();
         send_transaction_tick();
+        #else
+        test_send_transaction_tick();
+        #endif
         delay_ms(100);
     }
 

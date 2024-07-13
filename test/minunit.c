@@ -2265,9 +2265,16 @@ static char* test_get_utxo_balance() {
     return 0;
 }
 
+static char* test_broadcast_transaction() {
+    const char* tx_hex = "0100000001b19cddc9e6ee6033f7d0017d0d7fa7fa392241e27d152b21a7438ede43642a78010000006b483045022100fd8cf8af1195762b7e51615aa35ee5a628657fc8f4d8badee2c0b4ba4653505002200a4c9a5f746f4002b99e19ff0b6a9ffc6a9d11446fb45b8ccaa3a2cef3fd5f1c012103f989aa187ad7334bf30824b50b25dc210f67098ec740235a26df3d8544435386ffffffff02581b0000000000001976a914da3696832a15e2c25de3916f5e2a3c07795a165588acc8320000000000001976a914a21410d319b3782653bed02bac1125707b0d57b288ac0000";
+    broadcast_transaction(tx_hex);
+    return 0;
+}
+
 static char* all_tests() {
     // mu_run_test(test_print_formatted_bytes);
     // mu_run_test(test_find_differences);
+    // mu_run_test(test_broadcast_transaction);
 
     #if S256Field_TEST
     mu_run_test(test_S256Field_eq);
@@ -2327,7 +2334,7 @@ static char* all_tests() {
     // mu_run_test(test_verify_p2sh);
     // mu_run_test(test_signing_transaction);
     // mu_run_test(test_sign_input);
-    mu_run_test(test_create_real_transaciton);
+    // mu_run_test(test_create_real_transaciton);
     // mu_run_test(test_create_testnet_transaction);
     #endif
 

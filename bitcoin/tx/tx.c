@@ -823,8 +823,8 @@ void broadcast_transaction(const char *tx_hex) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     curl = curl_easy_init();
     if (curl) {
-        // Set the URL
-        curl_easy_setopt(curl, CURLOPT_URL, "https://blockstream.info/api/tx");
+        // Set the URL for BlockCypher API
+        curl_easy_setopt(curl, CURLOPT_URL, "https://api.blockcypher.com/v1/btc/main/txs/push");
 
         // Set the headers
         headers = curl_slist_append(headers, "Content-Type: application/json");
