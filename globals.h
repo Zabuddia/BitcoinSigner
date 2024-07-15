@@ -10,6 +10,8 @@ extern bool in_generate_address;
 extern bool in_check_balance;
 extern bool in_send_transaction;
 
+void keyboard_input(char* input);
+
 bool left_button_pressed();
 bool up_button_pressed();
 bool down_button_pressed();

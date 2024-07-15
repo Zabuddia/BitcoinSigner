@@ -22,7 +22,7 @@ static bool testnet;
 
 static void display_instructions() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the secret phrase for your private key.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    scanf("%s", secret);
+    keyboard_input(secret);
 }
 
 static void display_compress_yes() {
