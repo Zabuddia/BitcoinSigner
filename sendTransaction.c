@@ -94,7 +94,7 @@ static void display_getkey_confirm() {
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT, private_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 2, "Public key: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 3, public_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 3, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 5, "Press the left button to re-enter the private key.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
@@ -259,7 +259,7 @@ static void display_getfee() {
 static void display_fee_confirm() {
     uint64_t total_balance = 0;
     for (int32_t i = 0; i < num_utxo_indexes; i++) {
-        total_balance += get_utxo_balance(txids[utxo_indexes[i]], public_key);
+        total_balance += utxo_balances[utxo_indexes[i]];
     }
     change = total_balance - amount - txFee;
     if (change < 0) {
@@ -270,7 +270,7 @@ static void display_fee_confirm() {
     display_draw_string(STARTING_X, STARTING_Y, "Fee: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     int32_t approximate_sats_per_byte = txFee / 225;
     char str[10000] = {0};
-    sprintf(str, "%lu, ~%d s/b", txFee, approximate_sats_per_byte);
+    sprintf(str, "%lu, ~%d sats/byte", txFee, approximate_sats_per_byte);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Change: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     sprintf(str, "%lu", change);
