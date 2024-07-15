@@ -12,10 +12,22 @@ bool in_check_balance;
 bool in_send_transaction;
 
 void keyboard_input(char* input) {
-    int fd;
+        int fd;
     struct libevdev *dev = NULL;
     struct input_event ev;
     uint8_t buffer_index = 0;
+
+    // Keycode to character mapping (simplified)
+    const char keycode_to_char[] = {
+        [KEY_1] = '1', [KEY_2] = '2', [KEY_3] = '3', [KEY_4] = '4', [KEY_5] = '5',
+        [KEY_6] = '6', [KEY_7] = '7', [KEY_8] = '8', [KEY_9] = '9', [KEY_0] = '0',
+        [KEY_Q] = 'q', [KEY_W] = 'w', [KEY_E] = 'e', [KEY_R] = 'r', [KEY_T] = 't',
+        [KEY_Y] = 'y', [KEY_U] = 'u', [KEY_I] = 'i', [KEY_O] = 'o', [KEY_P] = 'p',
+        [KEY_A] = 'a', [KEY_S] = 's', [KEY_D] = 'd', [KEY_F] = 'f', [KEY_G] = 'g',
+        [KEY_H] = 'h', [KEY_J] = 'j', [KEY_K] = 'k', [KEY_L] = 'l', [KEY_Z] = 'z',
+        [KEY_X] = 'x', [KEY_C] = 'c', [KEY_V] = 'v', [KEY_B] = 'b', [KEY_N] = 'n',
+        [KEY_M] = 'm', [KEY_SPACE] = ' '
+    };
 
     fd = open(KEYBOARD_DEVICE, O_RDONLY|O_NONBLOCK);
     if (fd < 0) {
@@ -30,6 +42,7 @@ void keyboard_input(char* input) {
         if (rc == 0 && ev.type == EV_KEY && ev.value >= 0) {
             if (ev.value == 1) { // Key press
                 printf("Key code: %d\n", ev.code); // Debugging statement
+
                 if (ev.code == KEY_ENTER) {
                     input[buffer_index] = '\0'; // Null-terminate the string
                     break;
@@ -38,28 +51,10 @@ void keyboard_input(char* input) {
                         buffer_index--;
                         input[buffer_index] = '\0';
                     }
-                } else if (ev.code >= KEY_1 && ev.code <= KEY_9) {
-                    // Handle numeric keys 1-9
+                } else if (ev.code < sizeof(keycode_to_char) && keycode_to_char[ev.code] != '\0') {
+                    // Handle alphanumeric keys and space
                     if (buffer_index < sizeof(input) - 1) {
-                        input[buffer_index++] = '0' + (ev.code - KEY_1 + 1);
-                        printf("Interpreted as: %c\n", input[buffer_index-1]); // Debugging statement
-                    }
-                } else if (ev.code == KEY_0) {
-                    // Handle numeric key 0
-                    if (buffer_index < sizeof(input) - 1) {
-                        input[buffer_index++] = '0';
-                        printf("Interpreted as: %c\n", input[buffer_index-1]); // Debugging statement
-                    }
-                } else if (ev.code >= KEY_A && ev.code <= KEY_Z) {
-                    // Handle alphabetic keys
-                    if (buffer_index < sizeof(input) - 1) {
-                        input[buffer_index++] = 'a' + (ev.code - KEY_A);
-                        printf("Interpreted as: %c\n", input[buffer_index-1]); // Debugging statement
-                    }
-                } else if (ev.code == KEY_SPACE) {
-                    // Handle space
-                    if (buffer_index < sizeof(input) - 1) {
-                        input[buffer_index++] = ' ';
+                        input[buffer_index++] = keycode_to_char[ev.code];
                         printf("Interpreted as: %c\n", input[buffer_index-1]); // Debugging statement
                     }
                 }
