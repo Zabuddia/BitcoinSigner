@@ -675,10 +675,22 @@ uint64_t get_balance(const char* address) {
         return 0;
     }
 
+    // Print the raw response for debugging
+    printf("HTTP response: %s\n", response);
+
     cJSON *json = cJSON_Parse(response);
     if (json == NULL) {
         fprintf(stderr, "Failed to parse JSON\n");
         return 0;
+    }
+
+    // Print the parsed JSON object for debugging
+    char *json_string = cJSON_Print(json);
+    if (json_string == NULL) {
+        fprintf(stderr, "Failed to print JSON\n");
+    } else {
+        printf("Parsed JSON: %s\n", json_string);
+        free(json_string); // Remember to free the allocated string
     }
 
     uint64_t balance = 0;
