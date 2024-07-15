@@ -14,11 +14,14 @@ enum check_balance_state {
     CHECK_BALANCE_GETKEY_TESTNET_YES,
     CHECK_BALANCE_GETKEY_TESTNET_NO,
     CHECK_BALANCE_GETKEY,
+    CHECK_BALANCE_GETADDR_CONFIRM,
+    CHECK_BALANCE_GETKEY_CONFIRM,
     CHECK_BALANCE_FETCHING,
     CHECK_BALANCE_DISPLAYING
 } check_balance_state;
 
 static char address[100];
+static char private_key[100];
 static bool compressed;
 static bool testnet;
 
@@ -68,7 +71,6 @@ static void display_getkey_testnet_no() {
 }
 
 static void display_getkey() {
-    char private_key[100];
     display_draw_string(STARTING_X, STARTING_Y, "Enter the private key to check the balance of:", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%s", private_key);
     mpz_t secret_num;
@@ -76,6 +78,18 @@ static void display_getkey() {
     PrivateKey* key = PrivateKey_init(secret_num);
     S256Point_address(key->point, (uint8_t*)address, compressed, testnet);
     PrivateKey_free(key);
+}
+
+static void display_getaddr_confirm() {
+    display_draw_string(STARTING_X, STARTING_Y, address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the left button to re-enter the address.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+}
+
+static void display_getkey_confirm() {
+    display_draw_string(STARTING_X, STARTING_Y, private_key, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the left button to re-enter the private key.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_fetching() {
@@ -105,6 +119,9 @@ void check_balance_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETMODE_ADDR;
                 display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
+                display_clear(BACKGROUND_COLOR);
             }
             break;
         case CHECK_BALANCE_GETMODE_ADDR:
@@ -114,11 +131,19 @@ void check_balance_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETMODE_PRIV;
                 display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
+                display_clear(BACKGROUND_COLOR);
             }
             break;
         case CHECK_BALANCE_GETADDR:
-            check_balance_state = CHECK_BALANCE_FETCHING;
-            display_clear(BACKGROUND_COLOR);
+            if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            } else {
+                check_balance_state = CHECK_BALANCE_GETADDR_CONFIRM;
+                display_clear(BACKGROUND_COLOR);
+            }
             break;
         case CHECK_BALANCE_GETKEY_COMPRESS_YES:
             if (center_button_pressed()) {
@@ -126,6 +151,9 @@ void check_balance_tick() {
                 display_clear(BACKGROUND_COLOR);
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETKEY_COMPRESS_NO;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
@@ -136,35 +164,77 @@ void check_balance_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETKEY_COMPRESS_YES;
                 display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
+                display_clear(BACKGROUND_COLOR);
             }
             break;
         case CHECK_BALANCE_GETKEY_TESTNET_YES:
             if (center_button_pressed()) {
-                check_balance_state = CHECK_BALANCE_FETCHING;
+                check_balance_state = CHECK_BALANCE_GETKEY;
                 display_clear(BACKGROUND_COLOR);
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETKEY_TESTNET_NO;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
         case CHECK_BALANCE_GETKEY_TESTNET_NO:
             if (center_button_pressed()) {
-                check_balance_state = CHECK_BALANCE_FETCHING;
+                check_balance_state = CHECK_BALANCE_GETKEY;
                 display_clear(BACKGROUND_COLOR);
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETKEY_TESTNET_YES;
                 display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
+                display_clear(BACKGROUND_COLOR);
             }
             break;
         case CHECK_BALANCE_GETKEY:
-            check_balance_state = CHECK_BALANCE_FETCHING;
-            display_clear(BACKGROUND_COLOR);
+            if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            } else {
+                check_balance_state = CHECK_BALANCE_GETKEY_CONFIRM;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case CHECK_BALANCE_GETADDR_CONFIRM:
+            if (center_button_pressed() || right_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_FETCHING;
+                display_clear(BACKGROUND_COLOR);
+            } else if (left_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_GETADDR;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case CHECK_BALANCE_GETKEY_CONFIRM:
+            if (center_button_pressed() || right_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_FETCHING;
+                display_clear(BACKGROUND_COLOR);
+            } else if (left_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_GETKEY;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
         case CHECK_BALANCE_FETCHING:
             check_balance_state = CHECK_BALANCE_DISPLAYING;
             break;
         case CHECK_BALANCE_DISPLAYING:
-            if (button_left() == 0) {
+            if (key3_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
+            } else if (key3_button_pressed()) {
+                check_balance_state = CHECK_BALANCE_WAITING;
+                display_clear(BACKGROUND_COLOR);
             }
             break;
     }
@@ -195,6 +265,12 @@ void check_balance_tick() {
             break;
         case CHECK_BALANCE_GETKEY:
             display_getkey();
+            break;
+        case CHECK_BALANCE_GETADDR_CONFIRM:
+            display_getaddr_confirm();
+            break;
+        case CHECK_BALANCE_GETKEY_CONFIRM:
+            display_getkey_confirm();
             break;
         case CHECK_BALANCE_FETCHING:
             display_fetching();
