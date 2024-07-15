@@ -2,7 +2,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <linux/input.h>
-#include <libevdev/libevdev.h>
+#include <libevdev-1.0/libevdev/libevdev.h>
 #include <ctype.h>
 
 #define KEYBOARD_DEVICE "/dev/input/event3"
@@ -39,17 +39,17 @@ void keyboard_input(char* input) {
                     }
                 } else if (ev.code >= KEY_1 && ev.code <= KEY_0) {
                     // Handle numeric keys
-                    if (buffer_index < max_length - 1) {
+                    if (buffer_index < sizeof(input) - 1) {
                         input[buffer_index++] = '0' + (ev.code - KEY_1 + 1) % 10;
                     }
                 } else if (ev.code >= KEY_A && ev.code <= KEY_Z) {
                     // Handle alphabetic keys
-                    if (buffer_index < max_length - 1) {
+                    if (buffer_index < sizeof(input) - 1) {
                         input[buffer_index++] = 'a' + (ev.code - KEY_A);
                     }
                 } else if (ev.code == KEY_SPACE) {
                     // Handle space
-                    if (buffer_index < max_length - 1) {
+                    if (buffer_index < sizeof(input) - 1) {
                         input[buffer_index++] = ' ';
                     }
                 }
