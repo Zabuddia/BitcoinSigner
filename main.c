@@ -50,7 +50,7 @@ int main() {
         #else
         test_send_transaction_tick();
         #endif
-        delay_ms(100);
+        delay_ms(TIMER_PERIOD);
     }
 
     Free_prime();

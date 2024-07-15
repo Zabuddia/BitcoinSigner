@@ -16,19 +16,19 @@ enum menu_state {
 static void draw_menu() {
 
     if (menu_state == STATE_GENERATE_ADDRESS) {
-        display_draw_string(STARTING_X, STARTING_Y, "Generate Address", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y, "Make Address", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
     } else {
-        display_draw_string(STARTING_X, STARTING_Y, "Generate Address", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y, "Make Address", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     }
     if (menu_state == STATE_CHECK_BALANCE) {
-        display_draw_string(STARTING_X, STARTING_Y + 20, "Check Balance", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Check Balance", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
     } else {
-        display_draw_string(STARTING_X, STARTING_Y + 20, "Check Balance", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Check Balance", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     }
     if (menu_state == STATE_SEND_TRANSACTION) {
-        display_draw_string(STARTING_X, STARTING_Y + 40, "Send Transaction", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Transaction", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
     } else {
-        display_draw_string(STARTING_X, STARTING_Y + 40, "Send Transaction", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Transaction", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     }
 }
 
@@ -40,35 +40,35 @@ void menu_tick() {
     //Transitions
     switch (menu_state) {
         case STATE_WAITING:
-            if (button_left() == 0) {
+            if (left_button_pressed()) {
                 menu_state = STATE_GENERATE_ADDRESS;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
         case STATE_GENERATE_ADDRESS:
-            if (button_up() == 0) {
+            if (button_up_pressed()) {
                 menu_state = STATE_SEND_TRANSACTION;
-            } else if (button_down() == 0) {
+            } else if (button_down_pressed()) {
                 menu_state = STATE_CHECK_BALANCE;
-            } else if ((button_center() == 0) || (button_right() == 0)) {
+            } else if ((button_center_pressed()) || (button_right_pressed())) {
                 menu_state = STATE_IN_GENERATE_ADDRESS;
             }
             break;
         case STATE_CHECK_BALANCE:
-            if (button_up() == 0) {
+            if (button_up_pressed()) {
                 menu_state = STATE_GENERATE_ADDRESS;
-            } else if (button_down() == 0) {
+            } else if (button_down_pressed()) {
                 menu_state = STATE_SEND_TRANSACTION;
-            } else if ((button_center() == 0) || (button_right() == 0)) {
+            } else if ((button_center_pressed()) || (button_right_pressed())) {
                 menu_state = STATE_IN_CHECK_BALANCE;
             }
             break;
         case STATE_SEND_TRANSACTION:
-            if (button_up() == 0) {
+            if (button_up_pressed()) {
                 menu_state = STATE_CHECK_BALANCE;
-            } else if (button_down() == 0) {
+            } else if (button_down_pressed()) {
                 menu_state = STATE_GENERATE_ADDRESS;
-            } else if ((button_center() == 0) || (button_right() == 0)) {
+            } else if ((button_center_pressed()) || (button_right_pressed())) {
                 menu_state = STATE_IN_SEND_TRANSACTION;
             }
             break;

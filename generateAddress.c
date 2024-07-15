@@ -7,21 +7,55 @@
 enum generate_address_state {
     STATE_GENERATE_ADDRESS_WAITING,
     STATE_GENERATE_ADDRESS_INSTRUCTIONS,
+    STATE_GENERATE_ADDRESS_COMPRESS_YES,
+    STATE_GENERATE_ADDRESS_COMPRESS_NO,
+    STATE_GENERATE_ADDRESS_TESTNET_YES,
+    STATE_GENERATE_ADDRESS_TESTNET_NO,
     STATE_GENERATE_ADDRESS_CONFIRM,
     STATE_GENERATE_ADDRESS_COMPUTE,
     STATE_GENERATE_ADDRESS_DISPLAY
 } generate_address_state;
 
 static char secret[100];
+static bool compressed;
+static bool testnet;
 
 static void display_instructions() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the secret phrase for your private key.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%s", secret);
 }
 
+static void display_compress_yes() {
+    compressed = true;
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+}
+
+static void display_compress_no() {
+    compressed = false;
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+}
+
+static void display_testnet_yes() {
+    testnet = true;
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+}
+
+static void display_testnet_no() {
+    testnet = false;
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+}
+
 static void display_confirm() {
     display_draw_string(STARTING_X, STARTING_Y,(const char*)secret, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + 50, "Press the center button to generate the address.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center button to generate the address.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_compute() {
@@ -29,7 +63,7 @@ static void display_compute() {
     hash_to_mpz_t((const uint8_t*)secret, strlen(secret), secret_num);
     PrivateKey* key = PrivateKey_init(secret_num);
     uint8_t address[1024];
-    S256Point_address(key->point, address, true, false);
+    S256Point_address(key->point, address, compressed, testnet);
     display_draw_string(STARTING_X, STARTING_X, (const char*)address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     PrivateKey_free(key);
 }
@@ -48,11 +82,47 @@ void generate_address_tick() {
             }
             break;
         case STATE_GENERATE_ADDRESS_INSTRUCTIONS:
-            generate_address_state = STATE_GENERATE_ADDRESS_CONFIRM;
+            generate_address_state = STATE_GENERATE_ADDRESS_COMPRESS_YES;
             display_clear(BACKGROUND_COLOR);
             break;
+        case STATE_GENERATE_ADDRESS_COMPRESS_YES:
+            if (center_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_TESTNET_YES;
+                display_clear(BACKGROUND_COLOR);
+            } else if (down_button_pressed() || up_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_COMPRESS_NO;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case STATE_GENERATE_ADDRESS_COMPRESS_NO:
+            if (center_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_TESTNET_YES;
+                display_clear(BACKGROUND_COLOR);
+            } else if (down_button_pressed() || up_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_COMPRESS_YES;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case STATE_GENERATE_ADDRESS_TESTNET_YES:
+            if (center_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_CONFIRM;
+                display_clear(BACKGROUND_COLOR);
+            } else if (down_button_pressed() || up_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_TESTNET_NO;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case STATE_GENERATE_ADDRESS_TESTNET_NO:
+            if (center_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_CONFIRM;
+                display_clear(BACKGROUND_COLOR);
+            } else if (down_button_pressed() || up_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_TESTNET_YES;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
         case STATE_GENERATE_ADDRESS_CONFIRM:
-            if (button_center() == 0) {
+            if (center_button_pressed()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_COMPUTE;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -61,7 +131,7 @@ void generate_address_tick() {
             generate_address_state = STATE_GENERATE_ADDRESS_DISPLAY;
             break;
         case STATE_GENERATE_ADDRESS_DISPLAY:
-            if (button_left() == 0) {
+            if (left_button_pressed()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
             }
             break;
@@ -72,6 +142,18 @@ void generate_address_tick() {
             break;
         case STATE_GENERATE_ADDRESS_INSTRUCTIONS:
             display_instructions();
+            break;
+        case STATE_GENERATE_ADDRESS_COMPRESS_YES:
+            display_compress_yes();
+            break;
+        case STATE_GENERATE_ADDRESS_COMPRESS_NO:
+            display_compress_no();
+            break;
+        case STATE_GENERATE_ADDRESS_TESTNET_YES:
+            display_testnet_yes();
+            break;
+        case STATE_GENERATE_ADDRESS_TESTNET_NO:
+            display_testnet_no();
             break;
         case STATE_GENERATE_ADDRESS_CONFIRM:
             display_confirm();
