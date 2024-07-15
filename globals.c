@@ -25,13 +25,13 @@ bool right_button_pressed() {
 }
 
 bool key1_button_pressed() {
-    return button_key1() == 0;
+    return button_key_1() == 0;
 }
 
 bool key2_button_pressed() {
-    return button_key2() == 0;
+    return button_key_2() == 0;
 }
 
 bool key3_button_pressed() {
-    return button_key3() == 0;
+    return button_key_3() == 0;
 }

@@ -46,29 +46,29 @@ void menu_tick() {
             }
             break;
         case STATE_GENERATE_ADDRESS:
-            if (button_up_pressed()) {
+            if (up_button_pressed()) {
                 menu_state = STATE_SEND_TRANSACTION;
-            } else if (button_down_pressed()) {
+            } else if (down_button_pressed()) {
                 menu_state = STATE_CHECK_BALANCE;
-            } else if ((button_center_pressed()) || (button_right_pressed())) {
+            } else if ((center_button_pressed()) || (right_button_pressed())) {
                 menu_state = STATE_IN_GENERATE_ADDRESS;
             }
             break;
         case STATE_CHECK_BALANCE:
-            if (button_up_pressed()) {
+            if (up_button_pressed()) {
                 menu_state = STATE_GENERATE_ADDRESS;
-            } else if (button_down_pressed()) {
+            } else if (down_button_pressed()) {
                 menu_state = STATE_SEND_TRANSACTION;
-            } else if ((button_center_pressed()) || (button_right_pressed())) {
+            } else if ((center_button_pressed()) || (right_button_pressed())) {
                 menu_state = STATE_IN_CHECK_BALANCE;
             }
             break;
         case STATE_SEND_TRANSACTION:
-            if (button_up_pressed()) {
+            if (up_button_pressed()) {
                 menu_state = STATE_CHECK_BALANCE;
-            } else if (button_down_pressed()) {
+            } else if (down_button_pressed()) {
                 menu_state = STATE_GENERATE_ADDRESS;
-            } else if ((button_center_pressed()) || (button_right_pressed())) {
+            } else if ((center_button_pressed()) || (right_button_pressed())) {
                 menu_state = STATE_IN_SEND_TRANSACTION;
             }
             break;
