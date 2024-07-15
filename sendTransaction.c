@@ -28,6 +28,7 @@ enum send_transaction_state {
     SEND_TRANSACTION_FEE_CONFIRM,
     SEND_TRANSACTION_FETCHING,
     SEND_TRANSACTION_CONFIRM,
+    SEND_TRANSACTION_BROADCAST,
     SEND_TRANSACTION_DISPLAYING,
     SEND_TRANSACTION_TERMINATED
 } send_transaction_state;
@@ -50,6 +51,7 @@ static bool testnet;
 static int32_t current_utxo_index;
 static char tx_hex[10000];
 static bool no_utxos;
+static float estimated_transaction_size;
 
 static void display_compress_yes() {
     no_utxos = false;
@@ -139,7 +141,7 @@ static void display_getutxos() {
     for (int32_t i = 0; i < num_utxos; i++) {
         utxo_balances[i] = get_utxo_balance(txids[i], public_key);
     }
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 5, "Finished fetching UTXOs", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Finished fetching UTXOs", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     while (!center_button_pressed()) ;
     // char str[10000] = {0};
     // for (int32_t i = 0; i < num_utxos; i++) {
@@ -268,9 +270,10 @@ static void display_fee_confirm() {
         return;
     }
     display_draw_string(STARTING_X, STARTING_Y, "Fee: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    int32_t approximate_sats_per_byte = txFee / 225;
+    estimated_transaction_size = 148 * num_utxo_indexes + 34 * 2 + 10;
+    float approximate_sats_per_byte = txFee / estimated_transaction_size;
     char str[10000] = {0};
-    sprintf(str, "%lu, ~%d sats/byte", txFee, approximate_sats_per_byte);
+    sprintf(str, "%lu, ~%.2f sats/byte", txFee, approximate_sats_per_byte);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Change: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     sprintf(str, "%lu", change);
@@ -362,21 +365,21 @@ static void display_fetching() {
 
 static void display_transaction_confirm() {
     display_draw_string(STARTING_X, STARTING_Y, "To: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, target_address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT, target_address, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     char str[10000] = {0};
     sprintf(str, "Amount: %lu", amount);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 2, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     sprintf(str, "Fee: %lu", txFee);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 3, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 3, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     sprintf(str, "Change: %lu", change);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 5, "Press the center or right button to confirm the transaction.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 6, "Press the left button to terminate transaction.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 4, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 5, "Press the center or right button to confirm the transaction.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 6, "Press the left button to terminate transaction.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_transaction() {
     broadcast_transaction(tx_hex);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 
 }
 
@@ -571,6 +574,9 @@ void send_transaction_tick() {
                 display_clear(BACKGROUND_COLOR);
             }
             break;
+        case SEND_TRANSACTION_BROADCAST:
+            send_transaction_state = SEND_TRANSACTION_DISPLAYING;
+            break;
         case SEND_TRANSACTION_DISPLAYING:
             if (key3_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
@@ -644,8 +650,10 @@ void send_transaction_tick() {
         case SEND_TRANSACTION_CONFIRM:
             display_transaction_confirm();
             break;
-        case SEND_TRANSACTION_DISPLAYING:
+        case SEND_TRANSACTION_BROADCAST:
             display_transaction();
+            break;
+        case SEND_TRANSACTION_DISPLAYING:
             break;
         case SEND_TRANSACTION_TERMINATED:
             break;
