@@ -17,6 +17,7 @@ void keyboard_input(char* input) {
     struct libevdev *dev = NULL;
     struct input_event ev;
     uint8_t buffer_index = 0;
+    int shift_pressed = 0;
 
     // Keycode to character mapping (simplified)
     const char keycode_to_char[] = {
@@ -40,9 +41,11 @@ void keyboard_input(char* input) {
 
     while (1) {
         int rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
-        if (rc == 0 && ev.type == EV_KEY && ev.value >= 0) {
+        if (rc == 0 && ev.type == EV_KEY) {
             if (ev.value == 1) { // Key press
-                if (ev.code == KEY_ENTER) {
+                if (ev.code == KEY_LEFTSHIFT || ev.code == KEY_RIGHTSHIFT) {
+                    shift_pressed = 1;
+                } else if (ev.code == KEY_ENTER) {
                     input[buffer_index] = '\0'; // Null-terminate the string
                     break;
                 } else if (ev.code == KEY_BACKSPACE) {
@@ -53,8 +56,16 @@ void keyboard_input(char* input) {
                 } else if (ev.code < sizeof(keycode_to_char) && keycode_to_char[ev.code] != '\0') {
                     // Handle alphanumeric keys and space
                     if (buffer_index < MAX_INPUT_LENGTH - 1) {
-                        input[buffer_index++] = keycode_to_char[ev.code];
+                        char ch = keycode_to_char[ev.code];
+                        if (shift_pressed && isalpha(ch)) {
+                            ch = toupper(ch);
+                        }
+                        input[buffer_index++] = ch;
                     }
+                }
+            } else if (ev.value == 0) { // Key release
+                if (ev.code == KEY_LEFTSHIFT || ev.code == KEY_RIGHTSHIFT) {
+                    shift_pressed = 0;
                 }
             }
         }
