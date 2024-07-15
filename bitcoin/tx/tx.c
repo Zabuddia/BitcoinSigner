@@ -680,15 +680,17 @@ uint64_t get_balance(const char* address) {
         fprintf(stderr, "Failed to parse JSON\n");
         return 0;
     }
+
     uint64_t balance = 0;
     cJSON *balance_json = cJSON_GetObjectItemCaseSensitive(json, "final_balance");
-    if (cJSON_IsNumber(balance_json)) {
-        balance = balance_json->valueint;
+    if (balance_json == NULL) {
+        fprintf(stderr, "JSON does not contain 'final_balance' field\n");
+    } else if (!cJSON_IsNumber(balance_json)) {
+        fprintf(stderr, "'final_balance' is not a number\n");
     } else {
-        cJSON_Delete(json);
-        fprintf(stderr, "Failed to get balance\n");
-        return 0;
+        balance = balance_json->valueint;
     }
+
     cJSON_Delete(json);
     return balance;
 }
