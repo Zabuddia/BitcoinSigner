@@ -42,8 +42,6 @@ void keyboard_input(char* input) {
         int rc = libevdev_next_event(dev, LIBEVDEV_READ_FLAG_NORMAL, &ev);
         if (rc == 0 && ev.type == EV_KEY && ev.value >= 0) {
             if (ev.value == 1) { // Key press
-                printf("Key code: %d\n", ev.code); // Debugging statement
-
                 if (ev.code == KEY_ENTER) {
                     input[buffer_index] = '\0'; // Null-terminate the string
                     break;
@@ -52,11 +50,10 @@ void keyboard_input(char* input) {
                         buffer_index--;
                         input[buffer_index] = '\0';
                     }
-                } else if (ev.code < MAX_INPUT_LENGTH && keycode_to_char[ev.code] != '\0') {
+                } else if (ev.code < sizeof(keycode_to_char) && keycode_to_char[ev.code] != '\0') {
                     // Handle alphanumeric keys and space
-                    if (buffer_index < sizeof(input) - 1) {
+                    if (buffer_index < MAX_INPUT_LENGTH - 1) {
                         input[buffer_index++] = keycode_to_char[ev.code];
-                        printf("Interpreted as: %c\n", input[buffer_index-1]); // Debugging statement
                     }
                 }
             }
