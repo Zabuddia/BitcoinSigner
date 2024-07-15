@@ -6,13 +6,14 @@
 #include <ctype.h>
 
 #define KEYBOARD_DEVICE "/dev/input/event3"
+#define MAX_INPUT_LENGTH 100
 
 bool in_generate_address;
 bool in_check_balance;
 bool in_send_transaction;
 
 void keyboard_input(char* input) {
-        int fd;
+    int fd;
     struct libevdev *dev = NULL;
     struct input_event ev;
     uint8_t buffer_index = 0;
@@ -51,7 +52,7 @@ void keyboard_input(char* input) {
                         buffer_index--;
                         input[buffer_index] = '\0';
                     }
-                } else if (ev.code < sizeof(keycode_to_char) && keycode_to_char[ev.code] != '\0') {
+                } else if (ev.code < MAX_INPUT_LENGTH && keycode_to_char[ev.code] != '\0') {
                     // Handle alphanumeric keys and space
                     if (buffer_index < sizeof(input) - 1) {
                         input[buffer_index++] = keycode_to_char[ev.code];
