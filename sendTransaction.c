@@ -87,12 +87,12 @@ static void display_getkey() {
 }
 
 static void display_getkey_confirm() {
-    display_draw_string(STARTING_X, STARTING_Y, "Private key: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, private_key, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Private key: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, private_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Public key: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, public_key, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 4, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 5, "Press the left button to re-enter the private key.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, public_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 4, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 5, "Press the left button to re-enter the private key.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static bool is_duplicate(int32_t* array, int32_t size, int32_t value) {
@@ -376,7 +376,7 @@ void send_transaction_tick() {
     switch (send_transaction_state) {
         case SEND_TRANSACTION_WAITING:
             if (in_send_transaction) {
-                send_transaction_state = SEND_TRANSACTION_GETKEY;
+                send_transaction_state = SEND_TRANSACTION_GETKEY_COMPRESS_YES;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
