@@ -39,14 +39,14 @@ static void display_getaddr() {
     scanf("%s", address);
 }
 
-static void display_getkey_compressed_yes() {
+static void display_getkey_compress_yes() {
     compressed = false;
     display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
-static void display_getkey_compressed_no() {
+static void display_getkey_compress_no() {
     compressed = true;
     display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
