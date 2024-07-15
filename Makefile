@@ -11,7 +11,7 @@ TEST_NAME=TestExecutable
 
 # Rule for the main target
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(filter-out test/minunit.o, $(OBJS)) -o $(NAME) -lbcm2835 -lgmp -lcrypto -lcurl -lcjson
+	$(CC) $(CFLAGS) $(filter-out test/minunit.o, $(OBJS)) -o $(NAME) -lbcm2835 -lgmp -lcrypto -lcurl -lcjson -levdev
 
 # Rule for object files
 %.o: %.c $(HEADERS)
@@ -23,4 +23,4 @@ clean:
 
 # Rule for tests
 test: $(TEST_OBJS)
-	$(CC) $(CFLAGS) $(TEST_OBJS) -o $(TEST_NAME) -lbcm2835 -lgmp -lcrypto -lcurl -lcjson
+	$(CC) $(CFLAGS) $(TEST_OBJS) -o $(TEST_NAME) -lbcm2835 -lgmp -lcrypto -lcurl -lcjson -levdev
