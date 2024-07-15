@@ -94,7 +94,7 @@ static void display_getkey_confirm() {
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT, private_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 2, "Public key: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 3, public_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 4, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 5, "Press the left button to re-enter the private key.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
@@ -199,6 +199,7 @@ static void toggle_utxo() {
             if (utxo_indexes[i] == current_utxo_index) {
                 utxo_indexes[i] = -1;
                 num_utxo_indexes--;
+                printf("removed UTXO index\n");
             }
         }
     } else {
@@ -206,6 +207,7 @@ static void toggle_utxo() {
             if (utxo_indexes[i] == -1) {
                 utxo_indexes[i] = current_utxo_index;
                 num_utxo_indexes++;
+                printf("added UTXO index\n");
                 break;
             }
         }
@@ -214,13 +216,12 @@ static void toggle_utxo() {
 
 static void display_utxo_confirm() {
     char str[10000] = {0};
-    for (int32_t i = 0; i < num_utxos; i++) {
-        uint64_t balance = get_utxo_balance(txids[i], public_key);
-        format_utxo_info(str, i, txids[i], balance);
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        format_utxo_info(str, utxo_indexes[i], txids[utxo_indexes[i]], utxo_balances[utxo_indexes[i]]);
         strcat(str, "     ");
     }
     display_draw_string(STARTING_X, STARTING_Y, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, SCREEN_HEIGHT - 10, "Press the center or right button to confirm the UTXOs.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, SCREEN_HEIGHT - 40, "Press the center or right button to confirm the UTXOs.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, SCREEN_HEIGHT - 20, "Press the left button to re-select the UTXOs.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
