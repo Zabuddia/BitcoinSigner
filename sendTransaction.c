@@ -84,7 +84,7 @@ static void display_testnet_no() {
 
 static void display_getkey() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the private key to send the transaction with.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    scanf("%s", private_key);
+    keyboard_input(private_key);
     mpz_t secret_num;
     hash_to_mpz_t((const uint8_t*)private_key, strlen(private_key), secret_num);
     key = PrivateKey_init(secret_num);
@@ -229,7 +229,7 @@ static void display_utxo_confirm() {
 
 static void display_getaddr() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the address to send the transaction to.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    scanf("%s", target_address);
+    keyboard_input(target_address);
 }
 
 static void display_addr_confirm() {
@@ -241,12 +241,15 @@ static void display_addr_confirm() {
 
 static void display_getamount() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the amount to send.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    scanf("%lu", &amount);
+    char str[10000] = {0};
+    keyboard_input(str);
+    amount = atoi(str);
+    // scanf("%lu", &amount);
 }
 
 static void display_amount_confirm() {
     display_draw_string(STARTING_X, STARTING_Y, "Amount: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    char str[10000] = {0};
+    char str[100] = {0};
     sprintf(str, "%lu", amount);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
@@ -255,7 +258,10 @@ static void display_amount_confirm() {
 
 static void display_getfee() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the fee to send the transaction with.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    scanf("%lu", &txFee);
+    char str[100] = {0};
+    keyboard_input(str);
+    txFee = atoi(str);
+    // scanf("%lu", &txFee);
 }
 
 static void display_fee_confirm() {

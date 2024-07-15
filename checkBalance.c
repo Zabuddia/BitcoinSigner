@@ -39,7 +39,7 @@ static void display_getmode_addr() {
 
 static void display_getaddr() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the address to check the balance of:", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    scanf("%s", address);
+    keyboard_input(address);
 }
 
 static void display_getkey_compress_yes() {
@@ -72,7 +72,7 @@ static void display_getkey_testnet_no() {
 
 static void display_getkey() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the private key to check the balance of:", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    scanf("%s", private_key);
+    keyboard_input(private_key);
     mpz_t secret_num;
     hash_to_mpz_t((const uint8_t*)private_key, strlen(private_key), secret_num);
     PrivateKey* key = PrivateKey_init(secret_num);
