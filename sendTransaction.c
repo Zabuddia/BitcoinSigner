@@ -8,13 +8,28 @@
 
 enum send_transaction_state {
     SEND_TRANSACTION_WAITING,
+    SEND_TRANSACTION_GETKEY_COMPRESS_YES,
+    SEND_TRANSACTION_GETKEY_COMPRESS_NO,
+    SEND_TRANSACTION_GETKEY_TESTNET_YES,
+    SEND_TRANSACTION_GETKEY_TESTNET_NO,
     SEND_TRANSACTION_GETKEY,
+    SEND_TRANSACTION_GETKEY_CONFIRM,
     SEND_TRANSACTION_GETUTXOS,
+    SEND_TRANSACTION_DISPLAY_UTXO,
+    SEND_TRANSACTION_NEXT_UTXO,
+    SEND_TRANSACTION_PREVIOUS_UTXO,
+    SEND_TRANSACTION_TOGGLE_UTXO,
+    SEND_TRANSACTION_UTXO_CONFIRM,
     SEND_TRANSACTION_GETADDR,
+    SEND_TRANSACTION_ADDR_CONFIRM,
     SEND_TRANSACTION_GETAMOUNT,
+    SEND_TRANSACTION_AMOUNT_CONFIRM,
     SEND_TRANSACTION_GETFEE,
+    SEND_TRANSACTION_FEE_CONFIRM,
     SEND_TRANSACTION_FETCHING,
-    SEND_TRANSACTION_DISPLAYING
+    SEND_TRANSACTION_CONFIRM,
+    SEND_TRANSACTION_DISPLAYING,
+    SEND_TRANSACTION_TERMINATED
 } send_transaction_state;
 
 static char private_key[100];
@@ -29,6 +44,38 @@ static int32_t* vouts;
 static int32_t num_utxos;
 static int32_t* utxo_indexes;
 static int32_t num_utxo_indexes;
+static bool compressed;
+static bool testnet;
+static int32_t current_utxo_index;
+static char tx_hex[10000];
+
+static void display_compress_yes() {
+    compressed = true;
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+}
+
+static void display_compress_no() {
+    compressed = false;
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+}
+
+static void display_testnet_yes() {
+    testnet = true;
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+}
+
+static void display_testnet_no() {
+    testnet = false;
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+}
 
 static void display_getkey() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the private key to send the transaction with.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
@@ -36,9 +83,16 @@ static void display_getkey() {
     mpz_t secret_num;
     hash_to_mpz_t((const uint8_t*)private_key, strlen(private_key), secret_num);
     key = PrivateKey_init(secret_num);
-    S256Point_address(key->point, (uint8_t*)public_key, true, false);
-    printf("Private key: %s\n", private_key);
-    printf("Public key: %s\n", public_key);
+    S256Point_address(key->point, (uint8_t*)public_key, compressed, testnet);
+}
+
+static void display_getkey_confirm() {
+    display_draw_string(STARTING_X, STARTING_Y, "Private key: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, private_key, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Public key: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, public_key, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 4, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 5, "Press the left button to re-enter the private key.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static bool is_duplicate(int32_t* array, int32_t size, int32_t value) {
@@ -61,63 +115,155 @@ static void format_utxo_info(char *str, int i, const char *txid, long balance) {
 }
 
 static void display_getutxos() {
+    display_draw_string(STARTING_X, STARTING_Y, "Fetching UTXOs...", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     char utxo_response[10000] = {0};
     get_utxos(public_key, utxo_response);
     extract_all_utxo_info(utxo_response, &txids, &vouts, &num_utxos);
+    display_clear(BACKGROUND_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Finished fetching UTXOs.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center button to continue.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the center button to select/deselect UTXO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, "Press the key 1 button when done looking at UTXOs", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    current_utxo_index = 0;
+    utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
+    for (int32_t i = 0; i < num_utxos; i++) {
+        utxo_indexes[i] = -1;
+    }
+    // char str[10000] = {0};
+    // for (int32_t i = 0; i < num_utxos; i++) {
+    //     uint64_t balance = get_utxo_balance(txids[i], public_key);
+    //     format_utxo_info(str, i, txids[i], balance);
+    //     strcat(str, "     ");
+    //     printf("Txid: %s\n", txids[i]);
+    //     printf("Vout: %d\n", vouts[i]);
+    // }
+    // display_draw_string(STARTING_X, STARTING_Y, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    // utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
+    // printf("Enter the number of utxos you would like to use: \n");
+    // scanf("%d", &num_utxo_indexes);
+    // for (int32_t i = 0; i < num_utxo_indexes; i++) {
+    //     printf("Enter the index of the utxo you would like to use: \n");
+    //     scanf("%d", &utxo_indexes[i]);
+    //     while (is_duplicate(utxo_indexes, i, utxo_indexes[i])) {
+    //         printf("You have already selected that utxo. Please select a different one.\n");
+    //         scanf("%d", &utxo_indexes[i]);
+    //     }
+    // }
+    // printf("UTXO indexes: ");
+    // for (int32_t i = 0; i < num_utxo_indexes; i++) {
+    //     printf("%d ", utxo_indexes[i]);
+    // }
+    // printf("\n");
+}
+
+static void display_utxo() {
+    char str[10000] = {0};
+    uint64_t balance = get_utxo_balance(txids[current_utxo_index], public_key);
+    format_utxo_info(str, current_utxo_index, txids[current_utxo_index], balance);
+    if (is_duplicate(utxo_indexes, num_utxo_indexes, current_utxo_index)) {
+        display_draw_string(STARTING_X, STARTING_Y, str, DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+    } else {
+        display_draw_string(STARTING_X, STARTING_Y, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    }
+}
+
+static void next_utxo() {
+    current_utxo_index++;
+    if (current_utxo_index >= num_utxos) {
+        current_utxo_index = 0;
+    }
+}
+
+static void previous_utxo() {
+    current_utxo_index--;
+    if (current_utxo_index < 0) {
+        current_utxo_index = num_utxos - 1;
+    }
+}
+
+static void toggle_utxo() {
+    if (is_duplicate(utxo_indexes, num_utxo_indexes, current_utxo_index)) {
+        for (int32_t i = 0; i < num_utxo_indexes; i++) {
+            if (utxo_indexes[i] == current_utxo_index) {
+                utxo_indexes[i] = -1;
+                num_utxo_indexes--;
+            }
+        }
+    } else {
+        for (int32_t i = 0; i < num_utxo_indexes; i++) {
+            if (utxo_indexes[i] == -1) {
+                utxo_indexes[i] = current_utxo_index;
+                num_utxo_indexes++;
+                break;
+            }
+        }
+    }
+}
+
+static void display_utxo_confirm() {
     char str[10000] = {0};
     for (int32_t i = 0; i < num_utxos; i++) {
         uint64_t balance = get_utxo_balance(txids[i], public_key);
         format_utxo_info(str, i, txids[i], balance);
         strcat(str, "     ");
-        printf("Txid: %s\n", txids[i]);
-        printf("Vout: %d\n", vouts[i]);
     }
     display_draw_string(STARTING_X, STARTING_Y, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
-    printf("Enter the number of utxos you would like to use: \n");
-    scanf("%d", &num_utxo_indexes);
-    for (int32_t i = 0; i < num_utxo_indexes; i++) {
-        printf("Enter the index of the utxo you would like to use: \n");
-        scanf("%d", &utxo_indexes[i]);
-        while (is_duplicate(utxo_indexes, i, utxo_indexes[i])) {
-            printf("You have already selected that utxo. Please select a different one.\n");
-            scanf("%d", &utxo_indexes[i]);
-        }
-    }
-    printf("UTXO indexes: ");
-    for (int32_t i = 0; i < num_utxo_indexes; i++) {
-        printf("%d ", utxo_indexes[i]);
-    }
-    printf("\n");
-
+    display_draw_string(STARTING_X, SCREEN_HEIGHT - 10, "Press the center or right button to confirm the UTXOs.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, SCREEN_HEIGHT - 20, "Press the left button to re-select the UTXOs.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_getaddr() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the address to send the transaction to.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%s", target_address);
-    printf("Target address: %s\n", target_address);
+}
+
+static void display_addr_confirm() {
+    display_draw_string(STARTING_X, STARTING_Y, "Address: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, target_address, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, "Press the left button to re-enter the address.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_getamount() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the amount to send.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%lu", &amount);
-    printf("Amount: %lu\n", amount);
+}
+
+static void display_amount_confirm() {
+    display_draw_string(STARTING_X, STARTING_Y, "Amount: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    char str[10000] = {0};
+    sprintf(str, "%lu", amount);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, "Press the left button to re-enter the amount.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_getfee() {
     display_draw_string(STARTING_X, STARTING_Y, "Enter the fee to send the transaction with.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     scanf("%lu", &txFee);
+}
+
+static void display_fee_confirm() {
     uint64_t total_balance = 0;
     for (int32_t i = 0; i < num_utxo_indexes; i++) {
         total_balance += get_utxo_balance(txids[utxo_indexes[i]], public_key);
     }
     change = total_balance - amount - txFee;
-    printf("Fee: %lu\n", txFee);
-    printf("Change: %lu\n", change);
     if (change < 0) {
         display_draw_string(STARTING_X, STARTING_Y, "Insufficient funds!", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the left button to re-enter the fee.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
         return;
     }
+    display_draw_string(STARTING_X, STARTING_Y, "Fee: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    int32_t approximate_sats_per_byte = txFee / 225;
+    char str[10000] = {0};
+    sprintf(str, "%lu, ~%d s/b", txFee, approximate_sats_per_byte);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Change: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    sprintf(str, "%lu", change);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 4, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 5, "Press the left button to re-enter the fee.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 // Function to write the serialized transaction to a file
@@ -159,7 +305,7 @@ static void display_fetching() {
         TxIn_toString(tx_ins[i]);
     }
     uint8_t target_h160[20] = {0};
-    decode_base58((const char*)target_address, (char*)target_h160);
+    decode_base58((const char*)target_address, (unsigned char*)target_h160);
     printf("Target h160: ");
     for (int32_t i = 0; i < 20; i++) {
         printf("%02x", target_h160[i]);
@@ -172,7 +318,7 @@ static void display_fetching() {
     printf("Tx out: ");
     TxOut_toString(tx_out);
     uint8_t change_h160[20] = {0};
-    decode_base58((const char*)public_key, (char*)change_h160);
+    decode_base58((const char*)public_key, (unsigned char*)change_h160);
     printf("Change h160: ");
     for (int32_t i = 0; i < 20; i++) {
         printf("%02x", change_h160[i]);
@@ -196,12 +342,29 @@ static void display_fetching() {
         printf("%02x", tx_serialized[i]);
     }
     printf("\n");
-    char tx_hex[10000] = {0};
     byte_array_to_hex_string(tx_serialized, Tx_length(tx), tx_hex);
     write_tx_to_file("tx.txt", tx_hex);
-    display_draw_string(STARTING_X, STARTING_Y, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     printf("Verified?: %d\n", Tx_verify(tx));
+}
+
+static void display_transaction_confirm() {
+    display_draw_string(STARTING_X, STARTING_Y, "To: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, target_address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    char str[10000] = {0};
+    sprintf(str, "Amount: %lu", amount);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    sprintf(str, "Fee: %lu", txFee);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    sprintf(str, "Change: %lu", change);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 4, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 5, "Press the center or right button to confirm the transaction.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 6, "Press the left button to terminate transaction.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+}
+
+static void display_transaction() {
     broadcast_transaction(tx_hex);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+
 }
 
 void send_transaction_init() {
@@ -217,58 +380,258 @@ void send_transaction_tick() {
                 display_clear(BACKGROUND_COLOR);
             }
             break;
+        case SEND_TRANSACTION_GETKEY_COMPRESS_YES:
+            if (center_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETKEY_TESTNET_YES;
+                display_clear(BACKGROUND_COLOR);
+            } else if (down_button_pressed() || up_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETKEY_COMPRESS_NO;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case SEND_TRANSACTION_GETKEY_COMPRESS_NO:
+            if (center_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETKEY_TESTNET_YES;
+                display_clear(BACKGROUND_COLOR);
+            } else if (down_button_pressed() || up_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETKEY_COMPRESS_YES;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case SEND_TRANSACTION_GETKEY_TESTNET_YES:
+            if (center_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETKEY;
+                display_clear(BACKGROUND_COLOR);
+            } else if (down_button_pressed() || up_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETKEY_TESTNET_NO;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case SEND_TRANSACTION_GETKEY_TESTNET_NO:
+            if (center_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETKEY;
+                display_clear(BACKGROUND_COLOR);
+            } else if (down_button_pressed() || up_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETKEY_TESTNET_YES;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
         case SEND_TRANSACTION_GETKEY:
-            send_transaction_state = SEND_TRANSACTION_GETUTXOS;
+            send_transaction_state = SEND_TRANSACTION_GETKEY_CONFIRM;
             display_clear(BACKGROUND_COLOR);
+            break;
+        case SEND_TRANSACTION_GETKEY_CONFIRM:
+            if (center_button_pressed() || right_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETUTXOS;
+                display_clear(BACKGROUND_COLOR);
+            } else if (left_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETKEY;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            }
             break;
         case SEND_TRANSACTION_GETUTXOS:
-            send_transaction_state = SEND_TRANSACTION_GETADDR;
-            display_clear(BACKGROUND_COLOR);
+            if (center_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_DISPLAY_UTXO;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case SEND_TRANSACTION_DISPLAY_UTXO:
+            if (right_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_NEXT_UTXO;
+                display_clear(BACKGROUND_COLOR);
+            } else if (left_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_PREVIOUS_UTXO;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key1_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_UTXO_CONFIRM;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            } else if (center_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_TOGGLE_UTXO;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case SEND_TRANSACTION_NEXT_UTXO:
+            send_transaction_state = SEND_TRANSACTION_DISPLAY_UTXO;
+            break;
+        case SEND_TRANSACTION_PREVIOUS_UTXO:
+            send_transaction_state = SEND_TRANSACTION_DISPLAY_UTXO;
+            break;
+        case SEND_TRANSACTION_TOGGLE_UTXO:
+            send_transaction_state = SEND_TRANSACTION_DISPLAY_UTXO;
+            break;
+        case SEND_TRANSACTION_UTXO_CONFIRM:
+            if (center_button_pressed() || right_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETADDR;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            } else if (left_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_DISPLAY_UTXO;
+                display_clear(BACKGROUND_COLOR);
+            }
             break;
         case SEND_TRANSACTION_GETADDR:
-            send_transaction_state = SEND_TRANSACTION_GETAMOUNT;
+            send_transaction_state = SEND_TRANSACTION_ADDR_CONFIRM;
             display_clear(BACKGROUND_COLOR);
+            break;
+        case SEND_TRANSACTION_ADDR_CONFIRM:
+            if (center_button_pressed() || right_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETAMOUNT;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            } else if (left_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETADDR;
+                display_clear(BACKGROUND_COLOR);
+            }
             break;
         case SEND_TRANSACTION_GETAMOUNT:
-            send_transaction_state = SEND_TRANSACTION_GETFEE;
+            send_transaction_state = SEND_TRANSACTION_AMOUNT_CONFIRM;
             display_clear(BACKGROUND_COLOR);
+            break;
+        case SEND_TRANSACTION_AMOUNT_CONFIRM:
+            if (center_button_pressed() || right_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETFEE;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            } else if (left_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETAMOUNT;
+                display_clear(BACKGROUND_COLOR);
+            }
             break;
         case SEND_TRANSACTION_GETFEE:
-            send_transaction_state = SEND_TRANSACTION_FETCHING;
+            send_transaction_state = SEND_TRANSACTION_FEE_CONFIRM;
             display_clear(BACKGROUND_COLOR);
             break;
+        case SEND_TRANSACTION_FEE_CONFIRM:
+            if (center_button_pressed() || right_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_FETCHING;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            } else if (left_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_GETFEE;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
         case SEND_TRANSACTION_FETCHING:
-            send_transaction_state = SEND_TRANSACTION_DISPLAYING;
+            send_transaction_state = SEND_TRANSACTION_CONFIRM;
+            break;
+        case SEND_TRANSACTION_CONFIRM:
+            if (center_button_pressed() || right_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_DISPLAYING;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            } else if (left_button_pressed()) {
+                send_transaction_state = SEND_TRANSACTION_TERMINATED;
+                display_clear(BACKGROUND_COLOR);
+            }
             break;
         case SEND_TRANSACTION_DISPLAYING:
-            if (button_left() == 0) {
+            if (key3_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
             }
+            break;
+        case SEND_TRANSACTION_TERMINATED:
+            send_transaction_state = SEND_TRANSACTION_WAITING;
             break;
     }
     //Actions
     switch (send_transaction_state) {
         case SEND_TRANSACTION_WAITING:
             break;
+        case SEND_TRANSACTION_GETKEY_COMPRESS_YES:
+            display_compress_yes();
+            break;
+        case SEND_TRANSACTION_GETKEY_COMPRESS_NO:
+            display_compress_no();
+            break;
+        case SEND_TRANSACTION_GETKEY_TESTNET_YES:
+            display_testnet_yes();
+            break;
+        case SEND_TRANSACTION_GETKEY_TESTNET_NO:
+            display_testnet_no();
+            break;
         case SEND_TRANSACTION_GETKEY:
             display_getkey();
+            break;
+        case SEND_TRANSACTION_GETKEY_CONFIRM:
+            display_getkey_confirm();
             break;
         case SEND_TRANSACTION_GETUTXOS:
             display_getutxos();
             break;
+        case SEND_TRANSACTION_DISPLAY_UTXO:
+            display_utxo();
+            break;
+        case SEND_TRANSACTION_NEXT_UTXO:
+            next_utxo();
+            break;
+        case SEND_TRANSACTION_PREVIOUS_UTXO:
+            previous_utxo();
+            break;
+        case SEND_TRANSACTION_TOGGLE_UTXO:
+            toggle_utxo();
+            break;
+        case SEND_TRANSACTION_UTXO_CONFIRM:
+            display_utxo_confirm();
+            break;
         case SEND_TRANSACTION_GETADDR:
             display_getaddr();
+            break;
+        case SEND_TRANSACTION_ADDR_CONFIRM:
+            display_addr_confirm();
             break;
         case SEND_TRANSACTION_GETAMOUNT:
             display_getamount();
             break;
+        case SEND_TRANSACTION_AMOUNT_CONFIRM:
+            display_amount_confirm();
+            break;
         case SEND_TRANSACTION_GETFEE:
             display_getfee();
+            break;
+        case SEND_TRANSACTION_FEE_CONFIRM:
+            display_fee_confirm();
             break;
         case SEND_TRANSACTION_FETCHING:
             display_fetching();
             break;
+        case SEND_TRANSACTION_CONFIRM:
+            display_transaction_confirm();
+            break;
         case SEND_TRANSACTION_DISPLAYING:
+            display_transaction();
+            break;
+        case SEND_TRANSACTION_TERMINATED:
             break;
     }
 }

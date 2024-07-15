@@ -1,17 +1,21 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "lib/lcd.h"
+
 #define RASPBERRY_PI 1
 
 #define TIMER_PERIOD 50
 
+#define SCREEN_WIDTH LCD_WIDTH
+#define SCREEN_HEIGHT LCD_HEIGHT
 #define BACKGROUND_COLOR WHITE
 #define FONT_COLOR BLACK
 #define SELECTED_BACKGROUND_COLOR BLUE
 #define SELECTED_FONT_COLOR WHITE
 #define STARTING_X 5
 #define STARTING_Y 5
-#define SPACE_BETWEEN_LINES 30
+#define SPACE_BETWEEN_LINES 20
 #define DEFAULT_FONT (&Font12)
 #define SMALL_FONT (&Font8)
 

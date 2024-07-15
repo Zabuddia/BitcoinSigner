@@ -82,14 +82,14 @@ static void display_getkey() {
 
 static void display_getaddr_confirm() {
     display_draw_string(STARTING_X, STARTING_Y, address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the left button to re-enter the address.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the left button to re-enter the address.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_getkey_confirm() {
     display_draw_string(STARTING_X, STARTING_Y, private_key, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the left button to re-enter the private key.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the left button to re-enter the private key.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_fetching() {

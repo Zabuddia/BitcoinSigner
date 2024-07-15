@@ -158,7 +158,7 @@ static void display_fetching() {
         TxIn_toString(tx_ins[i]);
     }
     uint8_t target_h160[20] = {0};
-    decode_base58((const char*)target_address, (char*)target_h160);
+    decode_base58((const char*)target_address, (unsigned char*)target_h160);
     printf("Target h160: ");
     for (int32_t i = 0; i < 20; i++) {
         printf("%02x", target_h160[i]);
@@ -171,7 +171,7 @@ static void display_fetching() {
     printf("Tx out: ");
     TxOut_toString(tx_out);
     uint8_t change_h160[20] = {0};
-    decode_base58((const char*)public_key, (char*)change_h160);
+    decode_base58((const char*)public_key, (unsigned char*)change_h160);
     printf("Change h160: ");
     for (int32_t i = 0; i < 20; i++) {
         printf("%02x", change_h160[i]);
