@@ -81,7 +81,7 @@ static void display_getkey() {
 static void display_fetching() {
     uint64_t balance = get_balance(address);
     char balance_str[100];
-    sprintf(balance_str, "Balance: %lu", balance);
+    sprintf(balance_str, "Balance: %lu Satoshis", balance);
     display_draw_string(STARTING_X, STARTING_Y, balance_str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
