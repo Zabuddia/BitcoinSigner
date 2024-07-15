@@ -194,8 +194,8 @@ static void previous_utxo() {
 }
 
 static void toggle_utxo() {
-    if (is_duplicate(utxo_indexes, num_utxo_indexes, current_utxo_index)) {
-        for (int32_t i = 0; i < num_utxo_indexes; i++) {
+    if (is_duplicate(utxo_indexes, num_utxos, current_utxo_index)) {
+        for (int32_t i = 0; i < num_utxos; i++) {
             if (utxo_indexes[i] == current_utxo_index) {
                 utxo_indexes[i] = -1;
                 num_utxo_indexes--;
@@ -203,7 +203,7 @@ static void toggle_utxo() {
             }
         }
     } else {
-        for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        for (int32_t i = 0; i < num_utxos; i++) {
             if (utxo_indexes[i] == -1) {
                 utxo_indexes[i] = current_utxo_index;
                 num_utxo_indexes++;
