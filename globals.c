@@ -55,7 +55,7 @@ void keyboard_input(char* input) {
                 }
             }
         }
-        usleep(1000); // Prevent CPU overuse
+        usleep(10); // Prevent CPU overuse
     }
 
     libevdev_free(dev);
