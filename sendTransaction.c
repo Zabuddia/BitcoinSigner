@@ -44,6 +44,7 @@ static int32_t* vouts;
 static int32_t num_utxos;
 static int32_t* utxo_indexes;
 static int32_t num_utxo_indexes;
+static uint64_t* utxo_balances;
 static bool compressed;
 static bool testnet;
 static int32_t current_utxo_index;
@@ -54,29 +55,29 @@ static void display_compress_yes() {
     no_utxos = false;
     compressed = true;
     display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_compress_no() {
     compressed = false;
     display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
 }
 
 static void display_testnet_yes() {
     testnet = true;
     display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_testnet_no() {
     testnet = false;
     display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
 }
 
 static void display_getkey() {
@@ -90,11 +91,11 @@ static void display_getkey() {
 
 static void display_getkey_confirm() {
     display_draw_string(STARTING_X, STARTING_Y, "Private key: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, private_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Public key: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, public_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 4, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 5, "Press the left button to re-enter the private key.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT, private_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 2, "Public key: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 3, public_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 4, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 5, "Press the left button to re-enter the private key.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static bool is_duplicate(int32_t* array, int32_t size, int32_t value) {
@@ -122,18 +123,23 @@ static void display_getutxos() {
     get_utxos(public_key, utxo_response);
     extract_all_utxo_info(utxo_response, &txids, &vouts, &num_utxos);
     if (num_utxos == 0) {
-        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "No UTXOs found. Try again.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "No UTXOs found. Try again.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
         no_utxos = true;
         return;
     }
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center button to continue.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the center button to select/deselect UTXO", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, "Press the key 1 button when done looking at UTXOs", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "Press the center button to continue.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Press the center button to select/deselect UTXO", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, "Press the key 1 button when done looking at UTXOs", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     current_utxo_index = 0;
     utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
     for (int32_t i = 0; i < num_utxos; i++) {
         utxo_indexes[i] = -1;
     }
+    utxo_balances = (uint64_t*)malloc(num_utxos * sizeof(uint64_t));
+    for (int32_t i = 0; i < num_utxos; i++) {
+        utxo_balances[i] = get_utxo_balance(txids[i], public_key);
+    }
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 5, "Finished fetching UTXOs", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     while (!center_button_pressed()) ;
     // char str[10000] = {0};
     // for (int32_t i = 0; i < num_utxos; i++) {
@@ -164,7 +170,7 @@ static void display_getutxos() {
 
 static void display_utxo() {
     char str[10000] = {0};
-    uint64_t balance = get_utxo_balance(txids[current_utxo_index], public_key);
+    uint64_t balance = utxo_balances[current_utxo_index];
     format_utxo_info(str, current_utxo_index, txids[current_utxo_index], balance);
     if (is_duplicate(utxo_indexes, num_utxo_indexes, current_utxo_index)) {
         display_draw_string(STARTING_X, STARTING_Y, str, DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
@@ -225,9 +231,9 @@ static void display_getaddr() {
 
 static void display_addr_confirm() {
     display_draw_string(STARTING_X, STARTING_Y, "Address: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, target_address, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, "Press the left button to re-enter the address.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, target_address, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 3, "Press the left button to re-enter the address.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_getamount() {
@@ -239,9 +245,9 @@ static void display_amount_confirm() {
     display_draw_string(STARTING_X, STARTING_Y, "Amount: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     char str[10000] = {0};
     sprintf(str, "%lu", amount);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, "Press the left button to re-enter the amount.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 3, "Press the left button to re-enter the amount.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_getfee() {
@@ -257,19 +263,19 @@ static void display_fee_confirm() {
     change = total_balance - amount - txFee;
     if (change < 0) {
         display_draw_string(STARTING_X, STARTING_Y, "Insufficient funds!", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the left button to re-enter the fee.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "Press the left button to re-enter the fee.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
         return;
     }
     display_draw_string(STARTING_X, STARTING_Y, "Fee: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     int32_t approximate_sats_per_byte = txFee / 225;
     char str[10000] = {0};
     sprintf(str, "%lu, ~%d s/b", txFee, approximate_sats_per_byte);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Change: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Change: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     sprintf(str, "%lu", change);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 4, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 5, "Press the left button to re-enter the fee.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 3, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, "Press the center or right button to confirm.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 5, "Press the left button to re-enter the fee.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 // Function to write the serialized transaction to a file
@@ -355,21 +361,21 @@ static void display_fetching() {
 
 static void display_transaction_confirm() {
     display_draw_string(STARTING_X, STARTING_Y, "To: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, target_address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, target_address, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     char str[10000] = {0};
     sprintf(str, "Amount: %lu", amount);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     sprintf(str, "Fee: %lu", txFee);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 3, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     sprintf(str, "Change: %lu", change);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 4, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 5, "Press the center or right button to confirm the transaction.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 6, "Press the left button to terminate transaction.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 5, "Press the center or right button to confirm the transaction.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 6, "Press the left button to terminate transaction.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_transaction() {
     broadcast_transaction(tx_hex);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 
 }
 
