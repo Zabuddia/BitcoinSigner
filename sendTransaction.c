@@ -115,20 +115,21 @@ static void format_utxo_info(char *str, int i, const char *txid, long balance) {
 }
 
 static void display_getutxos() {
-    display_draw_string(STARTING_X, STARTING_Y, "Fetching UTXOs...", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Fetching UTXOs...", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     char utxo_response[10000] = {0};
     get_utxos(public_key, utxo_response);
     extract_all_utxo_info(utxo_response, &txids, &vouts, &num_utxos);
     // display_clear(BACKGROUND_COLOR);
     // display_draw_string(STARTING_X, STARTING_Y, "Finished fetching UTXOs.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center button to continue.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the center button to select/deselect UTXO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, "Press the key 1 button when done looking at UTXOs", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center button to continue.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the center button to select/deselect UTXO", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, "Press the key 1 button when done looking at UTXOs", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     current_utxo_index = 0;
     utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
     for (int32_t i = 0; i < num_utxos; i++) {
         utxo_indexes[i] = -1;
     }
+    while (!center_button_pressed()) ;
     // char str[10000] = {0};
     // for (int32_t i = 0; i < num_utxos; i++) {
     //     uint64_t balance = get_utxo_balance(txids[i], public_key);
