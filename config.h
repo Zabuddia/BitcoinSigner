@@ -11,7 +11,7 @@
 #define SELECTED_FONT_COLOR WHITE
 #define STARTING_X 5
 #define STARTING_Y 5
-#define SPACE_BETWEEN_LINES 20
+#define SPACE_BETWEEN_LINES 30
 #define DEFAULT_FONT (&Font12)
 #define SMALL_FONT (&Font8)
 

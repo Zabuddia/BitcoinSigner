@@ -40,7 +40,7 @@ void menu_tick() {
     //Transitions
     switch (menu_state) {
         case STATE_WAITING:
-            if (left_button_pressed()) {
+            if (key3_button_pressed()) {
                 menu_state = STATE_GENERATE_ADDRESS;
                 display_clear(BACKGROUND_COLOR);
             }

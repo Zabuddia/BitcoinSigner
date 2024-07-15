@@ -82,8 +82,13 @@ void generate_address_tick() {
             }
             break;
         case STATE_GENERATE_ADDRESS_INSTRUCTIONS:
-            generate_address_state = STATE_GENERATE_ADDRESS_COMPRESS_YES;
-            display_clear(BACKGROUND_COLOR);
+            if (key3_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
+                display_clear(BACKGROUND_COLOR);
+            } else {
+                generate_address_state = STATE_GENERATE_ADDRESS_COMPRESS_YES;
+                display_clear(BACKGROUND_COLOR);
+            }
             break;
         case STATE_GENERATE_ADDRESS_COMPRESS_YES:
             if (center_button_pressed()) {
@@ -91,6 +96,9 @@ void generate_address_tick() {
                 display_clear(BACKGROUND_COLOR);
             } else if (down_button_pressed() || up_button_pressed()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_COMPRESS_NO;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
@@ -101,6 +109,9 @@ void generate_address_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_COMPRESS_YES;
                 display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
+                display_clear(BACKGROUND_COLOR);
             }
             break;
         case STATE_GENERATE_ADDRESS_TESTNET_YES:
@@ -109,6 +120,9 @@ void generate_address_tick() {
                 display_clear(BACKGROUND_COLOR);
             } else if (down_button_pressed() || up_button_pressed()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_TESTNET_NO;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
@@ -119,11 +133,17 @@ void generate_address_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_TESTNET_YES;
                 display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
+                display_clear(BACKGROUND_COLOR);
             }
             break;
         case STATE_GENERATE_ADDRESS_CONFIRM:
             if (center_button_pressed()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_COMPUTE;
+                display_clear(BACKGROUND_COLOR);
+            } else if (key3_button_pressed()) {
+                generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
@@ -131,7 +151,7 @@ void generate_address_tick() {
             generate_address_state = STATE_GENERATE_ADDRESS_DISPLAY;
             break;
         case STATE_GENERATE_ADDRESS_DISPLAY:
-            if (left_button_pressed()) {
+            if (key3_button_pressed()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
             }
             break;
