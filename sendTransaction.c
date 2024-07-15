@@ -51,28 +51,28 @@ static char tx_hex[10000];
 
 static void display_compress_yes() {
     compressed = true;
-    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_compress_no() {
     compressed = false;
-    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
 }
 
 static void display_testnet_yes() {
     testnet = true;
-    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_testnet_no() {
     testnet = false;
-    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
 }
@@ -119,8 +119,8 @@ static void display_getutxos() {
     char utxo_response[10000] = {0};
     get_utxos(public_key, utxo_response);
     extract_all_utxo_info(utxo_response, &txids, &vouts, &num_utxos);
-    display_clear(BACKGROUND_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y, "Finished fetching UTXOs.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    // display_clear(BACKGROUND_COLOR);
+    // display_draw_string(STARTING_X, STARTING_Y, "Finished fetching UTXOs.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES, "Press the center button to continue.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 2, "Press the center button to select/deselect UTXO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_LINES * 3, "Press the key 1 button when done looking at UTXOs", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
