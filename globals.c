@@ -147,19 +147,18 @@ bool key3_button_pressed() {
 }
 
 bool move_up() {
-    if (hold && hold_ticks > HOLD_TICKS) {
+    if (hold && hold_ticks > HOLD_TICKS && up_button_pressed()) {
         hold_ticks = 0;
-        return up_button_pressed();
+        return true;
     } else {
         return false;
     }
 }
 
 bool move_down() {
-    if (hold && hold_ticks > HOLD_TICKS) {
-        printf("move_down\n");
+    if (hold && hold_ticks > HOLD_TICKS && down_button_pressed()) {
         hold_ticks = 0;
-        return down_button_pressed();
+        return true;
     } else {
         return false;
     }
