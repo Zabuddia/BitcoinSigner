@@ -314,14 +314,6 @@ static void display_fetching() {
         prev_txs[i] = (uint8_t*)malloc(32 * sizeof(uint8_t));
         hex_string_to_byte_array(txids[utxo_indexes[i]], prev_txs[i]);
     }
-    // for (int32_t i = 0; i < num_utxo_indexes; i++) {
-    //     printf("Prev tx: ");
-    //     for (int32_t j = 0; j < 32; j++) {
-    //         printf("%02x", prev_txs[i][j]);
-    //     }
-    //     printf("\n");
-    // }
-
     Script** script_sigs = (Script**)malloc(num_utxo_indexes * sizeof(Script*));
     for (int32_t i = 0; i < num_utxo_indexes; i++) {
         script_sigs[i] = Script_init();
@@ -379,20 +371,20 @@ static void display_fetching() {
     write_tx_to_file("tx.txt", tx_hex);
     printf("Verified?: %d\n", Tx_verify(tx));
     display_clear(BACKGROUND_COLOR);
-    for (int32_t i = 0; i < num_utxo_indexes; i++) {
-        TxIn_free(tx_ins[i]);
-    }
-    free(tx_ins);
-    TxOut_free(tx_out);
-    free(tx);
-    for (int32_t i = 0; i < num_utxo_indexes; i++) {
-        free(prev_txs[i]);
-    }
-    free(prev_txs);
-    for (int32_t i = 0; i < num_utxo_indexes; i++) {
-        Script_free(script_sigs[i]);
-    }
-    free(script_sigs);
+    // for (int32_t i = 0; i < num_utxo_indexes; i++) {
+    //     TxIn_free(tx_ins[i]);
+    // }
+    // free(tx_ins);
+    // TxOut_free(tx_out);
+    // free(tx);
+    // for (int32_t i = 0; i < num_utxo_indexes; i++) {
+    //     free(prev_txs[i]);
+    // }
+    // free(prev_txs);
+    // for (int32_t i = 0; i < num_utxo_indexes; i++) {
+    //     Script_free(script_sigs[i]);
+    // }
+    // free(script_sigs);
 }
 
 static void display_transaction_confirm() {
@@ -414,14 +406,14 @@ static void display_transaction() {
     broadcast_transaction(tx_hex);
     display_clear(BACKGROUND_COLOR);
     display_draw_string(STARTING_X, STARTING_Y, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    PrivateKey_free(key);
-    for (int32_t i = 0; i < num_utxos; i++) {
-        free(txids[i]);
-    }
-    free(txids);
-    free(vouts);
-    free(utxo_indexes);
-    free(utxo_balances);
+    // PrivateKey_free(key);
+    // for (int32_t i = 0; i < num_utxos; i++) {
+    //     free(txids[i]);
+    // }
+    // free(txids);
+    // free(vouts);
+    // free(utxo_indexes);
+    // free(utxo_balances);
 }
 
 void send_transaction_init() {
