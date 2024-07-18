@@ -132,6 +132,36 @@ bool move_down() {
     }
 }
 
+bool move_right() {
+    if (hold && hold_ticks > HOLD_TICKS && right_button_pressed()) {
+        hold_ticks = 0;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool move_left() {
+    if (hold && hold_ticks > HOLD_TICKS && left_button_pressed()) {
+        hold_ticks = 0;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool center_selected() {
+    if (center_button_pressed()) {
+        button_selected = true;
+    }
+    if (button_selected && !center_button_pressed()) {
+        button_selected = false;
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool selected() {
     if (center_button_pressed() || right_button_pressed()) {
         button_selected = true;

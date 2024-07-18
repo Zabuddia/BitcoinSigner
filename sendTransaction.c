@@ -142,7 +142,7 @@ static void display_getutxos() {
         utxo_balances[i] = get_utxo_balance(txids[i], public_key);
     }
     display_draw_string(STARTING_X, STARTING_Y, "Finished fetching UTXOs", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    while (!center_button_pressed()) ;
+    while (!selected()) ;
     // char str[10000] = {0};
     // for (int32_t i = 0; i < num_utxos; i++) {
     //     uint64_t balance = get_utxo_balance(txids[i], public_key);
@@ -423,10 +423,10 @@ void send_transaction_tick() {
             }
             break;
         case SEND_TRANSACTION_GETKEY_COMPRESS_YES:
-            if (center_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY_TESTNET_YES;
                 display_clear(BACKGROUND_COLOR);
-            } else if (down_button_pressed() || up_button_pressed()) {
+            } else if (move_down() || move_up()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY_COMPRESS_NO;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
@@ -435,10 +435,10 @@ void send_transaction_tick() {
             }
             break;
         case SEND_TRANSACTION_GETKEY_COMPRESS_NO:
-            if (center_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY_TESTNET_YES;
                 display_clear(BACKGROUND_COLOR);
-            } else if (down_button_pressed() || up_button_pressed()) {
+            } else if (move_down() || move_up()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY_COMPRESS_YES;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
@@ -447,10 +447,10 @@ void send_transaction_tick() {
             }
             break;
         case SEND_TRANSACTION_GETKEY_TESTNET_YES:
-            if (center_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY;
                 display_clear(BACKGROUND_COLOR);
-            } else if (down_button_pressed() || up_button_pressed()) {
+            } else if (move_down() || move_up()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY_TESTNET_NO;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
@@ -459,10 +459,10 @@ void send_transaction_tick() {
             }
             break;
         case SEND_TRANSACTION_GETKEY_TESTNET_NO:
-            if (center_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY;
                 display_clear(BACKGROUND_COLOR);
-            } else if (down_button_pressed() || up_button_pressed()) {
+            } else if (move_down() || move_up()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY_TESTNET_YES;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
@@ -475,10 +475,10 @@ void send_transaction_tick() {
             display_clear(BACKGROUND_COLOR);
             break;
         case SEND_TRANSACTION_GETKEY_CONFIRM:
-            if (center_button_pressed() || right_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_GETUTXOS;
                 display_clear(BACKGROUND_COLOR);
-            } else if (left_button_pressed()) {
+            } else if (go_back()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
@@ -487,7 +487,7 @@ void send_transaction_tick() {
             }
             break;
         case SEND_TRANSACTION_GETUTXOS:
-            if (center_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_DISPLAY_UTXO;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
@@ -499,10 +499,10 @@ void send_transaction_tick() {
             }
             break;
         case SEND_TRANSACTION_DISPLAY_UTXO:
-            if (right_button_pressed()) {
+            if (move_right()) {
                 send_transaction_state = SEND_TRANSACTION_NEXT_UTXO;
                 display_clear(BACKGROUND_COLOR);
-            } else if (left_button_pressed()) {
+            } else if (move_left()) {
                 send_transaction_state = SEND_TRANSACTION_PREVIOUS_UTXO;
                 display_clear(BACKGROUND_COLOR);
             } else if (key1_button_pressed()) {
@@ -511,7 +511,7 @@ void send_transaction_tick() {
             } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
-            } else if (center_button_pressed()) {
+            } else if (center_selected()) {
                 send_transaction_state = SEND_TRANSACTION_TOGGLE_UTXO;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -526,13 +526,13 @@ void send_transaction_tick() {
             send_transaction_state = SEND_TRANSACTION_DISPLAY_UTXO;
             break;
         case SEND_TRANSACTION_UTXO_CONFIRM:
-            if (center_button_pressed() || right_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_GETADDR;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
-            } else if (left_button_pressed()) {
+            } else if (go_back()) {
                 send_transaction_state = SEND_TRANSACTION_DISPLAY_UTXO;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -542,13 +542,13 @@ void send_transaction_tick() {
             display_clear(BACKGROUND_COLOR);
             break;
         case SEND_TRANSACTION_ADDR_CONFIRM:
-            if (center_button_pressed() || right_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_GETAMOUNT;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
-            } else if (left_button_pressed()) {
+            } else if (go_back()) {
                 send_transaction_state = SEND_TRANSACTION_GETADDR;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -558,13 +558,13 @@ void send_transaction_tick() {
             display_clear(BACKGROUND_COLOR);
             break;
         case SEND_TRANSACTION_AMOUNT_CONFIRM:
-            if (center_button_pressed() || right_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_GETFEE;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
-            } else if (left_button_pressed()) {
+            } else if (go_back()) {
                 send_transaction_state = SEND_TRANSACTION_GETAMOUNT;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -574,13 +574,13 @@ void send_transaction_tick() {
             display_clear(BACKGROUND_COLOR);
             break;
         case SEND_TRANSACTION_FEE_CONFIRM:
-            if (center_button_pressed() || right_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_FETCHING;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
-            } else if (left_button_pressed()) {
+            } else if (go_back()) {
                 send_transaction_state = SEND_TRANSACTION_GETFEE;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -589,13 +589,13 @@ void send_transaction_tick() {
             send_transaction_state = SEND_TRANSACTION_CONFIRM;
             break;
         case SEND_TRANSACTION_CONFIRM:
-            if (center_button_pressed() || right_button_pressed()) {
+            if (selected()) {
                 send_transaction_state = SEND_TRANSACTION_DISPLAYING;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
-            } else if (left_button_pressed()) {
+            } else if (go_back()) {
                 send_transaction_state = SEND_TRANSACTION_TERMINATED;
                 display_clear(BACKGROUND_COLOR);
             }
