@@ -35,6 +35,8 @@ bool right_button_pressed();
 bool key1_button_pressed();
 bool key2_button_pressed();
 bool key3_button_pressed();
+bool move_up();
+bool move_down();
 bool selected();
 bool return_to_menu();
 

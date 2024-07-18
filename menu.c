@@ -49,7 +49,7 @@ void menu_tick() {
             }
             break;
         case STATE_GENERATE_ADDRESS:
-            if (up_button_pressed()) {
+            if (move_up()) {
                 menu_state = STATE_SEND_TRANSACTION;
             } else if (move_down()) {
                 menu_state = STATE_CHECK_BALANCE;
@@ -58,7 +58,7 @@ void menu_tick() {
             }
             break;
         case STATE_CHECK_BALANCE:
-            if (up_button_pressed()) {
+            if (move_up()) {
                 menu_state = STATE_GENERATE_ADDRESS;
             } else if (move_down()) {
                 menu_state = STATE_SEND_TRANSACTION;
@@ -67,7 +67,7 @@ void menu_tick() {
             }
             break;
         case STATE_SEND_TRANSACTION:
-            if (up_button_pressed()) {
+            if (move_up()) {
                 menu_state = STATE_CHECK_BALANCE;
             } else if (move_down()) {
                 menu_state = STATE_GENERATE_ADDRESS;
