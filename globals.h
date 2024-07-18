@@ -24,6 +24,8 @@ bool key2_button_pressed();
 bool key3_button_pressed();
 bool selected();
 bool return_to_menu();
+bool move_up();
+bool move_down();
 void button_tick();
 
 #endif // GLOBALS_H

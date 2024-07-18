@@ -9,6 +9,7 @@
         "stdio.h": "c",
         "stdlib.h": "c",
         "s256point.h": "c",
-        "input.h": "c"
+        "input.h": "c",
+        "all_libs.h": "c"
     }
 }

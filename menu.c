@@ -49,27 +49,27 @@ void menu_tick() {
             }
             break;
         case STATE_GENERATE_ADDRESS:
-            if (up_button_pressed()) {
+            if (move_up()) {
                 menu_state = STATE_SEND_TRANSACTION;
-            } else if (down_button_pressed()) {
+            } else if (move_down()) {
                 menu_state = STATE_CHECK_BALANCE;
             } else if ((center_button_pressed()) || (right_button_pressed())) {
                 menu_state = STATE_WAIT_GENERATE_ADDRESS;
             }
             break;
         case STATE_CHECK_BALANCE:
-            if (up_button_pressed()) {
+            if (move_up()) {
                 menu_state = STATE_GENERATE_ADDRESS;
-            } else if (down_button_pressed()) {
+            } else if (move_down()) {
                 menu_state = STATE_SEND_TRANSACTION;
             } else if ((center_button_pressed()) || (right_button_pressed())) {
                 menu_state = STATE_WAIT_CHECK_BALANCE;
             }
             break;
         case STATE_SEND_TRANSACTION:
-            if (up_button_pressed()) {
+            if (move_up()) {
                 menu_state = STATE_CHECK_BALANCE;
-            } else if (down_button_pressed()) {
+            } else if (move_down()) {
                 menu_state = STATE_GENERATE_ADDRESS;
             } else if ((center_button_pressed()) || (right_button_pressed())) {
                 menu_state = STATE_WAIT_SEND_TRANSACTION;
