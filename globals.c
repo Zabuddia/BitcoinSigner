@@ -150,11 +150,3 @@ bool selected() {
 bool return_to_menu() {
     return key3_button_pressed();
 }
-
-bool move_up() {
-    return up_button_pressed() && (previous_button != BUTTON_UP);
-}
-
-bool move_down() {
-    return down_button_pressed() && (previous_button != BUTTON_DOWN);
-}

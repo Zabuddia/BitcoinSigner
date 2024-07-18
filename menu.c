@@ -16,6 +16,8 @@ enum menu_state {
     STATE_WAIT_SEND_TRANSACTION
 } menu_state;
 
+static bool hold;
+
 static void draw_menu() {
 
     if (menu_state == STATE_GENERATE_ADDRESS) {
@@ -49,27 +51,27 @@ void menu_tick() {
             }
             break;
         case STATE_GENERATE_ADDRESS:
-            if (move_up()) {
+            if (up_button_pressed()) {
                 menu_state = STATE_SEND_TRANSACTION;
-            } else if (move_down()) {
+            } else if (down_button_pressed()) {
                 menu_state = STATE_CHECK_BALANCE;
             } else if ((center_button_pressed()) || (right_button_pressed())) {
                 menu_state = STATE_WAIT_GENERATE_ADDRESS;
             }
             break;
         case STATE_CHECK_BALANCE:
-            if (move_up()) {
+            if (up_button_pressed()) {
                 menu_state = STATE_GENERATE_ADDRESS;
-            } else if (move_down()) {
+            } else if (down_button_pressed()) {
                 menu_state = STATE_SEND_TRANSACTION;
             } else if ((center_button_pressed()) || (right_button_pressed())) {
                 menu_state = STATE_WAIT_CHECK_BALANCE;
             }
             break;
         case STATE_SEND_TRANSACTION:
-            if (move_up()) {
+            if (up_button_pressed()) {
                 menu_state = STATE_CHECK_BALANCE;
-            } else if (move_down()) {
+            } else if (down_button_pressed()) {
                 menu_state = STATE_GENERATE_ADDRESS;
             } else if ((center_button_pressed()) || (right_button_pressed())) {
                 menu_state = STATE_WAIT_SEND_TRANSACTION;
@@ -134,5 +136,16 @@ void menu_tick() {
             in_check_balance = false;
             in_send_transaction = true;
             break;
+        case STATE_WAIT_GENERATE_ADDRESS:
+            break;
+        case STATE_WAIT_CHECK_BALANCE:
+            break;
+        case STATE_WAIT_SEND_TRANSACTION:
+            break;
+    }
+    if (up_button_pressed() || down_button_pressed()) {
+        hold = true;
+    } else {
+        hold = false;
     }
 }
