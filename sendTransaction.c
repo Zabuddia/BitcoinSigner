@@ -405,7 +405,9 @@ static void display_transaction_confirm() {
 }
 
 static void display_transaction() {
+    display_draw_string(STARTING_X, STARTING_Y, "Broadcasting Transaction... ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     broadcast_transaction(tx_hex);
+    display_clear(BACKGROUND_COLOR);
     display_draw_string(STARTING_X, STARTING_Y, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     // PrivateKey_free(key);
     // for (int32_t i = 0; i < num_utxos; i++) {
