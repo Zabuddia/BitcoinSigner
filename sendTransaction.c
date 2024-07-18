@@ -398,7 +398,7 @@ static void display_transaction_confirm() {
     sprintf(str, "Change: %lu sats", change);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 5, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 6, "Press the center button to confirm the transaction.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 8, "Press the left button to terminate transaction.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 9, "Press the left button to terminate transaction.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_transaction() {
