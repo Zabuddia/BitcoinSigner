@@ -47,6 +47,7 @@ int main() {
         generate_address_tick();
         check_balance_tick();
         send_transaction_tick();
+        button_tick();
         #else
         test_send_transaction_tick();
         #endif

@@ -10,7 +10,10 @@ enum menu_state {
     STATE_SEND_TRANSACTION,
     STATE_IN_GENERATE_ADDRESS,
     STATE_IN_CHECK_BALANCE,
-    STATE_IN_SEND_TRANSACTION
+    STATE_IN_SEND_TRANSACTION,
+    STATE_WAIT_GENERATE_ADDRESS,
+    STATE_WAIT_CHECK_BALANCE,
+    STATE_WAIT_SEND_TRANSACTION
 } menu_state;
 
 static void draw_menu() {
@@ -51,7 +54,7 @@ void menu_tick() {
             } else if (down_button_pressed()) {
                 menu_state = STATE_CHECK_BALANCE;
             } else if ((center_button_pressed()) || (right_button_pressed())) {
-                menu_state = STATE_IN_GENERATE_ADDRESS;
+                menu_state = STATE_WAIT_GENERATE_ADDRESS;
             }
             break;
         case STATE_CHECK_BALANCE:
@@ -60,7 +63,7 @@ void menu_tick() {
             } else if (down_button_pressed()) {
                 menu_state = STATE_SEND_TRANSACTION;
             } else if ((center_button_pressed()) || (right_button_pressed())) {
-                menu_state = STATE_IN_CHECK_BALANCE;
+                menu_state = STATE_WAIT_CHECK_BALANCE;
             }
             break;
         case STATE_SEND_TRANSACTION:
@@ -69,7 +72,7 @@ void menu_tick() {
             } else if (down_button_pressed()) {
                 menu_state = STATE_GENERATE_ADDRESS;
             } else if ((center_button_pressed()) || (right_button_pressed())) {
-                menu_state = STATE_IN_SEND_TRANSACTION;
+                menu_state = STATE_WAIT_SEND_TRANSACTION;
             }
             break;
         case STATE_IN_GENERATE_ADDRESS:
@@ -80,6 +83,24 @@ void menu_tick() {
             break;
         case STATE_IN_SEND_TRANSACTION:
             menu_state = STATE_WAITING;
+            break;
+        case STATE_WAIT_GENERATE_ADDRESS:
+            if (!center_button_pressed() && !right_button_pressed()) {
+                menu_state = STATE_IN_GENERATE_ADDRESS;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case STATE_WAIT_CHECK_BALANCE:
+            if (!center_button_pressed() && !right_button_pressed()) {
+                menu_state = STATE_IN_CHECK_BALANCE;
+                display_clear(BACKGROUND_COLOR);
+            }
+            break;
+        case STATE_WAIT_SEND_TRANSACTION:
+            if (!center_button_pressed() && !right_button_pressed()) {
+                menu_state = STATE_IN_SEND_TRANSACTION;
+                display_clear(BACKGROUND_COLOR);
+            }
             break;
     }
     //Actions

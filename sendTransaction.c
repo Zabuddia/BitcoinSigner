@@ -370,6 +370,7 @@ static void display_fetching() {
     byte_array_to_hex_string(tx_serialized, Tx_length(tx), tx_hex);
     write_tx_to_file("tx.txt", tx_hex);
     printf("Verified?: %d\n", Tx_verify(tx));
+    display_clear(BACKGROUND_COLOR);
     // Tx_free(tx);
     // for (int32_t i = 0; i < num_utxo_indexes; i++) {
     //     free(prev_txs[i]);

@@ -4,6 +4,7 @@
 #include <linux/input.h>
 #include <libevdev-1.0/libevdev/libevdev.h>
 #include <ctype.h>
+#include "config.h"
 
 #define KEYBOARD_DEVICE "/dev/input/event3"
 #define MAX_INPUT_LENGTH 100
@@ -11,6 +12,8 @@
 bool in_generate_address;
 bool in_check_balance;
 bool in_send_transaction;
+
+uint8_t previous_button;
 
 void keyboard_input(char* input) {
     int fd;
@@ -81,11 +84,11 @@ bool left_button_pressed() {
 }
 
 bool up_button_pressed() {
-    return button_up() == 0;
+    return (button_up() == 0) && (previous_button != BUTTON_UP);
 }
 
 bool down_button_pressed() {
-    return button_down() == 0;
+    return (button_down() == 0) && (previous_button != BUTTON_DOWN);
 }
 
 bool center_button_pressed() {
@@ -106,4 +109,34 @@ bool key2_button_pressed() {
 
 bool key3_button_pressed() {
     return button_key_3() == 0;
+}
+
+bool select() {
+    return center_button_pressed() || right_button_pressed();
+}
+
+bool return_to_menu() {
+    return key3_button_pressed();
+}
+
+void button_tick() {
+    if (left_button_pressed()) {
+        previous_button = BUTTON_LEFT;
+    } else if (up_button_pressed()) {
+        previous_button = BUTTON_UP;
+    } else if (down_button_pressed()) {
+        previous_button = BUTTON_DOWN;
+    } else if (center_button_pressed()) {
+        previous_button = BUTTON_CENTER;
+    } else if (right_button_pressed()) {
+        previous_button = BUTTON_RIGHT;
+    } else if (key1_button_pressed()) {
+        previous_button = BUTTON_KEY_1;
+    } else if (key2_button_pressed()) {
+        previous_button = BUTTON_KEY_2;
+    } else if (key3_button_pressed()) {
+        previous_button = BUTTON_KEY_3;
+    } else {
+        previous_button = BUTTON_NONE;
+    }
 }
