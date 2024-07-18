@@ -27,5 +27,6 @@ bool move_up();
 bool move_down();
 bool selected();
 bool return_to_menu();
+bool go_back();
 
 #endif // GLOBALS_H

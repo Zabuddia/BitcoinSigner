@@ -147,3 +147,7 @@ bool selected() {
 bool return_to_menu() {
     return key3_button_pressed();
 }
+
+bool go_back() {
+    return left_button_pressed();
+}

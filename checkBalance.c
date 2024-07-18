@@ -87,16 +87,18 @@ static void display_getaddr_confirm() {
 }
 
 static void display_getkey_confirm() {
-    display_draw_string(STARTING_X, STARTING_Y, private_key, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 3, "Press the left button to re-enter the private key.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    dispaly_draw_string(STARTING_X, STARTING_Y, "Private key:", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, private_key, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Press the center button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, "Press the left button to re-enter the private key.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_fetching() {
+    display_draw_string(STARTING_X, STARTING_Y, "Balance:", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     uint64_t balance = get_balance(address);
     char balance_str[100];
-    sprintf(balance_str, "Balance: %lu Sats", balance);
-    display_draw_string(STARTING_X, STARTING_Y, balance_str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    sprintf(balance_str, "%lu Sats", balance);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, balance_str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 void check_balance_init() {
@@ -206,7 +208,7 @@ void check_balance_tick() {
             if (selected()) {
                 check_balance_state = CHECK_BALANCE_FETCHING;
                 display_clear(BACKGROUND_COLOR);
-            } else if (left_button_pressed()) {
+            } else if (go_back()) {
                 check_balance_state = CHECK_BALANCE_GETADDR;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
@@ -218,7 +220,7 @@ void check_balance_tick() {
             if (selected()) {
                 check_balance_state = CHECK_BALANCE_FETCHING;
                 display_clear(BACKGROUND_COLOR);
-            } else if (left_button_pressed()) {
+            } else if (go_back()) {
                 check_balance_state = CHECK_BALANCE_GETKEY;
                 display_clear(BACKGROUND_COLOR);
             } else if (return_to_menu()) {
