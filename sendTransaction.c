@@ -429,7 +429,7 @@ void send_transaction_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY_COMPRESS_NO;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -441,7 +441,7 @@ void send_transaction_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY_COMPRESS_YES;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -453,7 +453,7 @@ void send_transaction_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY_TESTNET_NO;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -465,7 +465,7 @@ void send_transaction_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY_TESTNET_YES;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -481,7 +481,7 @@ void send_transaction_tick() {
             } else if (left_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_GETKEY;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -490,7 +490,7 @@ void send_transaction_tick() {
             if (center_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_DISPLAY_UTXO;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             } else if (no_utxos) {
@@ -508,7 +508,7 @@ void send_transaction_tick() {
             } else if (key1_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_UTXO_CONFIRM;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             } else if (center_button_pressed()) {
@@ -529,7 +529,7 @@ void send_transaction_tick() {
             if (center_button_pressed() || right_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_GETADDR;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             } else if (left_button_pressed()) {
@@ -545,7 +545,7 @@ void send_transaction_tick() {
             if (center_button_pressed() || right_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_GETAMOUNT;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             } else if (left_button_pressed()) {
@@ -561,7 +561,7 @@ void send_transaction_tick() {
             if (center_button_pressed() || right_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_GETFEE;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             } else if (left_button_pressed()) {
@@ -577,7 +577,7 @@ void send_transaction_tick() {
             if (center_button_pressed() || right_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_FETCHING;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             } else if (left_button_pressed()) {
@@ -592,7 +592,7 @@ void send_transaction_tick() {
             if (center_button_pressed() || right_button_pressed()) {
                 send_transaction_state = SEND_TRANSACTION_DISPLAYING;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
                 display_clear(BACKGROUND_COLOR);
             } else if (left_button_pressed()) {
@@ -604,7 +604,7 @@ void send_transaction_tick() {
             send_transaction_state = SEND_TRANSACTION_DISPLAYING;
             break;
         case SEND_TRANSACTION_DISPLAYING:
-            if (key3_button_pressed()) {
+            if (return_to_menu()) {
                 send_transaction_state = SEND_TRANSACTION_WAITING;
             }
             break;

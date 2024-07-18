@@ -82,7 +82,7 @@ void generate_address_tick() {
             }
             break;
         case STATE_GENERATE_ADDRESS_INSTRUCTIONS:
-            if (key3_button_pressed()) {
+            if (return_to_menu()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
                 display_clear(BACKGROUND_COLOR);
             } else {
@@ -91,58 +91,58 @@ void generate_address_tick() {
             }
             break;
         case STATE_GENERATE_ADDRESS_COMPRESS_YES:
-            if (center_button_pressed()) {
+            if (selected()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_TESTNET_YES;
                 display_clear(BACKGROUND_COLOR);
-            } else if (down_button_pressed() || up_button_pressed()) {
+            } else if (move_down() || move_up()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_COMPRESS_NO;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
         case STATE_GENERATE_ADDRESS_COMPRESS_NO:
-            if (center_button_pressed()) {
+            if (selected()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_TESTNET_YES;
                 display_clear(BACKGROUND_COLOR);
-            } else if (down_button_pressed() || up_button_pressed()) {
+            } else if (move_down() || move_up()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_COMPRESS_YES;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
         case STATE_GENERATE_ADDRESS_TESTNET_YES:
-            if (center_button_pressed()) {
+            if (selected()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_CONFIRM;
                 display_clear(BACKGROUND_COLOR);
-            } else if (down_button_pressed() || up_button_pressed()) {
+            } else if (move_down() || move_up()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_TESTNET_NO;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
         case STATE_GENERATE_ADDRESS_TESTNET_NO:
-            if (center_button_pressed()) {
+            if (selected()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_CONFIRM;
                 display_clear(BACKGROUND_COLOR);
-            } else if (down_button_pressed() || up_button_pressed()) {
+            } else if (move_down() || move_up()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_TESTNET_YES;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
         case STATE_GENERATE_ADDRESS_CONFIRM:
-            if (center_button_pressed()) {
+            if (selected()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_COMPUTE;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -151,7 +151,7 @@ void generate_address_tick() {
             generate_address_state = STATE_GENERATE_ADDRESS_DISPLAY;
             break;
         case STATE_GENERATE_ADDRESS_DISPLAY:
-            if (key3_button_pressed()) {
+            if (return_to_menu()) {
                 generate_address_state = STATE_GENERATE_ADDRESS_WAITING;
             }
             break;

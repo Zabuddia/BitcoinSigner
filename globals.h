@@ -13,18 +13,6 @@ extern bool in_send_transaction;
 extern bool hold;
 extern uint8_t hold_ticks;
 
-extern enum button {
-    BUTTON_NONE,
-    BUTTON_LEFT,
-    BUTTON_UP,
-    BUTTON_DOWN,
-    BUTTON_CENTER,
-    BUTTON_RIGHT,
-    BUTTON_KEY_1,
-    BUTTON_KEY_2,
-    BUTTON_KEY_3
-} previous_button;
-
 void keyboard_input(char* input);
 
 bool left_button_pressed();

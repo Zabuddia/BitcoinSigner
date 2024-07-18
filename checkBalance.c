@@ -119,7 +119,7 @@ void check_balance_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETMODE_ADDR;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -131,13 +131,13 @@ void check_balance_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETMODE_PRIV;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
         case CHECK_BALANCE_GETADDR:
-            if (key3_button_pressed()) {
+            if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             } else {
@@ -152,7 +152,7 @@ void check_balance_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETKEY_COMPRESS_NO;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -164,7 +164,7 @@ void check_balance_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETKEY_COMPRESS_YES;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -176,7 +176,7 @@ void check_balance_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETKEY_TESTNET_NO;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -188,13 +188,13 @@ void check_balance_tick() {
             } else if (down_button_pressed() || up_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETKEY_TESTNET_YES;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
             break;
         case CHECK_BALANCE_GETKEY:
-            if (key3_button_pressed()) {
+            if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             } else {
@@ -209,7 +209,7 @@ void check_balance_tick() {
             } else if (left_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETADDR;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -221,7 +221,7 @@ void check_balance_tick() {
             } else if (left_button_pressed()) {
                 check_balance_state = CHECK_BALANCE_GETKEY;
                 display_clear(BACKGROUND_COLOR);
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
@@ -230,9 +230,9 @@ void check_balance_tick() {
             check_balance_state = CHECK_BALANCE_DISPLAYING;
             break;
         case CHECK_BALANCE_DISPLAYING:
-            if (key3_button_pressed()) {
+            if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
-            } else if (key3_button_pressed()) {
+            } else if (return_to_menu()) {
                 check_balance_state = CHECK_BALANCE_WAITING;
                 display_clear(BACKGROUND_COLOR);
             }
