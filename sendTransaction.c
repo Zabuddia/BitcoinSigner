@@ -231,7 +231,7 @@ static void display_utxo_confirm() {
         strcat(str, "     ");
     }
     display_draw_string(STARTING_X, STARTING_Y, str, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, "Press the center button to confirm the UTXOs.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT + SPACE_BETWEEN_DEFAULT_FONT * 3, "Press the center button to confirm the UTXOs.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 5, "Press the left button to re-select the UTXOs.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
@@ -256,7 +256,7 @@ static void display_getamount() {
 }
 
 static void display_amount_confirm() {
-    display_draw_string(STARTING_X, STARTING_Y, "Amount: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Amount: ", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     char str[100] = {0};
     sprintf(str, "%lu sats", amount);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, str, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
@@ -279,8 +279,8 @@ static void display_fee_confirm() {
     }
     change = total_balance - amount - txFee;
     if (change < 0) {
-        display_draw_string(STARTING_X, STARTING_Y, "Insufficient funds!", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "Press the left button to re-enter the fee.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y, "Insufficient funds!", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Press the left button to re-enter the fee.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
         return;
     }
     display_draw_string(STARTING_X, STARTING_Y, "Fee: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
@@ -379,7 +379,12 @@ static void display_fetching() {
     write_tx_to_file("tx.txt", tx_hex);
     printf("Verified?: %d\n", Tx_verify(tx));
     display_clear(BACKGROUND_COLOR);
-    Tx_free(tx);
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        TxIn_free(tx_ins[i]);
+    }
+    free(tx_ins);
+    TxOut_free(tx_out);
+    free(tx);
     for (int32_t i = 0; i < num_utxo_indexes; i++) {
         free(prev_txs[i]);
     }
