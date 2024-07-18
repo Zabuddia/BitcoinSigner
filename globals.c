@@ -13,6 +13,9 @@ bool in_generate_address;
 bool in_check_balance;
 bool in_send_transaction;
 
+bool hold;
+uint8_t hold_ticks;
+
 enum button previous_button;
 
 void keyboard_input(char* input) {
@@ -141,6 +144,24 @@ bool key3_button_pressed() {
         previous_button = BUTTON_KEY_3;
     }
     return pressed;
+}
+
+bool move_up() {
+    if (hold && hold_ticks > HOLD_TICKS) {
+        hold_ticks = 0;
+        return up_button_pressed();
+    } else {
+        return false;
+    }
+}
+
+bool move_down() {
+    if (hold && hold_ticks > HOLD_TICKS) {
+        hold_ticks = 0;
+        return down_button_pressed();
+    } else {
+        return false;
+    }
 }
 
 bool selected() {

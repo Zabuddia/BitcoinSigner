@@ -10,6 +10,9 @@ extern bool in_generate_address;
 extern bool in_check_balance;
 extern bool in_send_transaction;
 
+extern bool hold;
+extern uint8_t hold_ticks;
+
 extern enum button {
     BUTTON_NONE,
     BUTTON_LEFT,

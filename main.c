@@ -48,10 +48,15 @@ int main() {
         generate_address_tick();
         check_balance_tick();
         send_transaction_tick();
+        if (up_button_pressed() || down_button_pressed()) {
+            hold = true;
+        } else {
+            hold = false;
+        }
+        hold_ticks++;
         #else
         test_send_transaction_tick();
         #endif
-        previous_button = BUTTON_NONE;
         delay_ms(TIMER_PERIOD);
     }
 
