@@ -53,6 +53,8 @@ static char tx_hex[10000];
 static bool no_utxos;
 static float estimated_transaction_size;
 
+static bool already_fetched_utxos;
+
 static void display_compress_yes() {
     no_utxos = false;
     compressed = true;
@@ -96,7 +98,7 @@ static void display_getkey_confirm() {
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT, private_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 2, "Public key: ", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_SMALL_FONT * 3, public_key, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 3, "Press the center or right button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 3, "Press the center button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 5, "Press the left button to re-enter the private key.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
@@ -120,29 +122,37 @@ static void format_utxo_info(char *str, int i, const char *txid, long balance) {
 }
 
 static void display_getutxos() {
-    display_draw_string(STARTING_X, STARTING_Y, "Fetching UTXOs...", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    char utxo_response[10000] = {0};
-    get_utxos(public_key, utxo_response);
-    extract_all_utxo_info(utxo_response, &txids, &vouts, &num_utxos);
-    if (num_utxos == 0) {
-        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "No UTXOs found. Try again.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-        no_utxos = true;
-        return;
+    if (!already_fetched_utxos) {
+        display_draw_string(STARTING_X, STARTING_Y, "Fetching UTXOs...", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        char utxo_response[10000] = {0};
+        get_utxos(public_key, utxo_response);
+        extract_all_utxo_info(utxo_response, &txids, &vouts, &num_utxos);
+        if (num_utxos == 0) {
+            display_clear(BACKGROUND_COLOR);
+            display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "No UTXOs found. Try again.", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+            no_utxos = true;
+            return;
+        }
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "Press the center button to continue.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Press the center button to select/deselect UTXO", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, "Press the key 1 button when done looking at UTXOs", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        current_utxo_index = 0;
+        utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
+        for (int32_t i = 0; i < num_utxos; i++) {
+            utxo_indexes[i] = -1;
+        }
+        utxo_balances = (uint64_t*)malloc(num_utxos * sizeof(uint64_t));
+        for (int32_t i = 0; i < num_utxos; i++) {
+            utxo_balances[i] = get_utxo_balance(txids[i], public_key);
+        }
+        already_fetched_utxos = true;
+        display_clear(BACKGROUND_COLOR);
+    } else {
+        display_draw_string(STARTING_X, STARTING_Y, "Finished fetching UTXOs", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "Press the center button to continue.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Press the center button to select/deselect UTXO", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
+        display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, "Press the key 1 button when done looking at UTXOs", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     }
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "Press the center button to continue.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Press the center button to select/deselect UTXO", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, "Press the key 1 button when done looking at UTXOs", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    current_utxo_index = 0;
-    utxo_indexes = (int32_t*)malloc(num_utxos * sizeof(int32_t));
-    for (int32_t i = 0; i < num_utxos; i++) {
-        utxo_indexes[i] = -1;
-    }
-    utxo_balances = (uint64_t*)malloc(num_utxos * sizeof(uint64_t));
-    for (int32_t i = 0; i < num_utxos; i++) {
-        utxo_balances[i] = get_utxo_balance(txids[i], public_key);
-    }
-    display_draw_string(STARTING_X, STARTING_Y, "Finished fetching UTXOs", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    while (!selected()) ;
     // char str[10000] = {0};
     // for (int32_t i = 0; i < num_utxos; i++) {
     //     uint64_t balance = get_utxo_balance(txids[i], public_key);
