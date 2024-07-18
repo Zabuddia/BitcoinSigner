@@ -156,8 +156,8 @@ bool move_up() {
 }
 
 bool move_down() {
-    printf("move_down\n");
     if (hold && hold_ticks > HOLD_TICKS) {
+        printf("move_down\n");
         hold_ticks = 0;
         return down_button_pressed();
     } else {
