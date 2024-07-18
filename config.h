@@ -20,14 +20,4 @@
 #define DEFAULT_FONT (&Font12)
 #define SMALL_FONT (&Font8)
 
-#define BUTTON_LEFT 1
-#define BUTTON_UP 2
-#define BUTTON_DOWN 3
-#define BUTTON_CENTER 4
-#define BUTTON_RIGHT 5
-#define BUTTON_KEY_1 6
-#define BUTTON_KEY_2 7
-#define BUTTON_KEY_3 8
-#define BUTTON_NONE 0
-
 #endif // CONFIG_H

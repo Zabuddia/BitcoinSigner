@@ -27,28 +27,28 @@ static void display_instructions() {
 
 static void display_compress_yes() {
     compressed = true;
-    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_compress_no() {
     compressed = false;
-    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want compressed format?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
 }
 
 static void display_testnet_yes() {
     testnet = true;
-    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "YES", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "NO", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
 }
 
 static void display_testnet_no() {
     testnet = false;
-    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Do you want testnet?", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, "YES", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "NO", DEFAULT_FONT, SELECTED_BACKGROUND_COLOR, SELECTED_FONT_COLOR);
 }

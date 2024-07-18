@@ -10,7 +10,17 @@ extern bool in_generate_address;
 extern bool in_check_balance;
 extern bool in_send_transaction;
 
-extern uint8_t previous_button;
+extern enum button {
+    BUTTON_NONE,
+    BUTTON_LEFT,
+    BUTTON_UP,
+    BUTTON_DOWN,
+    BUTTON_CENTER,
+    BUTTON_RIGHT,
+    BUTTON_KEY_1,
+    BUTTON_KEY_2,
+    BUTTON_KEY_3
+} previous_button;
 
 void keyboard_input(char* input);
 
@@ -26,6 +36,5 @@ bool selected();
 bool return_to_menu();
 bool move_up();
 bool move_down();
-void button_tick();
 
 #endif // GLOBALS_H

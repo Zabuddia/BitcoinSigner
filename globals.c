@@ -13,7 +13,7 @@ bool in_generate_address;
 bool in_check_balance;
 bool in_send_transaction;
 
-uint8_t previous_button;
+enum button previous_button;
 
 void keyboard_input(char* input) {
     int fd;
@@ -80,35 +80,67 @@ void keyboard_input(char* input) {
 }
 
 bool left_button_pressed() {
-    return button_left() == 0;
+    bool pressed = button_left() == 0;
+    if (pressed) {
+        previous_button = BUTTON_LEFT;
+    }
+    return pressed;
 }
 
 bool up_button_pressed() {
-    return button_up() == 0;
+    bool pressed = button_up() == 0;
+    if (pressed) {
+        previous_button = BUTTON_UP;
+    }
+    return pressed;
 }
 
 bool down_button_pressed() {
-    return button_down() == 0;
+    bool pressed = button_down() == 0;
+    if (pressed) {
+        previous_button = BUTTON_DOWN;
+    }
+    return pressed;
 }
 
 bool center_button_pressed() {
-    return button_center() == 0;
+    bool pressed = button_center() == 0;
+    if (pressed) {
+        previous_button = BUTTON_CENTER;
+    }
+    return pressed;
 }
 
 bool right_button_pressed() {
-    return button_right() == 0;
+    bool pressed = button_right() == 0;
+    if (pressed) {
+        previous_button = BUTTON_RIGHT;
+    }
+    return pressed;
 }
 
 bool key1_button_pressed() {
-    return button_key_1() == 0;
+    bool pressed = button_key_1() == 0;
+    if (pressed) {
+        previous_button = BUTTON_KEY_1;
+    }
+    return pressed;
 }
 
 bool key2_button_pressed() {
-    return button_key_2() == 0;
+    bool pressed = button_key_2() == 0;
+    if (pressed) {
+        previous_button = BUTTON_KEY_2;
+    }
+    return pressed;
 }
 
 bool key3_button_pressed() {
-    return button_key_3() == 0;
+    bool pressed = button_key_3() == 0;
+    if (pressed) {
+        previous_button = BUTTON_KEY_3;
+    }
+    return pressed;
 }
 
 bool selected() {
@@ -120,31 +152,9 @@ bool return_to_menu() {
 }
 
 bool move_up() {
-    return up_button_pressed() && previous_button != BUTTON_UP;
+    return up_button_pressed() && (previous_button != BUTTON_UP);
 }
 
 bool move_down() {
-    return down_button_pressed() && previous_button != BUTTON_DOWN;
-}
-
-void button_tick() {
-    if (left_button_pressed()) {
-        previous_button = BUTTON_LEFT;
-    } else if (up_button_pressed()) {
-        previous_button = BUTTON_UP;
-    } else if (down_button_pressed()) {
-        previous_button = BUTTON_DOWN;
-    } else if (center_button_pressed()) {
-        previous_button = BUTTON_CENTER;
-    } else if (right_button_pressed()) {
-        previous_button = BUTTON_RIGHT;
-    } else if (key1_button_pressed()) {
-        previous_button = BUTTON_KEY_1;
-    } else if (key2_button_pressed()) {
-        previous_button = BUTTON_KEY_2;
-    } else if (key3_button_pressed()) {
-        previous_button = BUTTON_KEY_3;
-    } else {
-        previous_button = BUTTON_NONE;
-    }
+    return down_button_pressed() && (previous_button != BUTTON_DOWN);
 }

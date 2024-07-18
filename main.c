@@ -44,7 +44,6 @@ int main() {
 
     while (true) {
         #if RASPBERRY_PI
-        button_tick();
         menu_tick();
         generate_address_tick();
         check_balance_tick();
@@ -52,6 +51,7 @@ int main() {
         #else
         test_send_transaction_tick();
         #endif
+        previous_button = BUTTON_NONE;
         delay_ms(TIMER_PERIOD);
     }
 
