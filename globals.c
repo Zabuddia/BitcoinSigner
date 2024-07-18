@@ -111,7 +111,7 @@ bool key3_button_pressed() {
     return button_key_3() == 0;
 }
 
-bool select() {
+bool selected() {
     return center_button_pressed() || right_button_pressed();
 }
 

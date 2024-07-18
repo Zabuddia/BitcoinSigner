@@ -8,6 +8,7 @@
 #include "bitcoin/ecc/signature.h"
 #include "bitcoin/ecc/privatekey.h"
 #include "config.h"
+#include "globals.h"
 #include "menu.h"
 #include "generateAddress.h"
 #include "checkBalance.h"
