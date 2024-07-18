@@ -379,15 +379,15 @@ static void display_fetching() {
     write_tx_to_file("tx.txt", tx_hex);
     printf("Verified?: %d\n", Tx_verify(tx));
     display_clear(BACKGROUND_COLOR);
-    // Tx_free(tx);
-    // for (int32_t i = 0; i < num_utxo_indexes; i++) {
-    //     free(prev_txs[i]);
-    // }
-    // free(prev_txs);
-    // for (int32_t i = 0; i < num_utxo_indexes; i++) {
-    //     Script_free(script_sigs[i]);
-    // }
-    // free(script_sigs);
+    Tx_free(tx);
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        free(prev_txs[i]);
+    }
+    free(prev_txs);
+    for (int32_t i = 0; i < num_utxo_indexes; i++) {
+        Script_free(script_sigs[i]);
+    }
+    free(script_sigs);
 }
 
 static void display_transaction_confirm() {
@@ -409,14 +409,14 @@ static void display_transaction() {
     broadcast_transaction(tx_hex);
     display_clear(BACKGROUND_COLOR);
     display_draw_string(STARTING_X, STARTING_Y, tx_hex, SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
-    // PrivateKey_free(key);
-    // for (int32_t i = 0; i < num_utxos; i++) {
-    //     free(txids[i]);
-    // }
-    // free(txids);
-    // free(vouts);
-    // free(utxo_indexes);
-    // free(utxo_balances);
+    PrivateKey_free(key);
+    for (int32_t i = 0; i < num_utxos; i++) {
+        free(txids[i]);
+    }
+    free(txids);
+    free(vouts);
+    free(utxo_indexes);
+    free(utxo_balances);
 }
 
 void send_transaction_init() {
