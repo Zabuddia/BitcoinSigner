@@ -44,11 +44,11 @@ int main() {
 
     while (true) {
         #if RASPBERRY_PI
+        button_tick();
         menu_tick();
         generate_address_tick();
         check_balance_tick();
         send_transaction_tick();
-        button_tick();
         #else
         test_send_transaction_tick();
         #endif
