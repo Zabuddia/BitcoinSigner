@@ -87,7 +87,7 @@ static void display_getaddr_confirm() {
 }
 
 static void display_getkey_confirm() {
-    dispaly_draw_string(STARTING_X, STARTING_Y, "Private key:", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
+    display_draw_string(STARTING_X, STARTING_Y, "Private key:", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT, private_key, DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 2, "Press the center button to confirm.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
     display_draw_string(STARTING_X, STARTING_Y + SPACE_BETWEEN_DEFAULT_FONT * 4, "Press the left button to re-enter the private key.", SMALL_FONT, BACKGROUND_COLOR, FONT_COLOR);
