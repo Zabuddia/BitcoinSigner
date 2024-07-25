@@ -307,6 +307,7 @@ static void write_tx_to_file(const char *filename, const char *tx_hex) {
     fclose(file);
 }
 
+// If the change is 0, make there be only one output
 static void display_fetching() {
     display_draw_string(STARTING_X, STARTING_Y, "Creating Transaction...", DEFAULT_FONT, BACKGROUND_COLOR, FONT_COLOR);
     uint8_t** prev_txs = (uint8_t**)malloc(num_utxo_indexes * sizeof(uint8_t*));
